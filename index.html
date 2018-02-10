@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-        <meta charset="UTF-8">
-        <title>Scouting App</title>
-        <link rel="stylesheet" href="node_modules/onsenui/css/onsenui.css">
-        <link rel="stylesheet" href="node_modules/onsenui/css/onsen-css-components.css">
-        <script src="node_modules/onsenui/js/onsenui.js"></script>
-        <link rel="stylesheet" href="node_modules/font-awesome-animation/dist/font-awesome-animation.min.css">
+    <meta charset="UTF-8">
+    <title>Scouting App</title>
+    <link rel="stylesheet" href="node_modules/onsenui/css/onsenui.css">
+    <link rel="stylesheet" href="node_modules/onsenui/css/onsen-css-components.css">
+    <script src="node_modules/onsenui/js/onsenui.js"></script>
+    <link rel="stylesheet" href="node_modules/font-awesome-animation/dist/font-awesome-animation.min.css">
+    <script src="node_modules/axios/dist/axios.min.js"></script>
 </head>
 
 <body>
@@ -20,7 +21,6 @@
 
 
 <!-- START SUMANTH FIREBASE CODE-->
-
 
 
 <!-- END SUMANTH FIREBASE CODE-->
@@ -37,7 +37,7 @@
         </ons-tabbar>
 
         <script>
-            ons.getScriptPage().addEventListener('prechange', function(event) {
+            ons.getScriptPage().addEventListener('prechange', function (event) {
                 if (event.target.matches('#appTabbar')) {
                     event.currentTarget.querySelector('ons-toolbar .center').innerHTML = event.tabItem.getAttribute('label');
                 }
@@ -66,8 +66,6 @@
             <div class="title">Team Data</div>
             <div class="content"></div>
         </ons-card>
-
-
 
 
         <style>
@@ -100,7 +98,7 @@
             <div class="center"></div>
         </ons-toolbar>
 
-        <ons-pull-hook id="pull-hook" threshold-height="120px">
+        <ons-pull-hook id="pull-hook" threshold-height="130px">
             <ons-icon id="pull-hook-icon" size="22px" class="pull-hook-content" icon="fa-arrow-down"></ons-icon>
         </ons-pull-hook>
 
@@ -118,6 +116,7 @@
                 // this.querySelector('ons-toolbar div.center').textContent = this.data.title;
                 var pullHook = document.getElementById('pull-hook');
                 var icon = document.getElementById('pull-hook-icon');
+                var teamsBA = null;
                 pullHook.addEventListener('changestate', function (event) {
                     switch (event.state) {
                         case 'initial':
@@ -135,51 +134,62 @@
                             icon.removeAttribute('rotate');
                             icon.setAttribute('spin', true);
                             icon.setAttribute('animated');
-                            icon.setAttribute('');
+                            icon.setAttribute('faa-flashing');
                             break;
                     }
                 });
-                var getRandomName = function () {
-                    const names = ['Oscar', 'Max', 'Tiger', 'Sam', 'Misty', 'Simba', 'Coco', 'Chloe', 'Lucy', 'Missy'];
+                var getTeams = function (page) {
+                     axios({
+                        method: 'get',
+                        url: `https://www.thebluealliance.com/api/v3/teams/${page}`,
+                        headers: {'X-TBA-Auth-Key': ' S59CP2qkqLt0DuimRWKRByClsvqzgib2lyCJAUhIfdb59Mmxd54WAcK0B2vs6D0e'}
+                    }).then((res) => {
+                        return JSON.parse(res);
+                     })
+                };
+                var getTeamName = function () {
+                    teamBA = getTeams(1);
+                    console.log(teamBA);
+                    var names = ['blim blam', 'kabla', 'asdfadsfasdf', 'asdf', '32142342n3nnifinn'];
                     return names[Math.floor(Math.random() * names.length)];
                 };
-                var getRandomUrl = function () {
-                    const width = 40 + Math.floor(20 * Math.random());
-                    const height = 40 + Math.floor(20 * Math.random());
-                    return `https://placekitten.com/g/${width}/${height}`;
+                var getTeamNumber = function () {
+                    // const width = 40 + Math.floor(20 * Math.random());
+                    return Math.random() * 10000;
                 };
-                var getRandomKitten = function () {
+                var getRandomTeam = function () {
                     return {
-                        name: getRandomName(),
-                        url: getRandomUrl()
+                        name: getTeamName(),
+                        number: getTeamNumber()
                     };
                 };
                 var getRandomData = function () {
                     const data = [];
                     for (var i = 0; i < 8; i++) {
-                        data.push(getRandomKitten());
+                        teamBA = getTeams(2)
+                        data.push(getRandomTeam());
                     }
                     return data;
                 };
-                var createKitten = function (kitten) {
+                var createTeam = function (team) {
                     return ons.createElement(`
               <ons-list-item>
                 <div class="left">
-                  <img class="list-item__thumbnail" src="${kitten.url}">
+                  <div class="left" > ${team.name}</div>
                 </div>
-                <div class="center">${kitten.name}</div>
+                <div class="center">${team.number}</div>
               </ons-list-item>
             `
                     );
                 };
-                var kittens = getRandomData();
-                for (kitty of kittens) {
-                    var kitten = createKitten(kitty);
-                    document.getElementById('kitten-list').appendChild(kitten);
-                };
+                var teams = getRandomData();
+                for (team of teams) {
+                    var teamEl = createTeam(team);
+                    document.getElementById('teams-list').appendChild(teamEl);
+                }
                 pullHook.onAction = function (done) {
-                    setTimeout(function() {
-                        document.getElementById('kitten-list').appendChild(createKitten(getRandomKitten()));
+                    setTimeout(function () {
+                        document.getElementById('teams-list').appendChild(createTeam(getRandomTeam()));
                         done();
                     }, 400);
                 }
@@ -199,7 +209,8 @@
     <!-- Lazy load thousands of items -->
     <ons-page id="lazy-repeat-page">
         <p class="intro">
-            Automatically unloads items that are not visible and loads new ones. Useful when the list contains thousands of items.<br><br>
+            Automatically unloads items that are not visible and loads new ones. Useful when the list contains thousands
+            of items.<br><br>
         </p>
 
         <ons-list>
@@ -293,7 +304,7 @@
                 var getRandomKitten = function () {
                     return {
                         name: getRandomName(),
-                        url: getRandomUrl()
+                        number: getRandomUrl()
                     };
                 };
                 var getRandomData = function () {
@@ -307,7 +318,7 @@
                     return ons.createElement(`
               <ons-list-item>
                 <div class="left">
-                  <img class="list-item__thumbnail" src="${kitten.url}">
+                  <img class="list-item__thumbnail" src="${kitten.number}">
                 </div>
                 <div class="center">${kitten.name}</div>
               </ons-list-item>
@@ -318,9 +329,10 @@
                 for (kitty of kittens) {
                     var kitten = createKitten(kitty);
                     document.getElementById('kitten-list').appendChild(kitten);
-                };
+                }
+                ;
                 pullHook.onAction = function (done) {
-                    setTimeout(function() {
+                    setTimeout(function () {
                         document.getElementById('kitten-list').appendChild(createKitten(getRandomKitten()));
                         done();
                     }, 400);
@@ -366,12 +378,14 @@
                     Prompt
                 </div>
             </ons-list-item>
-            <ons-list-item tappable modifier="longdivider" onclick="ons.notification.toast('Hi there!', { buttonLabel: 'Dismiss', timeout: 1500 })">
+            <ons-list-item tappable modifier="longdivider"
+                           onclick="ons.notification.toast('Hi there!', { buttonLabel: 'Dismiss', timeout: 1500 })">
                 <div class="center">
                     Toast
                 </div>
             </ons-list-item>
-            <ons-list-item tappable modifier="longdivider" onclick="ons.openActionSheet({ buttons: ['Label 1', 'Label 2', 'Label 3', 'Cancel'], destructive: 2, cancelable: true })">
+            <ons-list-item tappable modifier="longdivider"
+                           onclick="ons.openActionSheet({ buttons: ['Label 1', 'Label 2', 'Label 3', 'Cancel'], destructive: 2, cancelable: true })">
                 <div class="center">
                     Action/Bottom Sheet
                 </div>
@@ -439,7 +453,9 @@
             </div>
         </ons-alert-dialog>
 
-        <ons-toast id="toast-dialog" animation="fall">Supercalifragilisticexpialidocious<button onclick="fn.hideDialog('toast-dialog')">No way</button></ons-toast>
+        <ons-toast id="toast-dialog" animation="fall">Supercalifragilisticexpialidocious
+            <button onclick="fn.hideDialog('toast-dialog')">No way</button>
+        </ons-toast>
 
         <ons-modal id="modal-dialog" onclick="fn.hideDialog('modal-dialog')">
             <p style="text-align: center">
@@ -467,10 +483,15 @@
         </ons-popover>
 
         <ons-action-sheet id="action-sheet-dialog" cancelable>
-            <ons-action-sheet-button onclick="fn.hideDialog('action-sheet-dialog')" icon="md-square-o">Action 1</ons-action-sheet-button>
-            <ons-action-sheet-button onclick="fn.hideDialog('action-sheet-dialog')" icon="md-square-o">Action 2</ons-action-sheet-button>
-            <ons-action-sheet-button onclick="fn.hideDialog('action-sheet-dialog')" modifier="destructive" icon="md-square-o">Action 3</ons-action-sheet-button>
-            <ons-action-sheet-button onclick="fn.hideDialog('action-sheet-dialog')" icon="md-square-o">Cancel</ons-action-sheet-button>
+            <ons-action-sheet-button onclick="fn.hideDialog('action-sheet-dialog')" icon="md-square-o">Action 1
+            </ons-action-sheet-button>
+            <ons-action-sheet-button onclick="fn.hideDialog('action-sheet-dialog')" icon="md-square-o">Action 2
+            </ons-action-sheet-button>
+            <ons-action-sheet-button onclick="fn.hideDialog('action-sheet-dialog')" modifier="destructive"
+                                     icon="md-square-o">Action 3
+            </ons-action-sheet-button>
+            <ons-action-sheet-button onclick="fn.hideDialog('action-sheet-dialog')" icon="md-square-o">Cancel
+            </ons-action-sheet-button>
         </ons-action-sheet>
 
         <script>
@@ -491,7 +512,9 @@
                         elem.show();
                         if (id === 'modal-dialog') {
                             clearTimeout(timeoutID);
-                            timeoutID = setTimeout(function() { fn.hideDialog(id) }, 2000);
+                            timeoutID = setTimeout(function () {
+                                fn.hideDialog(id)
+                            }, 2000);
                         }
                     }
                 };
@@ -601,7 +624,8 @@
     <!-- Load more items on scroll bottom -->
     <ons-page id="load-more-page" on-infinite-scroll="fn.loadMore">
         <p class="intro">
-            Useful for loading more items when the scroll reaches the bottom of the page, typically after an asynchronous API call.<br><br>
+            Useful for loading more items when the scroll reaches the bottom of the page, typically after an
+            asynchronous API call.<br><br>
         </p>
 
         <ons-list id="list-node"></ons-list>
@@ -620,7 +644,7 @@
                     listNode.appendChild(createListItem(i));
                 }
                 window.fn.loadMore = function (done) {
-                    setTimeout(function() {
+                    setTimeout(function () {
                         const listLength = listNode.children.length;
                         for (var i = 0; i < 10; i++) {
                             listNode.appendChild(createListItem(listLength + i));
@@ -671,7 +695,8 @@
             <div style="text-align: center; margin: 40px; color: #666">
                 <p>
                     <ons-progress-circular class="progressStyle" value="20"></ons-progress-circular>
-                    <ons-progress-circular class="progressStyle" value="40" secondary-value="80"></ons-progress-circular>
+                    <ons-progress-circular class="progressStyle" value="40"
+                                           secondary-value="80"></ons-progress-circular>
                     <ons-progress-circular class="progressStyle" indeterminate></ons-progress-circular>
                 </p>
 
@@ -717,7 +742,7 @@
                 var progressStatus = document.getElementById('progress-status');
                 var progressValue = document.getElementById('progress-value');
                 var intervalID = 0;
-                intervalID = setInterval(function() {
+                intervalID = setInterval(function () {
                     if (progressValue.value === 100) {
                         clearInterval(intervalID);
                         return;
@@ -795,9 +820,9 @@
 
     window.fn.pushPage = function (page, anim) {
         if (anim) {
-            document.getElementById('appNavigator').pushPage(page.id, { data: { title: page.title }, animation: anim });
+            document.getElementById('appNavigator').pushPage(page.id, {data: {title: page.title}, animation: anim});
         } else {
-            document.getElementById('appNavigator').pushPage(page.id, { data: { title: page.title } });
+            document.getElementById('appNavigator').pushPage(page.id, {data: {title: page.title}});
         }
     };
 </script>

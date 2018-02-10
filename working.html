@@ -365,7 +365,7 @@
                 var getRandomKitten = function () {
                     return {
                         name: getRandomName(),
-                        url: getRandomUrl()
+                        number: getRandomUrl()
                     };
                 };
                 var getRandomData = function () {
@@ -379,7 +379,7 @@
                     return ons.createElement(`
               <ons-list-item>
                 <div class="left">
-                  <img class="list-item__thumbnail" src="${kitten.url}">
+                  <img class="list-item__thumbnail" src="${kitten.number}">
                 </div>
                 <div class="center">${kitten.name}</div>
               </ons-list-item>

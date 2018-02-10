@@ -8,12 +8,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/TechnoTitans/ScoutingWebsite.git"
+    "number": "git+https://github.com/TechnoTitans/ScoutingWebsite.git"
   },
   "author": "Yaseen Shaikh + Sumanth Kadiyala",
   "license": "WTFPL",
   "bugs": {
-    "url": "https://github.com/TechnoTitans/ScoutingWebsite/issues"
+    "number": "https://github.com/TechnoTitans/ScoutingWebsite/issues"
   },
   "homepage": "https://github.com/TechnoTitans/ScoutingWebsite#readme",
   "devDependencies": {
@@ -21,6 +21,7 @@
     "onsenui": "^2.9.1"
   },
   "dependencies": {
+    "axios": "^0.17.1",
     "font-awesome-animation": "^0.2.0"
   }
 }
