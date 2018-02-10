@@ -17,12 +17,10 @@
   },
   "homepage": "https://github.com/TechnoTitans/ScoutingWebsite#readme",
   "devDependencies": {
-    "babel-cli": "^6.26.0",
     "babel-preset-env": "^1.6.1",
-    "onsenui": "^2.9.1",
-    "vue-onsenui": "^2.5.0"
+    "onsenui": "^2.9.1"
   },
   "dependencies": {
-    "vue": "^2.5.13"
+    "font-awesome-animation": "^0.2.0"
   }
 }
