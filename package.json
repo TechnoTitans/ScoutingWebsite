@@ -1,0 +1,28 @@
+{
+  "name": "scoutingwebsite",
+  "version": "1.0.0",
+  "description": "Scouting app for tTechnoTitans team 1638",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TechnoTitans/ScoutingWebsite.git"
+  },
+  "author": "Yaseen Shaikh + Sumanth Kadiyala",
+  "license": "WTFPL",
+  "bugs": {
+    "url": "https://github.com/TechnoTitans/ScoutingWebsite/issues"
+  },
+  "homepage": "https://github.com/TechnoTitans/ScoutingWebsite#readme",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "onsenui": "^2.9.1",
+    "vue-onsenui": "^2.5.0"
+  },
+  "dependencies": {
+    "vue": "^2.5.13"
+  }
+}
