@@ -1,12 +1,13 @@
 'use strict';
 
 var state = 'ga', eventCode = 'gai', year = 2018;
-var allTeams;
+var allTeams = [];
 
 document.addEventListener('init', function (event) {
-    console.log("Init");
+    console.log("Init", event.target.id);
+    var page = event.target;
     // this.querySelector('ons-toolbar div.center').textContent = this.data.title;
-    if (event.target.matches("#home")) {
+    if (page.matches("#home")) {
         var page = event.target;
         // var pullHook = page.querySelector("#pull-hook");
         // var icon = page.querySelector("#pull-hook-icon");
@@ -80,15 +81,21 @@ document.addEventListener('init', function (event) {
             });
         };
 
+        var teamClick = function () {
+            var teamNumber = this.dataset.teamNum;
+            document.getElementById("appNavigator").pushPage("team-scout.html", {data: {num: teamNumber}})
+        };
         var createTeam = function (team) {
-            return ons.createElement(`
-              <ons-list-item>
+            var elem = ons.createElement(`
+              <ons-list-item data-team-num="${team.team_number}">
               <div>
                 ${team.nickname} - ${team.team_number}
                 </div>
               </ons-list-item>
             `
             );
+            elem.onclick = teamClick;
+            return elem;
         };
         // var teams = getRandomData();
         // for (team of teams) {
@@ -105,8 +112,9 @@ document.addEventListener('init', function (event) {
         var addTeams = function(teams, query) {
             for (let team of teams) {
                 if (query.every(term => team.nickname.toLowerCase().indexOf(term) !== -1
-                        || team.team_number.toString().indexOf(term) !== -1))
+                        || team.team_number.toString().indexOf(term) !== -1)) {
                     page.querySelector("#teams-list").appendChild(createTeam(team));
+                }
             }
         };
         fetchTeams();
@@ -118,5 +126,20 @@ document.addEventListener('init', function (event) {
             var terms = this.value.toLowerCase().split(" ");
             addTeams(allTeams, terms);
         };
+    } else if (page.matches("#team-scout")) {
+        console.log(page.data);
+        var teamNum = page.data.num;
+        var teamObj;
+        for (let team of allTeams) {
+            if (team.team_number.toString() === teamNum) {
+                teamObj = team;
+                break;
+            }
+        }
+        if (teamObj == null) {
+            alert("Could not find team"); // should never happen anyway
+            return;
+        }
+        page.querySelector("#team-title").innerHTML = `${teamObj.nickname}`;
     }
 });
