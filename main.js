@@ -3,6 +3,15 @@
 var state = 'ga', eventCode = 'gai', year = 2018;
 var allTeams = [];
 
+var getTeamByNumber = function(num) {
+    num = num.toString();
+    for (let team of allTeams) {
+        if (team.team_number.toString() === num) {
+            return team;
+        }
+    }
+};
+
 document.addEventListener('init', function (event) {
     console.log("Init", event.target.id);
     var page = event.target;
@@ -83,7 +92,7 @@ document.addEventListener('init', function (event) {
 
         var teamClick = function () {
             var teamNumber = this.dataset.teamNum;
-            document.getElementById("appNavigator").pushPage("team-scout.html", {data: {num: teamNumber}})
+            document.getElementById("appNavigator").pushPage("team-scout.html", {data: {num: teamNumber}});
         };
         var createTeam = function (team) {
             var elem = ons.createElement(`
@@ -112,7 +121,8 @@ document.addEventListener('init', function (event) {
         var addTeams = function(teams, query) {
             for (let team of teams) {
                 if (query.every(term => team.nickname.toLowerCase().indexOf(term) !== -1
-                        || team.team_number.toString().indexOf(term) !== -1)) {
+                        || team.team_number.toString().indexOf(term) !== -1)
+                    || (query.join(" ")==="the best team" && team.team_number === 1683)) { // lol easter egg
                     page.querySelector("#teams-list").appendChild(createTeam(team));
                 }
             }
@@ -129,17 +139,45 @@ document.addEventListener('init', function (event) {
     } else if (page.matches("#team-scout")) {
         console.log(page.data);
         var teamNum = page.data.num;
-        var teamObj;
-        for (let team of allTeams) {
-            if (team.team_number.toString() === teamNum) {
-                teamObj = team;
-                break;
-            }
-        }
-        if (teamObj == null) {
+        var teamObj = getTeamByNumber(teamNum);
+        if (!teamObj) {
             alert("Could not find team"); // should never happen anyway
             return;
         }
         page.querySelector("#team-title").innerHTML = `${teamObj.nickname}`;
+        var buttons = page.querySelectorAll("ons-card");
+        for (let button of buttons) {
+            button.onclick = function() {
+                document.getElementById("appNavigator").pushPage(`${this.id}-scout.html`, {data: {title: "Home", team: teamObj}});
+            }
+        }
+    } else if (page.matches("#match-scout") || page.matches("#pit-scout")) {
+        var isMatch = page.matches("#match-scout"), team = page.data.team;
+        console.log(team);
+        page.querySelector("#team-title").innerHTML = team.nickname;
+        page.querySelector("#team-num").innerHTML = team.team_number;
+        page.querySelector("#team-name").innerHTML = team.nickname;
+        if (isMatch) {
+            var target = -1, success = false, chosen = null;
+            var targetBtns = page.querySelectorAll("#auto-target ons-button");
+            var resultBtns = page.querySelectorAll("#auto-target-result ons-button");
+            var enableButtons = function(enabled) {
+                for (let button of resultBtns) button.disabled = !enabled;
+            };
+            for (let button of targetBtns) {
+                button.onclick = function() {
+                    target = this.dataset.target;
+                    this.classList.add("chosen");
+                    if (chosen) chosen.classList.remove("chosen");
+                    if (this != chosen) {
+                        chosen = this;
+                        enableButtons(true);
+                    } else {
+                        chosen = null;
+                        enableButtons(false);
+                    }
+                };
+            }
+        }
     }
 });

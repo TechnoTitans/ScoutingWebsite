@@ -64,25 +64,87 @@
 </template>
 
 <template id="team-scout.html">
-    <ons-page id="team-scout">
+    <ons-page id="team-scout" class="scout-page">
         <ons-toolbar>
             <div class="left"><ons-back-button>Home</ons-back-button></div>
             <div class="center" id="team-title"></div>
         </ons-toolbar>
-        <div id="intro-btns" style="text-align: center; margin-top: 30px; padding: 1em;">
-            <ons-button id="match" modifier="large">
-                Match
-            </ons-button>
-       </div>
+        <h2 style="text-align: center;">Team Scouting</h2>
+        <div id="intro-btns" class="btns">
+            <ons-card id="match" modifier="large">
+                <div class="title">Match</div>
+                <div class="content">When scouting for a real match</div>
+            </ons-card>
+            <ons-card id="pit" modifier="large">
+                <div class="title">Pit</div>
+                <div class="content">Simply asking questions</div>
+            </ons-card>
+        </div>
     </ons-page>
 </template>
+
+<template id="match-scout.html">
+    <ons-page id="match-scout" class="scout-page">
+        <ons-toolbar>
+            <div class="left"><ons-back-button>Team</ons-back-button></div>
+            <div class="center" id="team-title"></div>
+        </ons-toolbar>
+        <h2>Team <span id="team-num"></span> - <span id="team-name"></span></h2>
+        <div id="match-btns" class="btns">
+            <div id="autonomous" style="padding: 5px;">
+                <h3>Autonomous</h3>
+                Choose target:<br />
+                <div id="auto-target">
+                    <ons-button modifier="large" data-target="0">Switch (Same side)</ons-button>
+                    <ons-button modifier="large" data-target="1">Switch (Cross side)</ons-button>
+                    <ons-button modifier="large" data-target="2">Scale (Same side)</ons-button>
+                    <ons-button modifier="large" data-target="3">Scale (Cross side)</ons-button>
+                    <ons-button modifier="large" data-target="4">Drive across line</ons-button>
+                </div>
+                <div id="auto-target-result">
+                    <ons-button disabled>Success</ons-button>
+                    <ons-button disabled>Failure</ons-button>
+                </div>
+            </div>
+        </div>
+    </ons-page>
+</template>
+
+<template id="pit-scout.html">
+    <ons-page id="pit-scout" class="scout-page">
+        <ons-toolbar>
+            <div class="left"><ons-back-button>Team</ons-back-button></div>
+            <div class="center" id="team-title"></div>
+        </ons-toolbar>
+        <h2>Team <span id="team-num"></span> - <span id="team-name"></span></h2>
+        <div id="pit-btns" style="" class="btns">
+        </div>
+    </ons-page>
+</template>
+
 <style>
     ons-splitter-side[animation=overlay] {
         border-left: 1px solid #bbb;
     }
-    #team-scout ons-button {
-        padding: 3em;
+    #team-scout ons-card .title {
         font-size: xx-large;
+    }
+    #team-scout ons-card .content {
+        font-size: large;
+    }
+    .scout-page h2 {
+        text-align: center;
+    }
+    .scout-page .btns {
+        text-align: center;
+        margin-top: 20px;
+        padding: 0.1em;
+    }
+    .scout-page ons-button {
+        margin: 6px;
+    }
+    .scout-page ons-button.chosen {
+        background-color: #025aa5;
     }
 </style>
 
