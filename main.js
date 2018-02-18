@@ -12,6 +12,40 @@ var getTeamByNumber = function(num) {
     }
 };
 
+var createSelectMenu = function(div, onchange) {
+    var chosen = null;
+    var btns = div.querySelectorAll("ons-button");
+    div.dataset.selected = "";
+    for (let button of btns) {
+        button.onclick = function() {
+            this.classList.add("chosen");
+            if (chosen) chosen.classList.remove("chosen");
+            if (this != chosen) {
+                chosen = this;
+            } else {
+                chosen = null;
+            }
+            div.dataset.selected = chosen ? chosen.dataset.select : "";
+            if (onchange) onchange(chosen);
+        };
+    }
+};
+
+var createNumInput = function(container) {
+    var inp = container.querySelector("ons-input");
+    var plus = container.querySelector(".plus"), minus = container.querySelector(".minus");
+    plus.onclick = function() {
+        var v = parseInt(inp.value, 10);
+        if (isNaN(v)) v = 0;
+        inp.value = v + 1;
+    };
+    minus.onclick = function() {
+        var v = parseInt(inp.value, 10);
+        if (isNaN(v)) v = 0;
+        inp.value = v - 1;
+    };
+};
+
 document.addEventListener('init', function (event) {
     console.log("Init", event.target.id);
     var page = event.target;
@@ -111,10 +145,10 @@ document.addEventListener('init', function (event) {
         //     var teamEl = createTeam(team);
         //     document.getElementById('teams-list').appendChild(teamEl);
         // }
-        var fetchTeams = function (done) {
+        var fetchTeams = function () {
             getTeams().then(function(teams) {
                 addTeams(teams, []);
-                if (done) done();
+                page.querySelector("#loading").style.display = "none";
             });
         };
 
@@ -151,33 +185,36 @@ document.addEventListener('init', function (event) {
                 document.getElementById("appNavigator").pushPage(`${this.id}-scout.html`, {data: {title: "Home", team: teamObj}});
             }
         }
-    } else if (page.matches("#match-scout") || page.matches("#pit-scout")) {
-        var isMatch = page.matches("#match-scout"), team = page.data.team;
-        console.log(team);
-        page.querySelector("#team-title").innerHTML = team.nickname;
+    } else if (page.matches("#match-scout")) {
+        var team = document.querySelector("#match-scout").data.team;
         page.querySelector("#team-num").innerHTML = team.team_number;
         page.querySelector("#team-name").innerHTML = team.nickname;
-        if (isMatch) {
-            var target = -1, success = false, chosen = null;
-            var targetBtns = page.querySelectorAll("#auto-target ons-button");
-            var resultBtns = page.querySelectorAll("#auto-target-result ons-button");
-            var enableButtons = function(enabled) {
-                for (let button of resultBtns) button.disabled = !enabled;
-            };
-            for (let button of targetBtns) {
-                button.onclick = function() {
-                    target = this.dataset.target;
-                    this.classList.add("chosen");
-                    if (chosen) chosen.classList.remove("chosen");
-                    if (this != chosen) {
-                        chosen = this;
-                        enableButtons(true);
-                    } else {
-                        chosen = null;
-                        enableButtons(false);
-                    }
-                };
+        // autonomous
+        var team = document.querySelector("#match-scout").data.team;
+        console.log(team);
+        //page.querySelector("#team-title").innerHTML = team.nickname;
+        var target = -1, success = false, chosen = null;
+        var targetBtns = page.querySelectorAll("#auto-target ons-button");
+        var resultBtns = page.querySelectorAll("#auto-target-result ons-button");
+        var enableButtons = function(enabled) {
+            for (let button of resultBtns) {
+                button.disabled = !enabled;
+                if (button.classList.contains("chosen") && !enabled) button.classList.remove("chosen");
             }
-        }
+            if (!enabled) page.querySelector("#auto-target-result").dataset.chosen = "";
+        };
+        createSelectMenu(page.querySelector("#auto-target"), chosen => enableButtons(chosen != null));
+        createSelectMenu(page.querySelector("#auto-target-result"));
+        page.querySelectorAll("p").forEach(p => createNumInput(p));
+        page.querySelector("#submit-match").onclick = function() {
+            var data = {};
+            data.autoTarget = page.querySelector("#auto-target").dataset.selected;
+            data.autoSuccess = page.querySelector("#auto-target-result").dataset.selected;
+            data.teleopSwitch = parseInt(page.querySelector("#teleop-switch ons-input").value, 10);
+            data.teleopScale = parseInt(page.querySelector("#teleop-scale ons-input").value, 10);
+            data.teleopVault = parseInt(page.querySelector("#teleop-vault ons-input").value, 10);
+            data.comments = page.querySelector("textarea").value;
+            console.log(data);
+        };
     }
 });

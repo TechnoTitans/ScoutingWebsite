@@ -58,7 +58,9 @@
         <ons-toolbar>
             <div class="center" style="margin-top: 5px"><ons-search-input class="center"></ons-search-input></div>
         </ons-toolbar>
-        <ons-list id="teams-list">
+        <div id="loading" style="text-align: center; margin: 10px 0px;"><ons-icon id="loading-icon" size="22px" spin="true" icon="fa-spinner"></ons-icon></div>
+        <ons-list id="teams-list">            
+            
         </ons-list>
     </ons-page>
 </template>
@@ -86,25 +88,52 @@
 <template id="match-scout.html">
     <ons-page id="match-scout" class="scout-page">
         <ons-toolbar>
-            <div class="left"><ons-back-button>Team</ons-back-button></div>
-            <div class="center" id="team-title"></div>
+            <div class="left"><ons-back-button></ons-back-button></div>
+            <div class="center" id="team-title">Team <span id="team-num"></span> Match Scouting</span></div>
+            
         </ons-toolbar>
-        <h2>Team <span id="team-num"></span> - <span id="team-name"></span></h2>
+        <h2 id="team-name"></h2>
         <div id="match-btns" class="btns">
-            <div id="autonomous" style="padding: 5px;">
+            <div style="padding: 5px;">
+            <div id="autonomous">
                 <h3>Autonomous</h3>
                 Choose target:<br />
-                <div id="auto-target">
-                    <ons-button modifier="large" data-target="0">Switch (Same side)</ons-button>
-                    <ons-button modifier="large" data-target="1">Switch (Cross side)</ons-button>
-                    <ons-button modifier="large" data-target="2">Scale (Same side)</ons-button>
-                    <ons-button modifier="large" data-target="3">Scale (Cross side)</ons-button>
-                    <ons-button modifier="large" data-target="4">Drive across line</ons-button>
+                <div id="auto-target" class="btn-select-menu">
+                    <ons-button modifier="large" data-select="0">Switch (Same side)</ons-button>
+                    <ons-button modifier="large" data-select="1">Switch (Cross side)</ons-button>
+                    <ons-button modifier="large" data-select="2">Scale (Same side)</ons-button>
+                    <ons-button modifier="large" data-select="3">Scale (Cross side)</ons-button>
+                    <ons-button modifier="large" data-select="4">Drive across line</ons-button>
                 </div>
-                <div id="auto-target-result">
-                    <ons-button disabled>Success</ons-button>
-                    <ons-button disabled>Failure</ons-button>
+                <div id="auto-target-result" class="btn-select-menu">
+                    <ons-button disabled data-select="1">Success</ons-button>
+                    <ons-button disabled data-select="0">Failure</ons-button>
                 </div>
+            </div>
+            <hr />
+            <div id="teleop">
+                <h3>Teleoperated</h3>
+                <div id="teleop-run">
+                    <p id="teleop-switch">Switch blocks:<br/>
+                        <ons-button class="minus">-</ons-button>
+                        <ons-input type="number" value="0" min="0"></ons-input>
+                        <ons-button class="plus">+</ons-button>
+                    </p>
+                    <p id="teleop-scale">Scale blocks:<br/>
+                        <ons-button class="minus">-</ons-button>
+                        <ons-input type="number" value="0" min="0"></ons-input>
+                        <ons-button class="plus">+</ons-button>
+                    </p>
+                    <p id="teleop-vault">Vault blocks:<br />
+                        <ons-button class="minus">-</ons-button>
+                        <ons-input type="number" value="0" min="0"></ons-input>
+                        <ons-button class="plus">+</ons-button>
+                    </p>
+                </div>
+            </div>
+            <hr />
+            <textarea placeholder="Comments (optional)"></textarea>
+            <ons-button id="submit-match">Submit</ons-button>
             </div>
         </div>
     </ons-page>
@@ -141,10 +170,43 @@
         padding: 0.1em;
     }
     .scout-page ons-button {
-        margin: 6px;
+        margin: 11px 6px;
     }
     .scout-page ons-button.chosen {
         background-color: #025aa5;
+    }
+    .scout-page textarea {
+        padding: 6px 12px;
+        font-size: 14px;
+        width: -webkit-fill-available;
+        width: -moz-fill-available;
+        border-radius: 4px;
+        height: 5em;
+    }
+    .scout-page textarea:focus {
+        box-shadow: 0 0 5px rgba(81, 203, 238, 1);
+        border: 1px solid rgba(81, 203, 238, 1);
+    }
+    .scout-page .button--large {
+        width: auto;
+        display: block;
+    }
+    .scout-page #teleop-run p {
+        margin: 20px;    
+    }
+    .scout-page #teleop-run .text-input {
+        text-align: center;
+        font-size: x-large;    
+    }
+    .scout-page #teleop-run ons-input {
+        padding: 7px;
+        width: 3em;
+    }
+    .scout-page #teleop-run input:invalid {
+      box-shadow: 0 0 5px 1px red;
+    }
+    .plus, .minus {
+        font-size: x-large;
     }
 </style>
 
