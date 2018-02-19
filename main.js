@@ -202,5 +202,7 @@ document.addEventListener('init', function (event) {
             });
             return false;
         };
+    } else if (page.id === "pit-scout") {
+        page.querySelectorAll(".select-one").forEach(x => createSelectMenu(x));
     }
 });

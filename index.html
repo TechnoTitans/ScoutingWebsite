@@ -30,8 +30,6 @@
         <ons-tabbar swipeable id="appTabbar" position="auto">
             <ons-tab label="Home" icon="ion-home" page="home.html" active></ons-tab>
             <ons-tab label="View Teams" icon="ion-edit" page="teams.html"></ons-tab>
-            <ons-tab label 
-            <ons-tab></ons-tab>
         </ons-tabbar>
 
         <script>
@@ -188,8 +186,7 @@
             <div>
                 <div>
                     <h2 id = "driveTrainHeading" style = "font-size: 200%; margin-bottom: 0%; padding-bottom: 0%">Drive Train Type:</h2>
-                    <div>
-                        <br />
+                    <div class="select-one">
                         <ons-button modifier="large" data-select="0">Tank</ons-button>
                         <ons-button modifier="large" data-select="1">Swerve</ons-button>
                         <ons-button modifier="large" data-select="2">Mecanum</ons-button>
@@ -199,15 +196,15 @@
                 </div>
                 <div class = "pitScout">
                     <h2>Focus:</h2><br />
-                    <div>
+                    <div class="select-one">
                         <ons-button modifier="large" data-select="0">Switch</ons-button>
                         <ons-button modifier="large" data-select="1">Scale</ons-button>
-                        <ons-button modifier="large" data-select="1">Defense</ons-button>
+                        <ons-button modifier="large" data-select="2">Defense</ons-button>
                     </div>
                 </div>
                 <div class = "pitScout">
                     <h2>Capabilities:</h2><br />
-                    <div class = "CheckBoxPit">
+                    <div class = "CheckBoxPit select-one">
                         <ons-button modifier="large" data-select="0">Switch</ons-button>
                         <ons-button modifier="large" data-select="1">Scale</ons-button>
                     </div>
@@ -221,13 +218,11 @@
                
                 <div class = "pitScout">
                     <h2>End Game Strategy:</h2>
-                    <div class = "CheckBoxPit">
+                    <div class = "CheckBoxPit select-one">
                         <ons-button modifier="large" data-select="0">Ramps</ons-button>
                         <ons-button modifier="large" data-select="1">Climb</ons-button>
-                        <br>
-    
-                        <textarea placeholder="Additional Systems"></textarea>
-                    </div>
+                    </div><br />
+                    <textarea placeholder="Additional Systems"></textarea>
                 </div>
             </div>
         </ons-page>
