@@ -14,12 +14,21 @@ console.log('fb conslog', firebase);
 var db = firebase.database();
 
 var state = 'ga', eventCode = 'gai', year = 2018;
+let key = year + state + eventCode;
 var eventCodes = ['gai', 'col' , 'dul', 'dal', 'cmp', 'alb'];
 var allTeams = [];
 
 var writeScoutingData = function(data) {
     console.log('sent data for team' + data.teamName, data);
-    return db.ref("data").child(data.teamNum.toString()).push().set(data);
+    return db.ref("data").child(data.teamNum.toString()).child(data.eventCode).push().set(data);
+};
+
+var teamHasData = function (teamNum) {
+    db.ref('/data/' + teamNum).once('value').then(snapshot => {
+        // console.log(snapshot.val());
+        console.log('returning data');
+        return snapshot.val() !== null;
+    })
 };
 
 var getTeamByNumber = function(num) {
@@ -147,8 +156,15 @@ document.addEventListener('init', function (event) {
             alert("Could not find team"); // should never happen anyway
             return;
         }
-        page.querySelector("#team-title").innerHTML = `${teamObj.nickname}`;
+        page.querySelector("#team-title").innerHTML = `${teamObj.nickname}`
+            + `<div style="color: #4c6ef5; padding-left: 0.2em;"><i class="fas fa-circle" style="visibility: hidden;" id="prev-data-icon"></i></div>`;
         var buttons = page.querySelectorAll("ons-card");
+
+        // give indication of previous data
+        if(teamHasData(teamNum)){
+            console.log('team has data');
+            page.querySelector("#prev-data-icon").style.visibility = "visible";
+        }
         for (let button of buttons) {
             button.onclick = function() {
                 document.getElementById("appNavigator").pushPage(`${this.id}-scout.html`, {data: {team: teamObj}});
@@ -191,6 +207,7 @@ document.addEventListener('init', function (event) {
             data.timestamp = Date.now(); // just for fun idk
             data.teamName = team.nickname.trim();
             data.teamNum = team.team_number;
+            data.eventCode = ;
             var btn = this.querySelector("#submit-match");
             btn.style.width = btn.offsetWidth + "px"; // keep width fixed
             btn.querySelector("#submit-load").style.display = "initial";
