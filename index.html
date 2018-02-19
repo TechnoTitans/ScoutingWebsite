@@ -22,12 +22,6 @@
 </ons-navigator>
 
 
-<!-- START SUMANTH FIREBASE CODE-->
-
-
-
-<!-- END SUMANTH FIREBASE CODE-->
-
 <template id="tabbar.html">
     <ons-page id="tabbar-page">
         <ons-toolbar>
@@ -36,6 +30,8 @@
         <ons-tabbar swipeable id="appTabbar" position="auto">
             <ons-tab label="Home" icon="ion-home" page="home.html" active></ons-tab>
             <ons-tab label="View Teams" icon="ion-edit" page="teams.html"></ons-tab>
+            <ons-tab label 
+            <ons-tab></ons-tab>
         </ons-tabbar>
 
         <script>
@@ -65,6 +61,10 @@
             </ons-list-item>
         </ons-list>
     </ons-page>
+</template>
+
+<template id="settings.html">
+        
 </template>
 
 <!-- this just gets all the info from bluealliance-->
@@ -174,16 +174,64 @@
 </template>
 
 <template id="pit-scout.html">
-    <ons-page id="pit-scout" class="scout-page">
-        <ons-toolbar>
-            <div class="left"><ons-back-button>Team</ons-back-button></div>
-            <div class="center" id="team-title"></div>
-        </ons-toolbar>
-        <h2>Team <span id="team-num"></span> - <span id="team-name"></span></h2>
-        <div id="pit-btns" style="" class="btns">
-        </div>
-    </ons-page>
-</template>
+        <ons-page id="pit-scout" class="scout-page">
+            <ons-toolbar>
+                <div class="left"><ons-back-button>Team</ons-back-button></div>
+                <div class="center" id="team-title"></div>
+            </ons-toolbar>
+            <div class = "pitTitle">
+                <h2>Team <span id="team-num"></span> - <span id="team-name"></span></h2>
+            </div>
+            <div id="pit-btns" class="btns">
+            </div>
+    
+            <div>
+                <div>
+                    <h2 id = "driveTrainHeading" style = "font-size: 200%; margin-bottom: 0%; padding-bottom: 0%">Drive Train Type:</h2>
+                    <div>
+                        <br />
+                        <ons-button modifier="large" data-select="0">Tank</ons-button>
+                        <ons-button modifier="large" data-select="1">Swerve</ons-button>
+                        <ons-button modifier="large" data-select="2">Mecanum</ons-button>
+                        <ons-button modifier="large" data-select="3">Slide</ons-button>
+                        <ons-button modifier="large" data-select="4">Holonomic</ons-button>
+                    </div>
+                </div>
+                <div class = "pitScout">
+                    <h2>Focus:</h2><br />
+                    <div>
+                        <ons-button modifier="large" data-select="0">Switch</ons-button>
+                        <ons-button modifier="large" data-select="1">Scale</ons-button>
+                        <ons-button modifier="large" data-select="1">Defense</ons-button>
+                    </div>
+                </div>
+                <div class = "pitScout">
+                    <h2>Capabilities:</h2><br />
+                    <div class = "CheckBoxPit">
+                        <ons-button modifier="large" data-select="0">Switch</ons-button>
+                        <ons-button modifier="large" data-select="1">Scale</ons-button>
+                    </div>
+                    
+                    <div id = "insertHeight">
+                        <h4>Robot's Max Lift Height:</h4>
+                        <ons-input></ons-input> 
+                        <h5>inches</h5>
+                    </div>
+                </div>
+               
+                <div class = "pitScout">
+                    <h2>End Game Strategy:</h2>
+                    <div class = "CheckBoxPit">
+                        <ons-button modifier="large" data-select="0">Ramps</ons-button>
+                        <ons-button modifier="large" data-select="1">Climb</ons-button>
+                        <br>
+    
+                        <textarea placeholder="Additional Systems"></textarea>
+                    </div>
+                </div>
+            </div>
+        </ons-page>
+    </template>
 
 <style>
     ons-splitter-side[animation=overlay] {
