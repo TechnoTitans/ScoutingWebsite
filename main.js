@@ -17,8 +17,8 @@ var state = 'ga', eventCode = 'gai', year = 2018;
 var allTeams = [];
 
 var writeScoutingData = function(data) {
-    db.ref('/data/' + data.teamNum).set(data);
-    console.log('sent data for team' + data.teamName);
+    console.log('sent data for team' + data.teamName, data);
+    return db.ref('/data/' + data.teamNum).set(data);
 };
 
 var getTeamByNumber = function(num) {
@@ -47,6 +47,19 @@ var createSelectMenu = function(div, onchange) {
             if (onchange) onchange(chosen);
         };
     }
+};
+
+var makeSuccessFailureMenu = function(main, succ) {
+    var enableButtons = function(enabled) {
+        var btns = succ.querySelectorAll("ons-button");
+        for (let button of btns) {
+            button.disabled = !enabled;
+            if (button.classList.contains("chosen") && !enabled) button.classList.remove("chosen");
+        }
+        if (!enabled) main.dataset.chosen = "";
+    };
+    createSelectMenu(main, chosen => enableButtons(chosen != null));
+    createSelectMenu(succ);
 };
 
 var createNumInput = function(container) {
@@ -102,6 +115,8 @@ document.addEventListener('init', function (event) {
             getTeams().then(function(teams) {
                 addTeams(teams, []);
                 page.querySelector("#loading").style.display = "none";
+            }).catch(function(error) {
+                page.querySelector("#loading").innerHTML = `<p style="color: red;">Could not load dat<br />${error}<br />Check internet connection</p>`;
             });
         };
 
@@ -139,25 +154,24 @@ document.addEventListener('init', function (event) {
             }
         }
     } else if (page.matches("#match-scout")) {
-        var team = document.querySelector("#match-scout").data.team;
+        var team = page.data.team;
         page.querySelector("#team-num").innerHTML = team.team_number;
         page.querySelector("#team-name").innerHTML = team.nickname;
         // autonomous
-        var team = document.querySelector("#match-scout").data.team;
-        console.log(team);
         //page.querySelector("#team-title").innerHTML = team.nickname;
         var target = -1, success = false, chosen = null;
-        var targetBtns = page.querySelectorAll("#auto-target ons-button");
-        var resultBtns = page.querySelectorAll("#auto-target-result ons-button");
-        var enableButtons = function(enabled) {
-            for (let button of resultBtns) {
-                button.disabled = !enabled;
-                if (button.classList.contains("chosen") && !enabled) button.classList.remove("chosen");
-            }
-            if (!enabled) page.querySelector("#auto-target-result").dataset.chosen = "";
-        };
-        createSelectMenu(page.querySelector("#auto-target"), chosen => enableButtons(chosen != null));
-        createSelectMenu(page.querySelector("#auto-target-result"));
+        //var enableButtons = function(btnContainer, enabled) {
+        //    var btns = btnCoontainer.querySelectorAll("ons-button");
+        //    for (let button of btns) {
+        //        button.disabled = !enabled;
+        //        if (button.classList.contains("chosen") && !enabled) button.classList.remove("chosen");
+        //    }
+        //    if (!enabled) btnContainer.dataset.chosen = "";
+        //};
+        //createSelectMenu(targetBtnsContainer, chosen => enableButtons(resultBtnsContainer, chosen != null));
+        //createSelectMenu(resultBtnsContainer);
+        makeSuccessFailureMenu(page.querySelector("#auto-target"), page.querySelector("#auto-target-result"));
+        makeSuccessFailureMenu(page.querySelector("#end-game-menu"), page.querySelector("#end-game-result"));
         page.querySelectorAll("p").forEach(p => createNumInput(p));
         page.querySelector("#submit-match").onclick = function() {
             var data = {};
@@ -166,12 +180,19 @@ document.addEventListener('init', function (event) {
             data.teleopSwitch = parseInt(page.querySelector("#teleop-switch ons-input").value, 10);
             data.teleopScale = parseInt(page.querySelector("#teleop-scale ons-input").value, 10);
             data.teleopVault = parseInt(page.querySelector("#teleop-vault ons-input").value, 10);
+            data.endGame = page.querySelector("#end-game-menu").dataset.selected;
+            data.endGameSuccess = page.querySelector("#end-game-result").dataset.selected;
             data.comments = page.querySelector("textarea").value;
             data.timestamp = Date.now(); // just for fun idk
             data.teamName = team.nickname.trim();
             data.teamNum = team.team_number;
-            writeScoutingData(data);
-            console.log(data);
+            this.style.width = this.offsetWidth + "px"; // keep width fixed
+            this.querySelector("#submit-load").style.display = "initial";
+            this.querySelector("#submit-text").style.display = "none";
+            writeScoutingData(data).then(() => {
+                this.querySelector("#submit-load").style.display = "none";
+                this.querySelector("#submit-done").style.display = "initial";
+            });
         };
     }
 });

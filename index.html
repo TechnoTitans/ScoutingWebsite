@@ -120,25 +120,42 @@
                 <h3>Teleoperated</h3>
                 <div id="teleop-run">
                     <p id="teleop-switch">Switch blocks:<br/>
-                        <ons-button class="minus">-</ons-button>
+                        <ons-button class="minus"><ons-icon icon="md-minus"></ons-icon></ons-button>
                         <ons-input type="number" value="0" min="0"></ons-input>
-                        <ons-button class="plus">+</ons-button>
+                        <ons-button class="plus"><ons-icon icon="md-plus"></ons-icon></ons-button>
                     </p>
                     <p id="teleop-scale">Scale blocks:<br/>
-                        <ons-button class="minus">-</ons-button>
+                        <ons-button class="minus"><ons-icon icon="md-minus"></ons-icon></ons-button>
                         <ons-input type="number" value="0" min="0"></ons-input>
-                        <ons-button class="plus">+</ons-button>
+                        <ons-button class="plus"><ons-icon icon="md-plus"></ons-icon></ons-button>
                     </p>
                     <p id="teleop-vault">Vault blocks:<br />
-                        <ons-button class="minus">-</ons-button>
+                        <ons-button class="minus"><ons-icon icon="md-minus"></ons-icon></ons-button>
                         <ons-input type="number" value="0" min="0"></ons-input>
-                        <ons-button class="plus">+</ons-button>
+                        <ons-button class="plus"><ons-icon icon="md-plus"></ons-icon></ons-button>
                     </p>
                 </div>
             </div>
             <hr />
+            <div id="end-game">
+                <h3>End Game</h3>
+                <div id="end-game-menu" class="btn-select-menu">
+                    <ons-button modifier="large" data-select="climb">Climb (e.g. with rope/hook)</ons-button>
+                    <ons-button modifier="large" data-select="ramps">Ramps</ons-button>
+                    <ons-button modifier="large" data-select="other">Other</ons-button>
+                </div>
+                <div id="end-game-result" class="btn-select-menu">
+                    <ons-button disabled data-select="true">Success</ons-button>
+                    <ons-button disabled data-select="false">Failure</ons-button>
+                </div>
+            </div>
+            <hr />
             <textarea placeholder="Comments (optional)"></textarea>
-            <ons-button id="submit-match">Submit</ons-button>
+            <ons-button id="submit-match">
+                <span id="submit-text">Submit</span>
+                <span id="submit-load" style="display: none;"><ons-icon icon="ion-load-c" spin size="26px"></ons-icon></span>
+                <span id="submit-done" style="display: none;"><ons-icon icon="ion-checkmark-circled" size="26px"></ons-icon></span>
+            </ons-button>
             </div>
         </div>
     </ons-page>
@@ -213,6 +230,9 @@
     }
     .plus, .minus {
         font-size: x-large;
+    }
+    .scout-page #submit-match {
+        width: initial;
     }
 </style>
 
