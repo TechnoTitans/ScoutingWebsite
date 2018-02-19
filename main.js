@@ -19,7 +19,7 @@ var allTeams = [];
 
 var writeScoutingData = function(data) {
     console.log('sent data for team' + data.teamName, data);
-    return db.ref('/data/' + data.teamNum).set(data);
+    return db.ref("data").child(data.teamNum.toString()).push().set(data);
 };
 
 var getTeamByNumber = function(num) {
@@ -174,7 +174,11 @@ document.addEventListener('init', function (event) {
         makeSuccessFailureMenu(page.querySelector("#auto-target"), page.querySelector("#auto-target-result"));
         makeSuccessFailureMenu(page.querySelector("#end-game-menu"), page.querySelector("#end-game-result"));
         page.querySelectorAll("p").forEach(p => createNumInput(p));
-        page.querySelector("#submit-match").onclick = function() {
+        var submitted = false;
+        page.querySelector("form").onsubmit = function(e) {
+            e.preventDefault();
+            if (submitted) return false;
+            submitted = true;
             var data = {};
             data.autoTarget = page.querySelector("#auto-target").dataset.selected;
             data.autoSuccess = page.querySelector("#auto-target-result").dataset.selected;
@@ -187,13 +191,16 @@ document.addEventListener('init', function (event) {
             data.timestamp = Date.now(); // just for fun idk
             data.teamName = team.nickname.trim();
             data.teamNum = team.team_number;
-            this.style.width = this.offsetWidth + "px"; // keep width fixed
-            this.querySelector("#submit-load").style.display = "initial";
-            this.querySelector("#submit-text").style.display = "none";
+            var btn = this.querySelector("#submit-match");
+            btn.style.width = btn.offsetWidth + "px"; // keep width fixed
+            btn.querySelector("#submit-load").style.display = "initial";
+            btn.querySelector("#submit-text").style.display = "none";
             writeScoutingData(data).then(() => {
-                this.querySelector("#submit-load").style.display = "none";
-                this.querySelector("#submit-done").style.display = "initial";
+                btn.querySelector("#submit-load").style.display = "none";
+                btn.querySelector("#submit-done").style.display = "initial";
+                btn.style.backgroundColor = "green";
             });
+            return false;
         };
     }
 });
