@@ -32,6 +32,7 @@
         <ons-tabbar swipeable id="appTabbar" position="auto">
             <ons-tab label="Home" icon="ion-home" page="home.html" active></ons-tab>
             <ons-tab label="View Teams" icon="ion-edit" page="teams.html"></ons-tab>
+            <ons-tab label="Settings" icon="ion-settings" page="settings.html"></ons-tab>
         </ons-tabbar>
 
         <script>
@@ -46,7 +47,7 @@
 
 <template id="teams.html">
     <ons-page id="rank-teams">
-        <ons-list id="teams-list" class="accordion">            
+        <!-- <ons-list id="teams-list" class="accordion">            
             <ons-list-item onclick="fn.toggle(this);" class="active">
                 <div class="head"><span>Rank criteria: <ons-input type="number" min="0" max="100"></ons-input></span></div>
                 <div class="content" id="rank-criteria">
@@ -59,12 +60,8 @@
                 <div class="head"><span>Test 2</span></div>
                 <div class="content">Hi<br />Hello<br />Idk<br /></div>
             </ons-list-item>
-        </ons-list>
+        </ons-list> -->
     </ons-page>
-</template>
-
-<template id="settings.html">
-        
 </template>
 
 <!-- this just gets all the info from bluealliance-->
@@ -75,6 +72,25 @@
         </ons-toolbar>
         <div id="loading" style="text-align: center; margin: 10px 0px;"><ons-icon id="loading-icon" size="22px" spin="true" icon="fa-spinner"></ons-icon></div>
         <ons-list id="teams-list">
+        </ons-list>
+    </ons-page>
+</template>
+
+<template id = "settings.html">
+    <ons-page id = "settingsPage">
+        <ons-list id="teams-list">            
+            <ons-list-item onclick="fn.toggle(this);" class="active">
+                <div class="head" style><span style = "text-align: center">Rank criteria:</span></div>
+                <div class="content" id="rank-criteria">
+                    <p>Autonomous Switch: <ons-range></ons-range></p>
+                    <p>Autonomous Scale: <ons-range></ons-range></p>
+                    <p>Teleop Switch: <ons-range></ons-range></p>
+                    <p>Teleop Scale: <ons-range></ons-range></p>
+                    <p>Vault: <ons-range></ons-range></p>
+                    <p>Endgame: <ons-range></ons-range></p>
+                    <p>Bias toward recent games: <ons-range></ons-range></p>
+                </div>
+            </ons-list-item>
         </ons-list>
     </ons-page>
 </template>
