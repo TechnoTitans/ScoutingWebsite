@@ -1,7 +1,25 @@
 'use strict';
 
+
+// import * as firebase from "firebase";
+
+var config = {
+    apiKey: "AIzaSyAyrHz96bV4nR3SoyMsyPQ__MdOrYHdaEk",
+    authDomain: "scouting-data.firebaseapp.com",
+    databaseURL: "https://scouting-data.firebaseio.com/",
+    storageBucket: "bucket.appspot.com"
+};
+firebase.initializeApp(config);
+console.log('fb conslog', firebase);
+var db = firebase.database();
+
 var state = 'ga', eventCode = 'gai', year = 2018;
 var allTeams = [];
+
+var writeScoutingData = function(data) {
+    db.ref('/data/' + data.teamNum).set(data);
+    console.log('sent data for team' + data.teamName);
+};
 
 var getTeamByNumber = function(num) {
     num = num.toString();
@@ -52,72 +70,12 @@ document.addEventListener('init', function (event) {
     // this.querySelector('ons-toolbar div.center').textContent = this.data.title;
     if (page.matches("#home")) {
         var page = event.target;
-        // var pullHook = page.querySelector("#pull-hook");
-        // var icon = page.querySelector("#pull-hook-icon");
-
-        // console.log('els', pullHook, icon);
-
-        // pullHook.addEventListener('changestate', function (event) {
-        //     console.log(event);
-        //     switch (event.state) {
-        //         case 'initial':
-        //             icon.setAttribute('icon', 'fa-arrow-down');
-        //             icon.removeAttribute('rotate');
-        //             icon.removeAttribute('spin');
-        //             break;
-        //         case 'preaction':
-        //             icon.setAttribute('icon', 'fa-arrow-down');
-        //             icon.setAttribute('rotate', '180');
-        //             icon.removeAttribute('spin');
-        //             break;
-        //         case 'action':
-        //             icon.setAttribute('icon', 'fa-spinner');
-        //             icon.removeAttribute('rotate');
-        //             icon.setAttribute('spin', true);
-        //             icon.setAttribute('animated');
-        //             icon.setAttribute('faa-flashing');
-        //             break;
-        //     }
-        // });
-        // var getTeams = function (page) {
-        //     return new Promise(
-        //         function (resolve) {
-        //             // axios({
-        //             //     method: 'get',
-        //             //     url: `https://www.thebluealliance.com/api/v3/teams/${page}`,
-        //             //     headers: {'X-TBA-Auth-Key': ' S59CP2qkqLt0DuimRWKRByClsvqzgib2lyCJAUhIfdb59Mmxd54WAcK0B2vs6D0e'}
-        //             // }).then(function (response) {
-        //             //     console.log(response.data);
-        //             //     resolve(response.data);
-        //             // });
-        //         }
-        //     );
-        //
-        // };
-        // var getTeamName = function () {
-        //     getTeams(1).then(function (teams) {
-        //         teamsBlueAlliance = teams;
-        //     });
-        //     console.log(teamsBlueAlliance);
-        //     // var names = ['blim blam', 'kabla', 'asdfadsfasdf', 'asdf', '32142342n3nnifinn'];
-        //     names = teams.map(function (team) {
-        //         return team.name;
-        //     })
-        //
-        //
-        // };
-        // var getTeamNumber = function () {
-        //     // const width = 40 + Math.floor(20 * Math.random());
-        //     return Math.random() * 10000;
-        // };
-        // var teamsBlueAlliance = null;
-        // var maxPage = 40; // for blue alliance
         var getTeams = function () {
             var randomPage = 1;
             return axios({
                 method: 'get',
                 url: `https://www.thebluealliance.com/api/v3/event/${year}${state}${eventCode}/teams/simple`,
-                headers: {'X-TBA-Auth-Key': ' S59CP2qkqLt0DuimRWKRByClsvqzgib2lyCJAUhIfdb59Mmxd54WAcK0B2vs6D0e'}
+                headers: {'X-TBA-Auth-Key': 'S59CP2qkqLt0DuimRWKRByClsvqzgib2lyCJAUhIfdb59Mmxd54WAcK0B2vs6D0e'}
             }).then(function (response) {
                 allTeams = response.data;
                 return response.data;
@@ -140,11 +98,6 @@ document.addEventListener('init', function (event) {
             elem.onclick = teamClick;
             return elem;
         };
-        // var teams = getRandomData();
-        // for (team of teams) {
-        //     var teamEl = createTeam(team);
-        //     document.getElementById('teams-list').appendChild(teamEl);
-        // }
         var fetchTeams = function () {
             getTeams().then(function(teams) {
                 addTeams(teams, []);
@@ -214,6 +167,10 @@ document.addEventListener('init', function (event) {
             data.teleopScale = parseInt(page.querySelector("#teleop-scale ons-input").value, 10);
             data.teleopVault = parseInt(page.querySelector("#teleop-vault ons-input").value, 10);
             data.comments = page.querySelector("textarea").value;
+            data.timestamp = Date.now(); // just for fun idk
+            data.teamName = team.nickname.trim();
+            data.teamNum = team.team_number;
+            writeScoutingData(data);
             console.log(data);
         };
     }
