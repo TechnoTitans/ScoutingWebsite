@@ -18,7 +18,7 @@ var allTeams = [];
 
 var writeScoutingData = function(data) {
     console.log('sent data for team' + data.teamName, data);
-    return db.ref('/data/' + data.teamNum).set(data);
+    return db.ref("data").child(data.teamNum.toString()).push().set(data);
 };
 
 var getTeamByNumber = function(num) {
@@ -173,7 +173,10 @@ document.addEventListener('init', function (event) {
         makeSuccessFailureMenu(page.querySelector("#auto-target"), page.querySelector("#auto-target-result"));
         makeSuccessFailureMenu(page.querySelector("#end-game-menu"), page.querySelector("#end-game-result"));
         page.querySelectorAll("p").forEach(p => createNumInput(p));
+        var submitted = false;
         page.querySelector("#submit-match").onclick = function() {
+            if (submitted) return;
+            submitted = true;
             var data = {};
             data.autoTarget = page.querySelector("#auto-target").dataset.selected;
             data.autoSuccess = page.querySelector("#auto-target-result").dataset.selected;
@@ -192,6 +195,8 @@ document.addEventListener('init', function (event) {
             writeScoutingData(data).then(() => {
                 this.querySelector("#submit-load").style.display = "none";
                 this.querySelector("#submit-done").style.display = "initial";
+                this.style.backgroundColor = "green";
+                
             });
         };
     }
