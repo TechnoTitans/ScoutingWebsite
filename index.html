@@ -49,8 +49,21 @@
 </template>
 
 <template id="teams.html">
-    <ons-page>
-        <p>teams</p>
+    <ons-page id="rank-teams">
+        <ons-list id="teams-list" class="accordion">            
+            <ons-list-item onclick="fn.toggle(this);" class="active">
+                <div class="head"><span>Rank criteria: <ons-input type="number" min="0" max="100"></ons-input></span></div>
+                <div class="content" id="rank-criteria">
+                    <p>Autonomous Switch: <ons-range></ons-range></p>
+                    <p>Autonomous Scale: <ons-range></ons-range></p>
+                    <p>Teleop Switch: <ons-range></ons-range></p>
+                </div>
+            </ons-list-item>
+            <ons-list-item onclick="fn.toggle(this);">
+                <div class="head"><span>Test 2</span></div>
+                <div class="content">Hi<br />Hello<br />Idk<br /></div>
+            </ons-list-item>
+        </ons-list>
     </ons-page>
 </template>
 
@@ -61,8 +74,7 @@
             <div class="center" style="margin-top: 5px"><ons-search-input class="center"></ons-search-input></div>
         </ons-toolbar>
         <div id="loading" style="text-align: center; margin: 10px 0px;"><ons-icon id="loading-icon" size="22px" spin="true" icon="fa-spinner"></ons-icon></div>
-        <ons-list id="teams-list">            
-            
+        <ons-list id="teams-list">
         </ons-list>
     </ons-page>
 </template>
@@ -234,6 +246,38 @@
     .scout-page #submit-match {
         width: initial;
     }
+
+    .accordion .content {
+        opacity: 0;
+        max-height: 0;
+        overflow: hidden;
+        transition: 0.6s ease-out;
+        width: 100%;
+    }
+    .accordion .head {
+        width: 100%;
+    } 
+    .accordion .head:before {
+        margin-top: -3px;
+        content: '\02795';
+    }
+    .accordion .head span {
+        padding-left: 10px;
+    }
+    .accordion .active .head:before {
+        content: "\2796";
+    }
+    .accordion .active .content {
+        max-height: 500px;
+        opacity: 1;
+        margin-top: 10px;
+    }
+    #rank-criteria ons-range {
+        width: 100%;
+    }
+    #rank-criteria p {
+        margin: 10px 0px;    
+    }
 </style>
 
 <script>
@@ -259,6 +303,9 @@
             document.getElementById('appNavigator').pushPage(page.id, {data: {title: page.title}});
         }
     };
+    window.fn.toggle = function (el) {
+        el.classList.toggle("active");
+    }
 </script>
 
 </body>
