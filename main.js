@@ -182,7 +182,7 @@ document.addEventListener('init', function (event) {
         var buttons = page.querySelectorAll("ons-card");
         for (let button of buttons) {
             button.onclick = function() {
-                document.getElementById("appNavigator").pushPage(`${this.id}-scout.html`, {data: {title: "Home", team: teamObj}});
+                document.getElementById("appNavigator").pushPage(`${this.id}-scout.html`, {data: {team: teamObj}});
             }
         }
     } else if (page.matches("#match-scout")) {
