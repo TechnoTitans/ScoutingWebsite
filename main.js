@@ -13,14 +13,14 @@ firebase.initializeApp(config);
 console.log('fb conslog', firebase);
 var db = firebase.database();
 
-var state = 'ga', eventCode = 'gai', year = 2018;
-let key = year + state + eventCode;
+var state = 'ga', eventCode = 'gai', year = 2018; // todo determine eventcode by date
+var currentEventKey = year + state + eventCode;
 var eventCodes = ['gai', 'col' , 'dul', 'dal', 'cmp', 'alb'];
 var allTeams = [];
 
 var writeScoutingData = function(data) {
     console.log('sent data for team' + data.teamName, data);
-    return db.ref("data").child(data.teamNum.toString()).child(data.eventCode).push().set(data);
+    return db.ref("data").child(data.teamNum.toString()).child(data.eventKey).push().set(data);
 };
 
 var teamHasData = function (teamNum) {
@@ -207,7 +207,7 @@ document.addEventListener('init', function (event) {
             data.timestamp = Date.now(); // just for fun idk
             data.teamName = team.nickname.trim();
             data.teamNum = team.team_number;
-            data.eventCode = ;
+            data.eventKey = currentEventKey;
             var btn = this.querySelector("#submit-match");
             btn.style.width = btn.offsetWidth + "px"; // keep width fixed
             btn.querySelector("#submit-load").style.display = "initial";
