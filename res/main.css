@@ -42,7 +42,6 @@ ons-splitter-side[animation=overlay] {
     padding-bottom: 0%;
     margin-bottom: 0px;
     border: 0px;
-    font-size: 200%;
 }
 
 #insertHeight h4{
@@ -87,7 +86,6 @@ ons-splitter-side[animation=overlay] {
 
 
 .pitTitle h2{
-    font-size:275%;
     margin-bottom: 0%;
     padding-bottom: 0%;
 }

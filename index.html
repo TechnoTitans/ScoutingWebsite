@@ -177,18 +177,18 @@
 <template id="pit-scout.html">
         <ons-page id="pit-scout" class="scout-page">
             <ons-toolbar>
-                <div class="left"><ons-back-button>Team</ons-back-button></div>
-                <div class="center" id="team-title"></div>
+                <div class="left"><ons-back-button></ons-back-button></div>
+                <div class="center" id="team-title">Team <span id="team-num"></span> Pit Scouting</div>
             </ons-toolbar>
             <div class = "pitTitle">
-                <h2>Team <span id="team-num"></span> - <span id="team-name"></span></h2>
+                <h2><span id="team-name"></span></h2>
             </div>
             <div id="pit-btns" class="btns">
             </div>
     
             <div>
                 <div>
-                    <h2 id = "driveTrainHeading" style = "font-size: 200%; margin-bottom: 0%; padding-bottom: 0%">Drive Train Type:</h2>
+                    <h2 id = "driveTrainHeading" style = "margin-bottom: 0%; padding-bottom: 0%">Drive Train Type:</h2>
                     <div class="select-one">
                         <ons-button modifier="large" data-select="0">Tank</ons-button>
                         <ons-button modifier="large" data-select="1">Swerve</ons-button>

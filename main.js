@@ -220,6 +220,9 @@ document.addEventListener('init', function (event) {
             return false;
         };
     } else if (page.id === "pit-scout") {
+        var team = page.data.team;
+        page.querySelector("#team-num").innerHTML = team.team_number;
+        page.querySelector("#team-name").innerHTML = team.nickname;
         page.querySelectorAll(".select-one").forEach(x => createSelectMenu(x));
     }
 });
