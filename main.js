@@ -14,6 +14,7 @@ console.log('fb conslog', firebase);
 var db = firebase.database();
 
 var state = 'ga', eventCode = 'gai', year = 2018;
+var eventCodes = ['gai', 'col' , 'dul', 'dal', 'cmp', 'alb'];
 var allTeams = [];
 
 var writeScoutingData = function(data) {

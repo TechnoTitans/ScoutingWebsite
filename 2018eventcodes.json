@@ -1,0 +1,110 @@
+[
+  {
+  "city": "Albany",
+  "country": "USA",
+  "district": {
+   "abbreviation": "pch",
+   "display_name": "Peachtree",
+   "key": "2018pch",
+   "year": 2018
+  },
+  "end_date": "2018-03-17",
+  "event_code": "gaalb",
+  "event_type": 1,
+  "key": "2018gaalb",
+  "name": "PCH District Albany Event",
+  "start_date": "2018-03-15",
+  "state_prov": "GA",
+  "year": 2018
+ },
+ {
+  "city": "Athens",
+  "country": "USA",
+  "district": {
+   "abbreviation": "pch",
+   "display_name": "Peachtree",
+   "key": "2018pch",
+   "year": 2018
+  },
+  "end_date": "2018-04-07",
+  "event_code": "gacmp",
+  "event_type": 2,
+  "key": "2018gacmp",
+  "name": "Peachtree District State Championship",
+  "start_date": "2018-04-04",
+  "state_prov": "GA",
+  "year": 2018
+ },
+ {
+  "city": "Columbus",
+  "country": "USA",
+  "district": {
+   "abbreviation": "pch",
+   "display_name": "Peachtree",
+   "key": "2018pch",
+   "year": 2018
+  },
+  "end_date": "2018-03-24",
+  "event_code": "gacol",
+  "event_type": 1,
+  "key": "2018gacol",
+  "name": "PCH District Columbus Event",
+  "start_date": "2018-03-22",
+  "state_prov": "GA",
+  "year": 2018
+ },
+ {
+  "city": "Dalton",
+  "country": "USA",
+  "district": {
+   "abbreviation": "pch",
+   "display_name": "Peachtree",
+   "key": "2018pch",
+   "year": 2018
+  },
+  "end_date": "2018-03-10",
+  "event_code": "gadal",
+  "event_type": 1,
+  "key": "2018gadal",
+  "name": "PCH District Dalton Event",
+  "start_date": "2018-03-08",
+  "state_prov": "GA",
+  "year": 2018
+ },
+ {
+  "city": "Duluth",
+  "country": "USA",
+  "district": {
+   "abbreviation": "pch",
+   "display_name": "Peachtree",
+   "key": "2018pch",
+   "year": 2018
+  },
+  "end_date": "2018-03-31",
+  "event_code": "gadul",
+  "event_type": 1,
+  "key": "2018gadul",
+  "name": "PCH District Duluth Event",
+  "start_date": "2018-03-29",
+  "state_prov": "GA",
+  "year": 2018
+ },
+ {
+  "city": "Gainesville",
+  "country": "USA",
+  "district": {
+   "abbreviation": "pch",
+   "display_name": "Peachtree",
+   "key": "2018pch",
+   "year": 2018
+  },
+  "end_date": "2018-03-04",
+  "event_code": "gagai",
+  "event_type": 1,
+  "key": "2018gagai",
+  "name": "PCH District Gainesville Event",
+  "start_date": "2018-03-02",
+  "state_prov": "GA",
+  "year": 2018
+ }
+]
