@@ -99,7 +99,7 @@
         </ons-toolbar>
         <h2 id="team-name"></h2>
         <div id="match-btns" class="btns">
-            <div style="padding: 5px;">
+            <form style="padding: 5px;">
             <div id="autonomous">
                 <h3>Autonomous</h3>
                 Choose target:<br />
@@ -151,12 +151,12 @@
             </div>
             <hr />
             <textarea placeholder="Comments (optional)"></textarea>
-            <ons-button id="submit-match">
+            <button id="submit-match" class="button button--material"> <!-- Slight hack but this should get around form validation -->
                 <span id="submit-text">Submit</span>
                 <span id="submit-load" style="display: none;"><ons-icon icon="ion-load-c" spin size="26px"></ons-icon></span>
                 <span id="submit-done" style="display: none;"><ons-icon icon="ion-checkmark-circled" size="26px"></ons-icon></span>
-            </ons-button>
-            </div>
+            </button>
+            </form>
         </div>
     </ons-page>
 </template>
@@ -191,7 +191,7 @@
         margin-top: 20px;
         padding: 0.1em;
     }
-    .scout-page ons-button {
+    .scout-page .button {
         margin: 11px 6px;
     }
     .scout-page ons-button.chosen {

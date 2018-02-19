@@ -174,8 +174,9 @@ document.addEventListener('init', function (event) {
         makeSuccessFailureMenu(page.querySelector("#end-game-menu"), page.querySelector("#end-game-result"));
         page.querySelectorAll("p").forEach(p => createNumInput(p));
         var submitted = false;
-        page.querySelector("#submit-match").onclick = function() {
-            if (submitted) return;
+        page.querySelector("form").onsubmit = function(e) {
+            e.preventDefault();
+            if (submitted) return false;
             submitted = true;
             var data = {};
             data.autoTarget = page.querySelector("#auto-target").dataset.selected;
@@ -189,15 +190,16 @@ document.addEventListener('init', function (event) {
             data.timestamp = Date.now(); // just for fun idk
             data.teamName = team.nickname.trim();
             data.teamNum = team.team_number;
-            this.style.width = this.offsetWidth + "px"; // keep width fixed
-            this.querySelector("#submit-load").style.display = "initial";
-            this.querySelector("#submit-text").style.display = "none";
+            var btn = this.querySelector("#submit-match");
+            btn.style.width = btn.offsetWidth + "px"; // keep width fixed
+            btn.querySelector("#submit-load").style.display = "initial";
+            btn.querySelector("#submit-text").style.display = "none";
             writeScoutingData(data).then(() => {
-                this.querySelector("#submit-load").style.display = "none";
-                this.querySelector("#submit-done").style.display = "initial";
-                this.style.backgroundColor = "green";
-                
+                btn.querySelector("#submit-load").style.display = "none";
+                btn.querySelector("#submit-done").style.display = "initial";
+                btn.style.backgroundColor = "green";
             });
+            return false;
         };
     }
 });
