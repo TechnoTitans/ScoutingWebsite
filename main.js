@@ -18,7 +18,12 @@ var currentEventKey = year + state + eventCode;
 var eventCodes = ['gai', 'col' , 'dul', 'dal', 'cmp', 'alb'];
 var allTeams = [];
 
-var writeScoutingData = function(data) {
+var writeScoutingData = function(data, isPit) {
+    console.log('sent data for team' + data.teamName, data);
+    return db.ref("data").child(data.teamNum.toString()).child(data.eventKey).child(isPit ? 'pit' : 'match').push().set(data);
+};
+
+var writePitData = function (data){
     console.log('sent data for team' + data.teamName, data);
     return db.ref("data").child(data.teamNum.toString()).child(data.eventKey).push().set(data);
 };
@@ -48,7 +53,7 @@ var createSelectMenu = function(div, onchange) {
         button.onclick = function() {
             this.classList.add("chosen");
             if (chosen) chosen.classList.remove("chosen");
-            if (this != chosen) {
+            if (this !== chosen) {
                 chosen = this;
             } else {
                 chosen = null;
@@ -212,7 +217,7 @@ document.addEventListener('init', function (event) {
             btn.style.width = btn.offsetWidth + "px"; // keep width fixed
             btn.querySelector("#submit-load").style.display = "initial";
             btn.querySelector("#submit-text").style.display = "none";
-            writeScoutingData(data).then(() => {
+            writeScoutingData(data, false).then(() => {
                 btn.querySelector("#submit-load").style.display = "none";
                 btn.querySelector("#submit-done").style.display = "initial";
                 btn.style.backgroundColor = "green";
@@ -224,5 +229,27 @@ document.addEventListener('init', function (event) {
         page.querySelector("#team-num").innerHTML = team.team_number;
         page.querySelector("#team-name").innerHTML = team.nickname;
         page.querySelectorAll(".select-one").forEach(x => createSelectMenu(x));
+        var team = page.data.team;
+        page.querySelector("form").onsubmit = function(e) {
+            e.preventDefault();
+            if (submitted) return false;
+            submitted = true;
+            var data = {};
+            data.teamName = team.nickname.trim();
+            data.teamNum = team.team_number;
+            data.eventKey = currentEventKey;
+            data.driveTrain = page.querySelector("#drivetrain-select").dataset.selected;
+            data.focus = page.querySelector("#focus").dataset.selected;
+            data.capabilities = page.querySelector("#capabilities").dataset.selected;
+            data.maxLiftHeight = page.querySelector("#height").dataset.selected;
+            data.endGameStrategy = page.querySelector("#endgame-strategy").dataset.selected;
+            var btn = this.querySelector("#submit-pit");
+
+            writeScoutingData(data, true).then(() => {
+                btn.querySelector("#submit-load").style.display = "none";
+                btn.querySelector("#submit-done").style.display = "initial";
+                btn.style.backgroundColor = "green";
+            })
+        }
     }
 });

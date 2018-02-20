@@ -202,10 +202,10 @@
             <div id="pit-btns" class="btns">
             </div>
     
-            <div>
+            <form>
                 <div>
-                    <h2 id = "driveTrainHeading" style = "margin-bottom: 0%; padding-bottom: 0%">Drive Train Type:</h2>
-                    <div class="select-one">
+                    <h2 id = "driveTrainHeading" style = "font-size: 200%; margin-bottom: 0%; padding-bottom: 0%">Drive Train Type:</h2>
+                    <div class="select-one" id="drivetrain-select">
                         <ons-button modifier="large" data-select="0">Tank</ons-button>
                         <ons-button modifier="large" data-select="1">Swerve</ons-button>
                         <ons-button modifier="large" data-select="2">Mecanum</ons-button>
@@ -215,7 +215,7 @@
                 </div>
                 <div class = "pitScout">
                     <h2>Focus:</h2><br />
-                    <div class="select-one">
+                    <div class="select-one" id="focus">
                         <ons-button modifier="large" data-select="0">Switch</ons-button>
                         <ons-button modifier="large" data-select="1">Scale</ons-button>
                         <ons-button modifier="large" data-select="2">Defense</ons-button>
@@ -223,7 +223,7 @@
                 </div>
                 <div class = "pitScout">
                     <h2>Capabilities:</h2><br />
-                    <div class = "CheckBoxPit select-one">
+                    <div class = "CheckBoxPit select-one" id="capabilities">
                         <ons-button modifier="large" data-select="0">Switch</ons-button>
                         <ons-button modifier="large" data-select="1">Scale</ons-button>
                     </div>
@@ -235,15 +235,20 @@
                     </div>
                 </div>
                
-                <div class = "pitScout">
+                <div class="pitScout">
                     <h2>End Game Strategy:</h2>
-                    <div class = "CheckBoxPit select-one">
+                    <div class="CheckBoxPit select-one" id="endgame-strategy">
                         <ons-button modifier="large" data-select="0">Ramps</ons-button>
                         <ons-button modifier="large" data-select="1">Climb</ons-button>
-                    </div><br />
+                    </div><br/>
                     <textarea placeholder="Additional Systems"></textarea>
+                    <button id="submit-pit" class="button button--material" style="margin-left: auto; margin-right: auto;"> <!-- Slight hack but this should get around form validation -->
+                        <span id="submit-text">Submit</span>
+                        <span id="submit-load" style="display: none;"><ons-icon icon="ion-load-c" spin size="26px"></ons-icon></span>
+                        <span id="submit-done" style="display: none;"><ons-icon icon="ion-checkmark-circled" size="26px"></ons-icon></span>
+                    </button>
                 </div>
-            </div>
+            </form>
         </ons-page>
     </template>
 
