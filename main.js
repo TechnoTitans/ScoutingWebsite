@@ -241,7 +241,8 @@ document.addEventListener('init', function (event) {
             data.driveTrain = page.querySelector("#drivetrain-select").dataset.selected;
             data.focus = page.querySelector("#focus").dataset.selected;
             data.capabilities = page.querySelector("#capabilities").dataset.selected;
-            data.maxLiftHeight = page.querySelector("#height").dataset.selected;
+            data.maxLiftHeight = parseInt(page.querySelector("#heightInput").value);
+            data.comment = page.querySelector("#more-comments").value;
             data.endGameStrategy = page.querySelector("#endgame-strategy").dataset.selected;
             var btn = this.querySelector("#submit-pit");
 

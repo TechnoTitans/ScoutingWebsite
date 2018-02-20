@@ -228,9 +228,9 @@
                         <ons-button modifier="large" data-select="1">Scale</ons-button>
                     </div>
                     
-                    <div id = "insertHeight">
+                    <div id="insertHeight">
                         <h4>Robot's Max Lift Height:</h4>
-                        <ons-input></ons-input> 
+                        <ons-input type="number" id="heightInput" required></ons-input>
                         <h5>inches</h5>
                     </div>
                 </div>
@@ -241,7 +241,7 @@
                         <ons-button modifier="large" data-select="0">Ramps</ons-button>
                         <ons-button modifier="large" data-select="1">Climb</ons-button>
                     </div><br/>
-                    <textarea placeholder="Additional Systems"></textarea>
+                    <textarea placeholder="Additional Systems" id="more-comments"></textarea>
                     <button id="submit-pit" class="button button--material" style="margin-left: auto; margin-right: auto;"> <!-- Slight hack but this should get around form validation -->
                         <span id="submit-text">Submit</span>
                         <span id="submit-load" style="display: none;"><ons-icon icon="ion-load-c" spin size="26px"></ons-icon></span>
