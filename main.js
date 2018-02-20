@@ -59,7 +59,26 @@ var createSelectMenu = function(div, onchange) {
     }
 };
 
-var makeSuccessFailureMenu = function(main, succ) {
+var createSelectCheckboxMenu = function(div, onchange) {
+    var btns = div.querySelectorAll("ons-button");
+    var selected = {};
+    div.dataset.selected = "";
+    for (let button of btns) {
+        button.onclick = function() {
+            if (this.classList.contains("chosen")) {
+                this.classList.remove("chosen");
+                delete selected[this.dataset.select];
+            } else {
+                this.classList.add("chosen");
+                selected[this.dataset.select] = true;
+            }
+            div.dataset.selected = Object.keys(selected).join(",");
+            if (onchange) onchange(Object.keys(selected));
+        }
+    }
+};
+
+var makeSuccessFailureMenu = function(main, succ, isCheckbox) {
     var enableButtons = function(enabled) {
         var btns = succ.querySelectorAll("ons-button");
         for (let button of btns) {
@@ -68,7 +87,8 @@ var makeSuccessFailureMenu = function(main, succ) {
         }
         if (!enabled) main.dataset.chosen = "";
     };
-    createSelectMenu(main, chosen => enableButtons(chosen != null));
+    if (isCheckbox) createSelectCheckboxMenu(main, selected => enableButtons(selected.length > 0));
+    else createSelectMenu(main, chosen => enableButtons(chosen != null));
     createSelectMenu(succ);
 };
 
@@ -187,8 +207,8 @@ document.addEventListener('init', function (event) {
         //};
         //createSelectMenu(targetBtnsContainer, chosen => enableButtons(resultBtnsContainer, chosen != null));
         //createSelectMenu(resultBtnsContainer);
-        makeSuccessFailureMenu(page.querySelector("#auto-target"), page.querySelector("#auto-target-result"));
-        makeSuccessFailureMenu(page.querySelector("#end-game-menu"), page.querySelector("#end-game-result"));
+        makeSuccessFailureMenu(page.querySelector("#auto-target"), page.querySelector("#auto-target-result"), true);
+        makeSuccessFailureMenu(page.querySelector("#end-game-menu"), page.querySelector("#end-game-result"), false);
         page.querySelectorAll("p").forEach(p => createNumInput(p));
         var submitted = false;
         page.querySelector("form").onsubmit = function(e) {
@@ -224,5 +244,6 @@ document.addEventListener('init', function (event) {
         page.querySelector("#team-num").innerHTML = team.team_number;
         page.querySelector("#team-name").innerHTML = team.nickname;
         page.querySelectorAll(".select-one").forEach(x => createSelectMenu(x));
+        page.querySelectorAll(".select-many").forEach(x => createSelectCheckboxMenu(x));
     }
 });
