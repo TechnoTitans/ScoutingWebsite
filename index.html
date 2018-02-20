@@ -47,7 +47,8 @@
 
 <template id="teams.html">
     <ons-page id="rank-teams">
-       
+        <div id="teams-ranked">
+        </div>
     </ons-page>
 </template>
 
@@ -65,16 +66,18 @@
 
 <template id = "settings.html">
     <ons-page id = "settingsPage">
-                <div style><span style = "text-align: center">Rank criteria:</span></div>
-                <div id="rank-criteria">
-                    <p id="auto-switch-crit">Autonomous Switch: <ons-range></ons-range></p>
-                    <p id="auto-scale-crit">Autonomous Scale: <ons-range></ons-range></p>
-                    <p id="teleop-switch-crit">Teleop Switch: <ons-range></ons-range></p>
-                    <p id="teleop-scale-crit">Teleop Scale: <ons-range></ons-range></p>
-                    <p id="vault-crit">Vault: <ons-range></ons-range></p>
-                    <p id="engame-crit">Endgame: <ons-range></ons-range></p>
-                    <p id="bias-crit">Bias toward recent games: <ons-range></ons-range></p>
-                </div>
+        <div style="padding: 15px;">
+            <div style="text-align: center"><h2>Rank Criteria</h2></div>
+            <div id="rank-criteria">
+                <p id="auto-switch-crit">Autonomous Switch: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
+                <p id="auto-scale-crit">Autonomous Scale: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
+                <p id="teleop-switch-crit">Teleop Switch: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
+                <p id="teleop-scale-crit">Teleop Scale: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
+                <p id="vault-crit">Vault: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
+                <p id="engame-crit">Endgame: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
+                <p id="bias-crit">Bias toward recent games: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
+            </div>
+        </div>
     </ons-page>
 </template>
 

@@ -17,10 +17,31 @@ var state = 'ga', eventCode = 'gai', year = 2018; // todo determine eventcode by
 var currentEventKey = year + state + eventCode;
 var eventCodes = ['gai', 'col' , 'dul', 'dal', 'cmp', 'alb'];
 var allTeams = [];
+var allTeamData = null;
 
 var writeScoutingData = function(data) {
     console.log('sent data for team' + data.teamName, data);
     return db.ref("data").child(data.teamNum.toString()).child(data.eventKey).push().set(data);
+};
+
+var getTeams = function () {
+    if (allTeams.length > 0) return Promise.resolve(allTeams);
+    return axios({
+        method: 'get',
+        url: `https://www.thebluealliance.com/api/v3/event/${currentEventKey}/teams/simple`,
+        headers: {'X-TBA-Auth-Key': 'S59CP2qkqLt0DuimRWKRByClsvqzgib2lyCJAUhIfdb59Mmxd54WAcK0B2vs6D0e'}
+    }).then(function (response) {
+        allTeams = response.data;
+        return response.data;
+    });
+};
+
+var getAllTeamData = function () {
+    if (allTeamData) return Promise.resolve(allTeamData);
+    return db.ref("data").once("value").then(function(snapshot) {
+        allTeamData = snapshot.val();
+        return allTeamData;
+    });
 };
 
 var teamHasData = function (teamNum) {
@@ -113,17 +134,7 @@ document.addEventListener('init', function (event) {
     // this.querySelector('ons-toolbar div.center').textContent = this.data.title;
     if (page.matches("#home")) {
         var page = event.target;
-        var getTeams = function () {
-            var randomPage = 1;
-            return axios({
-                method: 'get',
-                url: `https://www.thebluealliance.com/api/v3/event/${year}${state}${eventCode}/teams/simple`,
-                headers: {'X-TBA-Auth-Key': 'S59CP2qkqLt0DuimRWKRByClsvqzgib2lyCJAUhIfdb59Mmxd54WAcK0B2vs6D0e'}
-            }).then(function (response) {
-                allTeams = response.data;
-                return response.data;
-            });
-        };
+
 
         var teamClick = function () {
             var teamNumber = this.dataset.teamNum;
@@ -239,11 +250,36 @@ document.addEventListener('init', function (event) {
             });
             return false;
         };
-    } else if (page.id === "pit-scout") {
+    } else if (page.matches("#pit-scout")) {
         var team = page.data.team;
         page.querySelector("#team-num").innerHTML = team.team_number;
         page.querySelector("#team-name").innerHTML = team.nickname;
         page.querySelectorAll(".select-one").forEach(x => createSelectMenu(x));
         page.querySelectorAll(".select-many").forEach(x => createSelectCheckboxMenu(x));
+    } else if (page.matches("#settingsPage")) {
+        page.querySelectorAll("#rank-criteria p").forEach(function(p) {
+            var range = p.querySelector("ons-range");
+            range.oninput = range.onchange = function() {
+                p.querySelector("span").innerHTML = this.value;
+            };
+            p.querySelector("span").innerHTML = range.value;
+            p.querySelector("ons-button").onclick = function() {
+                page.querySelectorAll("#rank-criteria p").forEach(function(x) {
+                    var r = x.querySelector("ons-range");
+                    if (x !== p) r.value = 0;
+                    else r.value = 100;
+                    r.onchange();
+                });
+            };
+        });
+    }
+});
+
+document.addEventListener("show", function(event) {
+    var page = event.target;
+    if (page.matches("#rank-teams")) {
+        Promise.all([getTeams(), getAllTeamData()]).then(function(values) {
+            
+        });
     }
 });

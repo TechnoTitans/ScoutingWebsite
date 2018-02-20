@@ -140,5 +140,9 @@ ons-splitter-side[animation=overlay] {
 }
 
 #rank-criteria p {
-    margin: 10px 0px;
+    margin: 15px 0px;
+}
+#rank-criteria p ons-button {
+    float: right;
+    margin-top: -10px;
 }
