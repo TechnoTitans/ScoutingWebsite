@@ -33,6 +33,7 @@ ons-splitter-side[animation=overlay] {
     background-color: #025aa5;
 }
 
+<<<<<<< HEAD
 #team-scout ons-card .title {
     font-size: xx-large;
 }
@@ -90,6 +91,8 @@ ons-splitter-side[animation=overlay] {
     padding-bottom: 0%;
 }
 
+=======
+>>>>>>> 4e76c74660407f718b8a1e5493f68d11367d1473
 .scout-page textarea {
     padding: 6px 12px;
     font-size: 14px;
