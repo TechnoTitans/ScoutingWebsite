@@ -18,6 +18,7 @@ var currentEventKey = year + state + eventCode;
 var eventCodes = ['gai', 'col' , 'dul', 'dal', 'cmp', 'alb'];
 var allTeams = [];
 var allTeamData = null;
+var teamDataDirty = true;
 
 var writeScoutingData = function(data) {
     console.log('sent data for team' + data.teamName, data);
@@ -38,9 +39,12 @@ var getTeams = function () {
 
 var getAllTeamData = function () {
     if (allTeamData) return Promise.resolve(allTeamData);
-    return db.ref("data").once("value").then(function(snapshot) {
-        allTeamData = snapshot.val();
-        return allTeamData;
+    return new Promise((resolve, reject) => {
+        db.ref("data").on("value", function(snapshot) {
+            allTeamData = snapshot.val();
+            teamDataDirty = true;
+            resolve(allTeamData);
+        });
     });
 };
 
@@ -260,6 +264,7 @@ document.addEventListener('init', function (event) {
         page.querySelectorAll("#rank-criteria p").forEach(function(p) {
             var range = p.querySelector("ons-range");
             range.oninput = range.onchange = function() {
+                teamDataDirty = true;
                 p.querySelector("span").innerHTML = this.value;
             };
             p.querySelector("span").innerHTML = range.value;
@@ -277,9 +282,55 @@ document.addEventListener('init', function (event) {
 
 document.addEventListener("show", function(event) {
     var page = event.target;
-    if (page.matches("#rank-teams")) {
+    var settings = document.querySelector("#settingsPage");
+    if (page.matches("#rank-teams") && teamDataDirty) {
+        var teamSubScores = {};
+        var teamScores = {};
+        var calculateScore = function(team, number) {
+            var matches = Object.values(team[currentEventKey]);
+            matches.sort((x, y) => y.timestamp - x.timestamp);
+            var autoMap = {"sscale": "auto-scale-crit", "cscale": "auto-scale-crit", "sswitch": "auto-switch-crit", "cswitch": "auto-switch-crit"};
+            var expWeight = -parseInt(settings.querySelector("#bias-crit ons-range").value) / 250;
+            var totalScore = 0, totalWeight = 0;
+            var subScores = {auto: 0, teleopSwitch: 0, teleopScale: 0, endGame: 0};      
+            for (let i = 0; i < matches.length; ++i) {
+                let weight = Math.exp(expWeight * i);
+                let mt = matches[i];
+                let score = 0;
+                let nonLines = mt.autoTarget.split(",").filter(x => x !== "dline"); 
+                if (mt.autoSuccess === "1" && nonLines.length > 0) {
+                    score += nonLines.map(target => +settings.querySelector(`#${autoMap[target]} ons-range`).value).reduce((x, y)=>x+y);
+                    subScores.auto += nonLines.length / matches.length;
+                } else if ((nonLines.length === 0) !== (mt.autoSuccess === "0")) {
+                    score += (+settings.querySelector("#auto-switch-crit ons-range").value) + (+settings.querySelector("#auto-scale-crit ons-range").value) / 10;
+                    subScores.auto += 0.2 / matches.length;
+                }
+                score += mt.teleopSwitch * (+settings.querySelector("#teleop-switch-crit ons-range").value) / 5;
+                subScores.teleopSwitch += mt.teleopSwitch / matches.length;
+                score += mt.teleopScale * (+settings.querySelector("#teleop-scale-crit ons-range").value) / 5;
+                subScores.teleopScale += mt.teleopScale / matches.length;
+                score += mt.teleopVault * (+settings.querySelector("#vault-crit ons-range").value) / 3;
+                subScores.endGame += +(mt.endGameSuccess === "true") / matches.length;
+                score += mt.endGameSuccess === "true" ? +settings.querySelector("#endgame-crit ons-range").value : 0;
+                totalScore += score * weight;
+                totalWeight += weight;
+            }
+            teamScores[number] = totalScore / totalWeight;
+            teamSubScores[number] = subScores;
+        };
         Promise.all([getTeams(), getAllTeamData()]).then(function(values) {
-            
+            teamDataDirty = false;
+            var teams = values[0].slice(), teamData = values[1];
+            var teamsWithData = [], teamsWOData = [];
+            for (let team of teams) {
+                if (teamData[team.team_number] != null) {
+                    calculateScore(teamData[team.team_number], team.team_number);
+                    teamsWithData.push(team);
+                }
+                else teamsWOData.push(team);
+            }
+            teamsWithData.sort((team1, team2) => teamScores[team2.team_number] - teamScores[team1.team_number]);
+            console.log(teamsWithData, teamScores);
         });
     }
 });

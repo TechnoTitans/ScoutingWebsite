@@ -65,7 +65,7 @@
 </template>
 
 <template id = "settings.html">
-    <ons-page id = "settingsPage">
+    <ons-page id = "settingsPage" data-dirty="y">
         <div style="padding: 15px;">
             <div style="text-align: center"><h2>Rank Criteria</h2></div>
             <div id="rank-criteria">
@@ -74,7 +74,7 @@
                 <p id="teleop-switch-crit">Teleop Switch: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
                 <p id="teleop-scale-crit">Teleop Scale: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
                 <p id="vault-crit">Vault: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
-                <p id="engame-crit">Endgame: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
+                <p id="endgame-crit">Endgame: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
                 <p id="bias-crit">Bias toward recent games: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
             </div>
         </div>
@@ -119,11 +119,11 @@
                 <h3>Autonomous</h3>
                 Choose target:<br />
                 <div id="auto-target" class="btn-select-menu">
-                    <ons-button modifier="large" data-select="0">Switch (Same side)</ons-button>
-                    <ons-button modifier="large" data-select="1">Switch (Cross side)</ons-button>
-                    <ons-button modifier="large" data-select="2">Scale (Same side)</ons-button>
-                    <ons-button modifier="large" data-select="3">Scale (Cross side)</ons-button>
-                    <ons-button modifier="large" data-select="4">Drive across line</ons-button>
+                    <ons-button modifier="large" data-select="sswitch">Switch (Same side)</ons-button>
+                    <ons-button modifier="large" data-select="cswitch">Switch (Cross side)</ons-button>
+                    <ons-button modifier="large" data-select="sscale">Scale (Same side)</ons-button>
+                    <ons-button modifier="large" data-select="cscale">Scale (Cross side)</ons-button>
+                    <ons-button modifier="large" data-select="dline">Drive across line</ons-button>
                 </div>
                 <div id="auto-target-result" class="btn-select-menu">
                     <ons-button disabled data-select="1">Success</ons-button>
