@@ -91,6 +91,16 @@
                     <p>Bias toward recent games: <ons-range></ons-range></p>
                 </div>
             </ons-list-item>
+            <ons-list-item>
+                <h4 style = "padding-right: 8%; font-size: 99%">Tournament:</h4>
+                <ons-select id="tournament" style = "float: left">
+                    <option value="Gainesville">Gainesville</option>
+                    <option value="Albany">Albany</option>
+                    <option value="Peachtree">Peachtree</option>
+                    <option value="Houston">Houston</option>
+                  </ons-select>
+
+            </ons-list-item>
         </ons-list>
     </ons-page>
 </template>
@@ -190,7 +200,7 @@
     </ons-page>
 </template>
 
-<template id="pit-scout.html">
+<template id="pit-scout.html">*+-
         <ons-page id="pit-scout" class="scout-page">
             <ons-toolbar>
                 <div class="left"><ons-back-button></ons-back-button></div>
@@ -250,7 +260,7 @@
     </template>
 
 
-<script>
+<script>  
     window.fn = {};
 
     window.fn.toggleMenu = function () {
