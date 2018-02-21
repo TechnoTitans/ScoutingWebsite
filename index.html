@@ -77,6 +77,15 @@
                 <p id="endgame-crit">Endgame: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
                 <p id="bias-crit">Bias toward recent games: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
             </div>
+	    <div>
+		<h4 style = "padding-right: 8%; font-size: 99%">Tournament:</h4>
+                <ons-select id="tournament" style = "float: left">
+                    <option value="Gainesville">Gainesville</option>
+                    <option value="Albany">Albany</option>
+                    <option value="Peachtree">Peachtree</option>
+                    <option value="Houston">Houston</option>
+                </ons-select>
+	    </div>
         </div>
     </ons-page>
 </template>
@@ -183,12 +192,9 @@
                 <div class="center" id="team-title">Team <span id="team-num"></span> Pit Scouting</div>
             </ons-toolbar>
             <div class = "pitTitle">
-                <h2><span id="team-name"></span></h2>
-            </div>
-            <div id="pit-btns" class="btns">
-            </div>
-    
-            <div>
+                <h2 style = "font-size: 150"><span id="team-name"></span></h2>
+    	    </div>
+            <form>
                 <div>
                     <h2 id = "driveTrainHeading" style = "margin-bottom: 0%; padding-bottom: 0%">Drive Train Type:</h2>
                     <div class="select-one">
@@ -201,7 +207,7 @@
                 </div>
                 <div class = "pitScout">
                     <h2>Focus:</h2><br />
-                    <div class="select-many">
+                    <div class="select-many" id="focus">
                         <ons-button modifier="large" data-select="0">Switch</ons-button>
                         <ons-button modifier="large" data-select="1">Scale</ons-button>
                         <ons-button modifier="large" data-select="2">Defense</ons-button>
@@ -209,7 +215,7 @@
                 </div>
                 <div class = "pitScout">
                     <h2>Capabilities:</h2><br />
-                    <div class = "CheckBoxPit select-many">
+                    <div class = "CheckBoxPit select-many" id="capabilities">
                         <ons-button modifier="large" data-select="0">Switch</ons-button>
                         <ons-button modifier="large" data-select="1">Scale</ons-button>
                     </div>
@@ -221,15 +227,20 @@
                     </div>
                 </div>
                
-                <div class = "pitScout">
-                    <h2>End Game Strategy:</h2>
-                    <div class = "CheckBoxPit select-one">
+                <div class="pitScout" style = "margin-top:10%">
+                    <h2 style = "margin-top: 4%" >End Game Strategy:</h2>
+                    <div class="CheckBoxPit select-one" id="endgame-strategy">
                         <ons-button modifier="large" data-select="0">Ramps</ons-button>
                         <ons-button modifier="large" data-select="1">Climb</ons-button>
-                    </div><br />
-                    <textarea placeholder="Additional Systems"></textarea>
+                    </div><br/>
+                    <textarea placeholder="Additional Systems" id="more-comments"></textarea>
+                    <button id="submit-pit" class="button button--material" style="margin-left: auto; margin-right: auto;"> <!-- Slight hack but this should get around form validation -->
+                        <span id="submit-text">Submit</span>
+                        <span id="submit-load" style="display: none;"><ons-icon icon="ion-load-c" spin size="26px"></ons-icon></span>
+                        <span id="submit-done" style="display: none;"><ons-icon icon="ion-checkmark-circled" size="26px"></ons-icon></span>
+                    </button>
                 </div>
-            </div>
+            </form>
         </ons-page>
     </template>
 

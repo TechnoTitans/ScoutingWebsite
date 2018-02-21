@@ -38,10 +38,11 @@ ons-splitter-side[animation=overlay] {
 }
 
 .pitScout h2{
-    padding-top: 10%;
+    padding-top: 6%;
     padding-bottom: 0%;
     margin-bottom: 0px;
     border: 0px;
+    font-size: 125%;
 }
 
 #insertHeight h4{
