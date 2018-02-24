@@ -13,19 +13,15 @@ firebase.initializeApp(config);
 console.log('fb conslog', firebase);
 var db = firebase.database();
 
-var state = 'ga', eventCode = 'gai', year = 2018; // todo determine eventcode by date
+var state = 'ga', eventCode = 'gai', year = 2018; // default event is gainsville
 var currentEventKey = year + state + eventCode;
-var eventCodes = ['gai', 'col' , 'dul', 'dal', 'cmp', 'alb'];
+var eventCodes = {'Gainesville': 'gai', 'Houston': 'cmptx', 'Peachtree' : 'cmp', 'Albany' : 'alb'}; // TODO find actual value
 var allTeams = [];
+var allTeamElems = [];
 
 var writeScoutingData = function(data, isPit) {
     console.log('sent data for team' + data.teamName, data);
     return db.ref("data").child(data.teamNum.toString()).child(data.eventKey).child(isPit ? 'pit' : 'match').push().set(data);
-};
-
-var writePitData = function (data){
-    console.log('sent data for team' + data.teamName, data);
-    return db.ref("data").child(data.teamNum.toString()).child(data.eventKey).push().set(data);
 };
 
 var teamHasData = function (teamNum) {
@@ -92,59 +88,79 @@ var createNumInput = function(container) {
     };
 };
 
-document.addEventListener('init', function (event) {
-    console.log("Init", event.target.id);
-    var page = event.target;
-    // this.querySelector('ons-toolbar div.center').textContent = this.data.title;
-    if (page.matches("#home")) {
-        var page = event.target;
-        var getTeams = function () {
-            var randomPage = 1;
-            return axios({
-                method: 'get',
-                url: `https://www.thebluealliance.com/api/v3/event/${year}${state}${eventCode}/teams/simple`,
-                headers: {'X-TBA-Auth-Key': 'S59CP2qkqLt0DuimRWKRByClsvqzgib2lyCJAUhIfdb59Mmxd54WAcK0B2vs6D0e'}
-            }).then(function (response) {
-                allTeams = response.data;
-                return response.data;
-            });
-        };
 
-        var teamClick = function () {
-            var teamNumber = this.dataset.teamNum;
-            document.getElementById("appNavigator").pushPage("team-scout.html", {data: {num: teamNumber}});
-        };
-        var createTeam = function (team) {
-            var elem = ons.createElement(`
+
+var teamClick = function () {
+    var teamNumber = this.dataset.teamNum;
+    document.getElementById("appNavigator").pushPage("team-scout.html", {data: {num: teamNumber}});
+};
+
+
+var createTeam = function (team) {
+    var elem = ons.createElement(`
               <ons-list-item data-team-num="${team.team_number}">
               <div>
                 ${team.nickname} - ${team.team_number}
                 </div>
               </ons-list-item>
             `
-            );
-            elem.onclick = teamClick;
-            return elem;
-        };
-        var fetchTeams = function () {
-            getTeams().then(function(teams) {
-                addTeams(teams, []);
-                page.querySelector("#loading").style.display = "none";
-            }).catch(function(error) {
-                page.querySelector("#loading").innerHTML = `<p style="color: red;">Could not load dat<br />${error}<br />Check internet connection</p>`;
-            });
-        };
+    );
+    elem.onclick = teamClick;
+    allTeamElems.push(elem);
+    return elem;
+};
 
-        var addTeams = function(teams, query) {
-            for (let team of teams) {
-                if (query.every(term => team.nickname.toLowerCase().indexOf(term) !== -1
-                        || team.team_number.toString().indexOf(term) !== -1)
-                    || (query.join(" ")==="the best team" && team.team_number === 1683)) { // lol easter egg
-                    page.querySelector("#teams-list").appendChild(createTeam(team));
-                }
-            }
-        };
-        fetchTeams();
+var addTeams = function(teams, query, page) {
+    // we need to remove the teams that are not present at the event
+    var teamList = page.querySelector("#teams-list");
+    allTeamElems = [];
+    teamList.innerHTML = ''; // hacky way to delete previous teams
+    for (let team of teams) {
+        if (query.every(term => team.nickname.toLowerCase().indexOf(term) !== -1
+                || team.team_number.toString().indexOf(term) !== -1)
+            || (query.join(" ")==="the best team" && team.team_number === 1683)) { // lol easter egg
+            // page.querySelector("#teams-list").appendChild(createTeam(team));
+            createTeam(team);
+        }
+        allTeamElems.forEach(teamEl => {
+            teamList.appendChild(teamEl);
+        });
+    }
+    if(teamList.innerHTML === '') {
+        teamList.innerHTML = '<div>No competition data yet for this event</div>'; // todo fix styling
+    }
+
+};
+
+var getTeams = function () {
+    return axios({
+        method: 'get',
+        url: `https://www.thebluealliance.com/api/v3/event/${year}${state}${eventCode}/teams/simple`,
+        headers: {'X-TBA-Auth-Key': 'S59CP2qkqLt0DuimRWKRByClsvqzgib2lyCJAUhIfdb59Mmxd54WAcK0B2vs6D0e'}
+    }).then(function (response) {
+        allTeams = response.data;
+        return response.data;
+    });
+};
+
+var fetchTeams = function (page) {
+    getTeams().then(function(teams) {
+        addTeams(teams, [], page);
+        page.querySelector("#loading").style.display = "none";
+    }).catch(function(error) {
+        page.querySelector("#loading").innerHTML = `<p style="color: red;">Could not load dat<br />${error}<br />Check internet connection</p>`;
+    });
+};
+var homePage; // completely hacky but idk
+document.addEventListener('init', function (event) {
+    console.log("Init", event.target.id);
+    var page = event.target;
+    // this.querySelector('ons-toolbar div.center').textContent = this.data.title;
+    if (page.matches("#home")) {
+        var page = event.target;
+        homePage = page;
+
+        fetchTeams(page);
         // pullHook.onaction = fetchTeams;
 
         var searchBar = page.querySelector("ons-search-input");
@@ -156,8 +172,10 @@ document.addEventListener('init', function (event) {
     } else if (page.matches("#team-scout")) {
         console.log(page.data);
         var teamNum = page.data.num;
+        console.log('team scout page', page.data);
         var teamObj = getTeamByNumber(teamNum);
         if (!teamObj) {
+            console.log('all teams when it couldnt find team', allTeams);
             alert("Could not find team"); // should never happen anyway
             return;
         }
@@ -251,6 +269,19 @@ document.addEventListener('init', function (event) {
                 btn.querySelector("#submit-done").style.display = "initial";
                 btn.style.backgroundColor = "green";
             })
+        }
+    } else if (page.id === "settingsPage") {
+        console.log('in settings page');
+        var tournamentCode = page.querySelector("#tournament");
+        tournamentCode.onchange =  function (event) {
+            console.log('onchange ing asldfaldsfm');
+            console.log(event.target.value);
+            eventCode = eventCodes[event.target.value];
+            fetchTeams(homePage);
+            ons.notification.toast('Successfully loaded teams', {
+                timeout: 1620,
+                buttonLabel: 'Dismiss'
+            });
         }
     }
 });

@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!--suppress XmlDuplicatedId -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -30,7 +31,7 @@
             <div class="center">Home</div>
         </ons-toolbar>
         <ons-tabbar swipeable id="appTabbar" position="auto">
-            <ons-tab label="Home" icon="ion-home" page="home.html" active></ons-tab>
+            <ons-tab label="Home" icon="ion-home" page="home.html" id="home-btn" active></ons-tab>
             <ons-tab label="View Teams" icon="ion-edit" page="teams.html"></ons-tab>
             <ons-tab label="Settings" icon="ion-settings" page="settings.html"></ons-tab>
         </ons-tabbar>
@@ -78,26 +79,26 @@
 
 <template id = "settings.html">
     <ons-page id = "settingsPage">
-        <ons-list id="teams-list">            
+        <ons-list id="teams-list">
             <ons-list-item onclick="fn.toggle(this);" class="active">
                 <div class="head" style><span style = "text-align: center">Rank criteria:</span></div>
                 <div class="content" id="rank-criteria">
-                    <p>Autonomous Switch: <ons-range></ons-range></p>
-                    <p>Autonomous Scale: <ons-range></ons-range></p>
-                    <p>Teleop Switch: <ons-range></ons-range></p>
-                    <p>Teleop Scale: <ons-range></ons-range></p>
-                    <p>Vault: <ons-range></ons-range></p>
-                    <p>Endgame: <ons-range></ons-range></p>
-                    <p>Bias toward recent games: <ons-range></ons-range></p>
+                    <p>Autonomous Switch: <ons-range id="auto-switch-weight"></ons-range></p>
+                    <p>Autonomous Scale: <ons-range id="auto-scale-weight"></ons-range></p>
+                    <p>Teleop Switch: <ons-range id="teleop-switch-weight"></ons-range></p>
+                    <p>Teleop Scale: <ons-range id="teleop-scale-weight"></ons-range></p>
+                    <p>Vault: <ons-range id="vault-weight"></ons-range></p>
+                    <p>Endgame: <ons-range id="endgame-weight"></ons-range></p>
+                    <p>Bias toward recent games: <ons-range id="time-weight"></ons-range></p> <!-- praneeth was gonna add a time decay-->
                 </div>
             </ons-list-item>
             <ons-list-item>
                 <h4 style = "padding-right: 8%; font-size: 99%">Tournament:</h4>
                 <ons-select id="tournament" style = "float: left">
-                    <option value="Gainesville">Gainesville</option>
-                    <option value="Albany">Albany</option>
-                    <option value="Peachtree">Peachtree</option>
-                    <option value="Houston">Houston</option>
+                    <option data-tournament="gai">Gainesville</option>
+                    <option data-tournament="alb">Albany</option>
+                    <option data-tournament="cmp">Peachtree</option>
+                    <!--<option data-tournament="cmptx">Houston</option>-->
                   </ons-select>
 
             </ons-list-item>
@@ -133,8 +134,7 @@
     <ons-page id="match-scout" class="scout-page">
         <ons-toolbar>
             <div class="left"><ons-back-button></ons-back-button></div>
-            <div class="center" id="team-title">Team <span id="team-num"></span> Match Scouting</span></div>
-            
+            <div class="center" id="team-title">Team <span id="team-num"></span> Match Scouting</div>
         </ons-toolbar>
         <h2 id="team-name"></h2>
         <div id="match-btns" class="btns">
@@ -207,8 +207,8 @@
                 <div class="center" id="team-title">Team <span id="team-num"></span> Pit Scouting</div>
             </ons-toolbar>
             <div class = "pitTitle">
-                <h2 style = "font-size: 150"><span id="team-name"></span></h2>
-    
+                <h2 style = "font-size: x-small"><span id="team-name"></span></h2>
+            </div>
             <form>
                 <div>
                     <h2 id = "driveTrainHeading" style = "font-size: 125%; margin-top:6%;">Drive Train Type:</h2>
@@ -234,16 +234,16 @@
                         <ons-button modifier="large" data-select="0">Switch</ons-button>
                         <ons-button modifier="large" data-select="1">Scale</ons-button>
                     </div>
-                    
+
                     <div id="insertHeight">
                         <h4>Robot's Max Lift Height:</h4>
                         <ons-input type="number" id="heightInput" required></ons-input>
                         <h5>inches</h5>
                     </div>
                 </div>
-               
+
                 <div class="pitScout" style = "margin-top:10%">
-                    <h2 style = "margin-top: 4%" >End Game Strategy:</h2>
+                    <h2 style="margin-top: 4%" >End Game Strategy:</h2>
                     <div class="CheckBoxPit select-one" id="endgame-strategy">
                         <ons-button modifier="large" data-select="0">Ramps</ons-button>
                         <ons-button modifier="large" data-select="1">Climb</ons-button>
@@ -256,8 +256,9 @@
                     </button>
                 </div>
             </form>
+
         </ons-page>
-    </template>
+</template>
 
 
 <script>  
