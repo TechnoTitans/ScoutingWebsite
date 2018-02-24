@@ -136,41 +136,14 @@ ons-splitter-side[animation=overlay] {
     width: initial;
 }
 
-.accordion .content {
-    opacity: 0;
-    max-height: 0;
-    overflow: hidden;
-    transition: 0.6s ease-out;
-    width: 100%;
-}
-
-.accordion .head {
-    width: 100%;
-}
-
-.accordion .head:before {
-    margin-top: -3px;
-    content: '\02795';
-}
-
-.accordion .head span {
-    padding-left: 10px;
-}
-
-.accordion .active .head:before {
-    content: "\2796";
-}
-
-.accordion .active .content {
-    max-height: 500px;
-    opacity: 1;
-    margin-top: 10px;
-}
-
 #rank-criteria ons-range {
     width: 100%;
 }
 
 #rank-criteria p {
-    margin: 10px 0px;
+    margin: 15px 0px;
+}
+#rank-criteria p ons-button {
+    float: right;
+    margin-top: -10px;
 }

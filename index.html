@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!--suppress XmlDuplicatedId -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -31,7 +30,7 @@
             <div class="center">Home</div>
         </ons-toolbar>
         <ons-tabbar swipeable id="appTabbar" position="auto">
-            <ons-tab label="Home" icon="ion-home" page="home.html" id="home-btn" active></ons-tab>
+            <ons-tab label="Home" icon="ion-home" page="home.html" active></ons-tab>
             <ons-tab label="View Teams" icon="ion-edit" page="teams.html"></ons-tab>
             <ons-tab label="Settings" icon="ion-settings" page="settings.html"></ons-tab>
         </ons-tabbar>
@@ -48,20 +47,8 @@
 
 <template id="teams.html">
     <ons-page id="rank-teams">
-        <!-- <ons-list id="teams-list" class="accordion">            
-            <ons-list-item onclick="fn.toggle(this);" class="active">
-                <div class="head"><span>Rank criteria: <ons-input type="number" min="0" max="100"></ons-input></span></div>
-                <div class="content" id="rank-criteria">
-                    <p>Autonomous Switch: <ons-range></ons-range></p>
-                    <p>Autonomous Scale: <ons-range></ons-range></p>
-                    <p>Teleop Switch: <ons-range></ons-range></p>
-                </div>
-            </ons-list-item>
-            <ons-list-item onclick="fn.toggle(this);">
-                <div class="head"><span>Test 2</span></div>
-                <div class="content">Hi<br />Hello<br />Idk<br /></div>
-            </ons-list-item>
-        </ons-list> -->
+        <div id="teams-ranked">
+        </div>
     </ons-page>
 </template>
 
@@ -78,31 +65,28 @@
 </template>
 
 <template id = "settings.html">
-    <ons-page id = "settingsPage">
-        <ons-list id="teams-list">
-            <ons-list-item onclick="fn.toggle(this);" class="active">
-                <div class="head" style><span style = "text-align: center">Rank criteria:</span></div>
-                <div class="content" id="rank-criteria">
-                    <p>Autonomous Switch: <ons-range id="auto-switch-weight"></ons-range></p>
-                    <p>Autonomous Scale: <ons-range id="auto-scale-weight"></ons-range></p>
-                    <p>Teleop Switch: <ons-range id="teleop-switch-weight"></ons-range></p>
-                    <p>Teleop Scale: <ons-range id="teleop-scale-weight"></ons-range></p>
-                    <p>Vault: <ons-range id="vault-weight"></ons-range></p>
-                    <p>Endgame: <ons-range id="endgame-weight"></ons-range></p>
-                    <p>Bias toward recent games: <ons-range id="time-weight"></ons-range></p> <!-- praneeth was gonna add a time decay-->
-                </div>
-            </ons-list-item>
-            <ons-list-item>
-                <h4 style = "padding-right: 8%; font-size: 99%">Tournament:</h4>
+    <ons-page id = "settingsPage" data-dirty="y">
+        <div style="padding: 15px;">
+            <div style="text-align: center"><h2>Rank Criteria</h2></div>
+            <div id="rank-criteria">
+                <p id="auto-switch-crit">Autonomous Switch: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
+                <p id="auto-scale-crit">Autonomous Scale: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
+                <p id="teleop-switch-crit">Teleop Switch: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
+                <p id="teleop-scale-crit">Teleop Scale: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
+                <p id="vault-crit">Vault: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
+                <p id="endgame-crit">Endgame: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
+                <p id="bias-crit">Bias toward recent games: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
+            </div>
+	    <div>
+		<h4 style = "padding-right: 8%; font-size: 99%">Tournament:</h4>
                 <ons-select id="tournament" style = "float: left">
-                    <option data-tournament="gai">Gainesville</option>
-                    <option data-tournament="alb">Albany</option>
-                    <option data-tournament="cmp">Peachtree</option>
-                    <!--<option data-tournament="cmptx">Houston</option>-->
-                  </ons-select>
-
-            </ons-list-item>
-        </ons-list>
+                    <option value="Gainesville">Gainesville</option>
+                    <option value="Albany">Albany</option>
+                    <option value="Peachtree">Peachtree</option>
+                    <!--<option value="Houston">Houston</option>-->
+                </ons-select>
+	    </div>
+        </div>
     </ons-page>
 </template>
 
@@ -143,11 +127,11 @@
                 <h3>Autonomous</h3>
                 Choose target:<br />
                 <div id="auto-target" class="btn-select-menu">
-                    <ons-button modifier="large" data-select="0">Switch (Same side)</ons-button>
-                    <ons-button modifier="large" data-select="1">Switch (Cross side)</ons-button>
-                    <ons-button modifier="large" data-select="2">Scale (Same side)</ons-button>
-                    <ons-button modifier="large" data-select="3">Scale (Cross side)</ons-button>
-                    <ons-button modifier="large" data-select="4">Drive across line</ons-button>
+                    <ons-button modifier="large" data-select="sswitch">Switch (Same side)</ons-button>
+                    <ons-button modifier="large" data-select="cswitch">Switch (Cross side)</ons-button>
+                    <ons-button modifier="large" data-select="sscale">Scale (Same side)</ons-button>
+                    <ons-button modifier="large" data-select="cscale">Scale (Cross side)</ons-button>
+                    <ons-button modifier="large" data-select="dline">Drive across line</ons-button>
                 </div>
                 <div id="auto-target-result" class="btn-select-menu">
                     <ons-button disabled data-select="1">Success</ons-button>
@@ -200,7 +184,7 @@
     </ons-page>
 </template>
 
-<template id="pit-scout.html">*+-
+<template id="pit-scout.html">
         <ons-page id="pit-scout" class="scout-page">
             <ons-toolbar>
                 <div class="left"><ons-back-button></ons-back-button></div>
@@ -211,7 +195,7 @@
             </div>
             <form>
                 <div>
-                    <h2 id = "driveTrainHeading" style = "font-size: 125%; margin-top:6%;">Drive Train Type:</h2>
+                    <h2 id = "driveTrainHeading" style = "margin-bottom: 0%; padding-bottom: 0%">Drive Train Type:</h2>
                     <div class="select-one" id="drivetrain-select">
                         <ons-button modifier="large" data-select="0">Tank</ons-button>
                         <ons-button modifier="large" data-select="1">Swerve</ons-button>
@@ -221,16 +205,16 @@
                     </div>
                 </div>
                 <div class = "pitScout">
-                    <h2>Focus:</h2>
-                    <div class="select-one" id="focus">
+                    <h2>Focus:</h2><br />
+                    <div class="select-many" id="focus">
                         <ons-button modifier="large" data-select="0">Switch</ons-button>
                         <ons-button modifier="large" data-select="1">Scale</ons-button>
                         <ons-button modifier="large" data-select="2">Defense</ons-button>
                     </div>
                 </div>
                 <div class = "pitScout">
-                    <h2>Capabilities:</h2>
-                    <div class = "CheckBoxPit select-one" id="capabilities">
+                    <h2>Capabilities:</h2><br />
+                    <div class = "CheckBoxPit select-many" id="capabilities">
                         <ons-button modifier="large" data-select="0">Switch</ons-button>
                         <ons-button modifier="large" data-select="1">Scale</ons-button>
                     </div>
@@ -241,7 +225,7 @@
                         <h5>inches</h5>
                     </div>
                 </div>
-
+               
                 <div class="pitScout" style = "margin-top:10%">
                     <h2 style="margin-top: 4%" >End Game Strategy:</h2>
                     <div class="CheckBoxPit select-one" id="endgame-strategy">
@@ -256,12 +240,11 @@
                     </button>
                 </div>
             </form>
-
         </ons-page>
-</template>
+    </template>
 
 
-<script>  
+<script>
     window.fn = {};
 
     window.fn.toggleMenu = function () {
