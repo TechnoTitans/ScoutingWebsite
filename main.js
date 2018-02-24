@@ -17,10 +17,12 @@ var state = 'ga', eventCode = 'gai', year = 2018; // todo determine eventcode by
 var currentEventKey = year + state + eventCode;
 var eventCodes = ['gai', 'col' , 'dul', 'dal', 'cmp', 'alb'];
 var allTeams = [];
+var allTeamElems = [];
 var allTeamData = null;
 var teamDataDirty = true;
+var homePage;
 
-var writeScoutingData = function(data, isPit) {
+var writeScoutingData = function (data, isPit) {
     console.log('sent data for team' + data.teamName, data);
     return db.ref("data").child(data.teamNum.toString()).child(data.eventKey).child(isPit ? 'pit' : 'match').push().set(data);
 };
@@ -29,7 +31,7 @@ var getTeams = function () {
     if (allTeams.length > 0) return Promise.resolve(allTeams);
     return axios({
         method: 'get',
-        url: `https://www.thebluealliance.com/api/v3/event/${currentEventKey}/teams/simple`,
+        url: `https://www.thebluealliance.com/api/v3/event/${currentEvent.key}/teams/simple`,
         headers: {'X-TBA-Auth-Key': 'S59CP2qkqLt0DuimRWKRByClsvqzgib2lyCJAUhIfdb59Mmxd54WAcK0B2vs6D0e'}
     }).then(function (response) {
         allTeams = response.data;
@@ -68,7 +70,7 @@ function HSVtoRGB(h, s, v) {
 var getAllTeamData = function () {
     if (allTeamData) return Promise.resolve(allTeamData);
     return new Promise((resolve, reject) => {
-        db.ref("data").on("value", function(snapshot) {
+        db.ref("data").on("value", function (snapshot) {
             allTeamData = snapshot.val();
             teamDataDirty = true;
             resolve(allTeamData);
@@ -84,7 +86,7 @@ var teamHasData = function (teamNum) {
     })
 };
 
-var getTeamByNumber = function(num) {
+var getTeamByNumber = function (num) {
     num = num.toString();
     for (let team of allTeams) {
         if (team.team_number.toString() === num) {
@@ -93,12 +95,12 @@ var getTeamByNumber = function(num) {
     }
 };
 
-var createSelectMenu = function(div, onchange) {
+var createSelectMenu = function (div, onchange) {
     var chosen = null;
     var btns = div.querySelectorAll("ons-button");
     div.dataset.selected = "";
     for (let button of btns) {
-        button.onclick = function() {
+        button.onclick = function () {
             this.classList.add("chosen");
             if (chosen) chosen.classList.remove("chosen");
             if (this !== chosen) {
@@ -112,12 +114,12 @@ var createSelectMenu = function(div, onchange) {
     }
 };
 
-var createSelectCheckboxMenu = function(div, onchange) {
+var createSelectCheckboxMenu = function (div, onchange) {
     var btns = div.querySelectorAll("ons-button");
     var selected = {};
     div.dataset.selected = "";
     for (let button of btns) {
-        button.onclick = function() {
+        button.onclick = function () {
             if (this.classList.contains("chosen")) {
                 this.classList.remove("chosen");
                 delete selected[this.dataset.select];
@@ -131,8 +133,8 @@ var createSelectCheckboxMenu = function(div, onchange) {
     }
 };
 
-var makeSuccessFailureMenu = function(main, succ, isCheckbox) {
-    var enableButtons = function(enabled) {
+var makeSuccessFailureMenu = function (main, succ, isCheckbox) {
+    var enableButtons = function (enabled) {
         var btns = succ.querySelectorAll("ons-button");
         for (let button of btns) {
             button.disabled = !enabled;
@@ -145,15 +147,15 @@ var makeSuccessFailureMenu = function(main, succ, isCheckbox) {
     createSelectMenu(succ);
 };
 
-var createNumInput = function(container) {
+var createNumInput = function (container) {
     var inp = container.querySelector("ons-input");
     var plus = container.querySelector(".plus"), minus = container.querySelector(".minus");
-    plus.onclick = function() {
+    plus.onclick = function () {
         var v = parseInt(inp.value, 10);
         if (isNaN(v)) v = 0;
         inp.value = v + 1;
     };
-    minus.onclick = function() {
+    minus.onclick = function () {
         var v = parseInt(inp.value, 10);
         if (isNaN(v)) v = 0;
         inp.value = v - 1;
@@ -168,148 +170,175 @@ document.addEventListener('init', function (event) {
         var page = event.target;
 
 
-        var teamClick = function () {
-            var teamNumber = this.dataset.teamNum;
-            document.getElementById("appNavigator").pushPage("team-scout.html", {data: {num: teamNumber}});
-        };
-        var createTeam = function (team) {
-            var elem = ons.createElement(`
+var createTeam = function (team) {
+    var elem = ons.createElement(`
               <ons-list-item data-team-num="${team.team_number}">
               <div>
                 ${team.nickname} - ${team.team_number}
                 </div>
               </ons-list-item>
             `
-            );
-            elem.onclick = teamClick;
-            return elem;
-        };
-        var fetchTeams = function () {
-            getTeams().then(function(teams) {
-                addTeams(teams, []);
-                page.querySelector("#loading").style.display = "none";
-            }).catch(function(error) {
-                page.querySelector("#loading").innerHTML = `<p style="color: red;">Could not load dat<br />${error}<br />Check internet connection</p>`;
-            });
-        };
+    );
+    elem.onclick = teamClick;
+    allTeamElems.push(elem);
+    return elem;
+};
 
-        var addTeams = function(teams, query) {
-            for (let team of teams) {
-                if (query.every(term => team.nickname.toLowerCase().indexOf(term) !== -1
-                        || team.team_number.toString().indexOf(term) !== -1)
-                    || (query.join(" ")==="the best team" && team.team_number === 1683)) { // lol easter egg
-                    page.querySelector("#teams-list").appendChild(createTeam(team));
+var teamClick = function () {
+    var teamNumber = this.dataset.teamNum;
+    document.getElementById("appNavigator").pushPage("team-scout.html", {data: {num: teamNumber}});
+};
+
+var fetchTeams = function (page) {
+    getTeams().then(function (teams) {
+        addTeams(teams, [], page);
+        page.querySelector("#loading").style.display = "none";
+    }).catch(function (error) {
+        page.querySelector("#loading").innerHTML = `<p style="color: red;">Could not load dat<br />${error}<br />Check internet connection</p>`;
+    });
+};
+
+document.addEventListener('init', function (event) {
+        console.log("Init", event.target.id);
+        var page = event.target;
+        // this.querySelector('ons-toolbar div.center').textContent = this.data.title;
+        if (page.matches("#home")) {
+            homePage = page;
+            // this.querySelector('ons-toolbar div.center').textContent = this.data.title;
+            fetchTeams(page);
+            // pullHook.onaction = fetchTeams;
+            var searchBar = page.querySelector("ons-search-input");
+            searchBar.onkeyup = function () {
+                page.querySelector("#teams-list").innerHTML = "";
+                var terms = this.value.toLowerCase().split(" ");
+                addTeams(allTeams, terms);
+            };
+        } else if (page.matches("#team-scout")) {
+            console.log(page.data);
+            var teamNum = page.data.num;
+            var teamObj = getTeamByNumber(teamNum);
+            if (!teamObj) {
+                alert("Could not find team"); // should never happen anyway
+                return;
+            }
+            page.querySelector("#team-title").innerHTML = `${teamObj.nickname}`
+                + `<div style="color: #4c6ef5; padding-left: 0.2em;"><i class="fas fa-circle" style="visibility: hidden;" id="prev-data-icon"></i></div>`;
+            var buttons = page.querySelectorAll("ons-card");
+
+            // give indication of previous data
+            if (teamHasData(teamNum)) {
+                console.log('team has data');
+                page.querySelector("#prev-data-icon").style.visibility = "visible";
+            }
+            for (let button of buttons) {
+                button.onclick = function () {
+                    document.getElementById("appNavigator").pushPage(`${this.id}-scout.html`, {data: {team: teamObj}});
                 }
             }
-        };
-        fetchTeams();
-        // pullHook.onaction = fetchTeams;
+        } else if (page.matches("#match-scout")) {
+            var team = page.data.team;
+            page.querySelector("#team-num").innerHTML = team.team_number;
+            page.querySelector("#team-name").innerHTML = team.nickname;
+            // autonomous
+            //page.querySelector("#team-title").innerHTML = team.nickname;
+            var target = -1, success = false, chosen = null;
+            //var enableButtons = function(btnContainer, enabled) {
+            //    var btns = btnCoontainer.querySelectorAll("ons-button");
+            //    for (let button of btns) {
+            //        button.disabled = !enabled;
+            //        if (button.classList.contains("chosen") && !enabled) button.classList.remove("chosen");
+            //    }
+            //    if (!enabled) btnContainer.dataset.chosen = "";
+            //};
+            //createSelectMenu(targetBtnsContainer, chosen => enableButtons(resultBtnsContainer, chosen != null));
+            //createSelectMenu(resultBtnsContainer);
+            makeSuccessFailureMenu(page.querySelector("#auto-target"), page.querySelector("#auto-target-result"), true);
+            makeSuccessFailureMenu(page.querySelector("#end-game-menu"), page.querySelector("#end-game-result"), false);
+            page.querySelectorAll("p").forEach(p => createNumInput(p));
+            var submitted = false;
+            page.querySelector("form").onsubmit = function (e) {
+                e.preventDefault();
+                if (submitted) return false;
+                submitted = true;
+                var data = {};
+                data.autoTarget = page.querySelector("#auto-target").dataset.selected;
+                data.autoSuccess = page.querySelector("#auto-target-result").dataset.selected;
+                data.teleopSwitch = parseInt(page.querySelector("#teleop-switch ons-input").value, 10);
+                data.teleopScale = parseInt(page.querySelector("#teleop-scale ons-input").value, 10);
+                data.teleopVault = parseInt(page.querySelector("#teleop-vault ons-input").value, 10);
+                data.endGame = page.querySelector("#end-game-menu").dataset.selected;
+                data.endGameSuccess = page.querySelector("#end-game-result").dataset.selected;
+                data.comments = page.querySelector("textarea").value;
+                data.timestamp = Date.now(); // just for fun idk
+                data.teamName = team.nickname.trim();
+                data.teamNum = team.team_number;
+                data.eventKey = currentEvent.key;
+                var btn = this.querySelector("#submit-match");
+                btn.style.width = btn.offsetWidth + "px"; // keep width fixed
+                btn.querySelector("#submit-load").style.display = "initial";
+                btn.querySelector("#submit-text").style.display = "none";
+                writeScoutingData(data, false).then(() => {
+                    btn.querySelector("#submit-load").style.display = "none";
+                    btn.querySelector("#submit-done").style.display = "initial";
+                    btn.style.backgroundColor = "green";
+                });
+                return false;
+            };
+        } else if (page.matches("#pit-scout")) {
+            var team = page.data.team;
+            page.querySelector("#team-num").innerHTML = team.team_number;
+            page.querySelector("#team-name").innerHTML = team.nickname;
+            page.querySelectorAll(".select-one").forEach(x => createSelectMenu(x));
+            page.querySelectorAll(".select-many").forEach(x => createSelectCheckboxMenu(x));
+            page.querySelector("form").onsubmit = function (e) {
+                e.preventDefault();
+                if (submitted) return false;
+                submitted = true;
+                var data = {};
+                data.teamName = team.nickname.trim();
+                data.teamNum = team.team_number;
+                data.eventKey = currentEvent.key;
+                data.driveTrain = page.querySelector("#drivetrain-select").dataset.selected;
+                data.focus = page.querySelector("#focus").dataset.selected;
+                data.capabilities = page.querySelector("#capabilities").dataset.selected;
+                data.maxLiftHeight = parseInt(page.querySelector("#heightInput").value);
+                data.comment = page.querySelector("#more-comments").value;
+                data.endGameStrategy = page.querySelector("#endgame-strategy").dataset.selected;
+                var btn = this.querySelector("#submit-pit");
 
-        var searchBar = page.querySelector("ons-search-input");
-        searchBar.onkeyup = function() {
-            page.querySelector("#teams-list").innerHTML = "";
-            var terms = this.value.toLowerCase().split(" ");
-            addTeams(allTeams, terms);
-        };
-    } else if (page.matches("#team-scout")) {
-        console.log(page.data);
-        var teamNum = page.data.num;
-        var teamObj = getTeamByNumber(teamNum);
-        if (!teamObj) {
-            alert("Could not find team"); // should never happen anyway
-            return;
-        }
-        page.querySelector("#team-title").innerHTML = `${teamObj.nickname}`
-            + `<div style="color: #4c6ef5; padding-left: 0.2em;"><i class="fas fa-circle" style="visibility: hidden;" id="prev-data-icon"></i></div>`;
-        var buttons = page.querySelectorAll("ons-card");
-
-        // give indication of previous data
-        if(teamHasData(teamNum)){
-            console.log('team has data');
-            page.querySelector("#prev-data-icon").style.visibility = "visible";
-        }
-        for (let button of buttons) {
-            button.onclick = function() {
-                document.getElementById("appNavigator").pushPage(`${this.id}-scout.html`, {data: {team: teamObj}});
+                writeScoutingData(data, true).then(() => {
+                    btn.querySelector("#submit-load").style.display = "none";
+                    btn.querySelector("#submit-done").style.display = "initial";
+                    btn.style.backgroundColor = "green";
+                });
             }
-        }
-    } else if (page.matches("#match-scout")) {
-        let team = page.data.team;
-        page.querySelector("#team-num").innerHTML = team.team_number;
-        page.querySelector("#team-name").innerHTML = team.nickname;
-        // autonomous
-        //page.querySelector("#team-title").innerHTML = team.nickname;
-        let target = -1, success = false, chosen = null;
-        //var enableButtons = function(btnContainer, enabled) {
-        //    var btns = btnCoontainer.querySelectorAll("ons-button");
-        //    for (let button of btns) {
-        //        button.disabled = !enabled;
-        //        if (button.classList.contains("chosen") && !enabled) button.classList.remove("chosen");
-        //    }
-        //    if (!enabled) btnContainer.dataset.chosen = "";
-        //};
-        //createSelectMenu(targetBtnsContainer, chosen => enableButtons(resultBtnsContainer, chosen != null));
-        //createSelectMenu(resultBtnsContainer);
-        makeSuccessFailureMenu(page.querySelector("#auto-target"), page.querySelector("#auto-target-result"), true);
-        makeSuccessFailureMenu(page.querySelector("#end-game-menu"), page.querySelector("#end-game-result"), false);
-        page.querySelectorAll("p").forEach(p => createNumInput(p));
-        let submitted = false;
-        page.querySelector("form").onsubmit = function(e) {
-            e.preventDefault();
-            if (submitted) return false;
-            submitted = true;
-            var data = {};
-            data.autoTarget = page.querySelector("#auto-target").dataset.selected;
-            data.autoSuccess = page.querySelector("#auto-target-result").dataset.selected;
-            data.teleopSwitch = parseInt(page.querySelector("#teleop-switch ons-input").value, 10);
-            data.teleopScale = parseInt(page.querySelector("#teleop-scale ons-input").value, 10);
-            data.teleopVault = parseInt(page.querySelector("#teleop-vault ons-input").value, 10);
-            data.endGame = page.querySelector("#end-game-menu").dataset.selected;
-            data.endGameSuccess = page.querySelector("#end-game-result").dataset.selected;
-            data.comments = page.querySelector("textarea").value;
-            data.timestamp = Date.now(); // just for fun idk
-            data.teamName = team.nickname.trim();
-            data.teamNum = team.team_number;
-            data.eventKey = currentEventKey;
-            var btn = this.querySelector("#submit-match");
-            btn.style.width = btn.offsetWidth + "px"; // keep width fixed
-            btn.querySelector("#submit-load").style.display = "initial";
-            btn.querySelector("#submit-text").style.display = "none";
-            writeScoutingData(data, false).then(() => {
-                btn.querySelector("#submit-load").style.display = "none";
-                btn.querySelector("#submit-done").style.display = "initial";
-                btn.style.backgroundColor = "green";
+        } else if (page.matches("#settingsPage")) {
+            page.querySelectorAll("#rank-criteria p").forEach(function (p) {
+                var range = p.querySelector("ons-range");
+                range.oninput = range.onchange = function () {
+                    teamDataDirty = true;
+                    p.querySelector("span").innerHTML = this.value;
+                };
+                p.querySelector("span").innerHTML = range.value;
+                p.querySelector("ons-button").onclick = function () {
+                    page.querySelectorAll("#rank-criteria p").forEach(function (x) {
+                        var r = x.querySelector("ons-range");
+                        if (x !== p) r.value = 0;
+                        else r.value = 100;
+                        r.onchange();
+                    });
+                };
             });
-            return false;
-        };
-    } else if (page.matches("#pit-scout")) {
-        let team = page.data.team;
-        let submitted = false;
-        page.querySelector("#team-num").innerHTML = team.team_number;
-        page.querySelector("#team-name").innerHTML = team.nickname;
-        page.querySelectorAll(".select-one").forEach(x => createSelectMenu(x));
-        page.querySelectorAll(".select-many").forEach(x => createSelectCheckboxMenu(x));
-        page.querySelector("form").onsubmit = function(e) {
-            e.preventDefault();
-            if (submitted) return false;
-            submitted = true;
-            var data = {};
-            data.teamName = team.nickname.trim();
-            data.teamNum = team.team_number;
-            data.eventKey = currentEventKey;
-            data.driveTrain = page.querySelector("#drivetrain-select").dataset.selected;
-            data.focus = page.querySelector("#focus").dataset.selected;
-            data.capabilities = page.querySelector("#capabilities").dataset.selected;
-            data.maxLiftHeight = parseInt(page.querySelector("#heightInput").value);
-            data.comment = page.querySelector("#more-comments").value;
-            data.endGameStrategy = page.querySelector("#endgame-strategy").dataset.selected;
-            var btn = this.querySelector("#submit-pit");
-
-            writeScoutingData(data, true).then(() => {
-                btn.querySelector("#submit-load").style.display = "none";
-                btn.querySelector("#submit-done").style.display = "initial";
-                btn.style.backgroundColor = "green";
-            });
+            var tournamentCode = page.querySelector("#tournament");
+            tournamentCode.onchange = function (event) {
+                console.log(event.target.value);
+                eventCode = eventCodes[event.target.value];
+                fetchTeams(homePage);
+                ons.notification.toast('Successfully loaded teams', {
+                    timeout: 1620,
+                    buttonLabel: 'Dismiss'
+                });
+            }
         }
     } else if (page.matches("#settingsPage")) {
         page.querySelectorAll("#rank-criteria p").forEach(function(p) {
@@ -331,8 +360,9 @@ document.addEventListener('init', function (event) {
     }
 });
 
-document.addEventListener("show", function(event) {
+document.addEventListener("show", function (event) {
     var page = event.target;
+    var settings = document.querySelector("#settingsPage");
     if (page.matches("#rank-teams") && teamDataDirty) {
         var settings = document.querySelector("#settingsPage");
         var teamSubScores = {};
