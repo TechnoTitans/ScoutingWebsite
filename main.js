@@ -174,11 +174,11 @@ var addTeams = function (teams, query, page) {
                 || team.team_number.toString().indexOf(term) !== -1)
             || (query.join(" ") === "the best team" && team.team_number === 1683)) { // lol easter egg
             // page.querySelector("#teams-list").appendChild(createTeam(team));
-            createTeam(team);
+            teamList.appendChild(createTeam(team));
         }
-        allTeamElems.forEach(teamEl => {
-            teamList.appendChild(teamEl);
-        });
+        //allTeamElems.forEach(teamEl => {
+        //    teamList.appendChild(teamEl);
+        //});
     }
     if (teamList.innerHTML === '') {
         teamList.innerHTML = '<div>No competition data for this event yet</div>'; // todo fix styling
@@ -196,8 +196,8 @@ var createTeam = function (team) {
             `
     );
     elem.onclick = teamClick;
-    allTeamElems.push(elem);
     return elem;
+    // allTeamElems.push(elem);
 };
 
 var teamClick = function () {
@@ -206,11 +206,11 @@ var teamClick = function () {
 };
 
 var fetchTeams = function (page) {
-    getTeams().then(function (teams) {
+    return getTeams().then(function (teams) {
         addTeams(teams, [], page);
         page.querySelector("#loading").style.display = "none";
     }).catch(function (error) {
-        page.querySelector("#loading").innerHTML = `<p style="color: red;">Could not load dat<br />${error}<br />Check internet connection</p>`;
+        page.querySelector("#loading").innerHTML = `<p style="color: red;">Could not load data<br />${error}<br />Check internet connection</p>`;
     });
 };
 
@@ -350,12 +350,13 @@ document.addEventListener('init', function (event) {
             tournamentCode.onchange = function (event) {
                 console.log(event.target.value);
                 eventCode = eventCodes[event.target.value];
-                fetchTeams(homePage);
-                ons.notification.toast('Successfully loaded teams', {
-                    timeout: 1620,
-                    buttonLabel: 'Dismiss'
-                });
                 teamListDirty = teamDataDirty = true;
+                fetchTeams(homePage).then(function() {
+                    ons.notification.toast('Successfully loaded teams', {
+                        timeout: 1620,
+                        buttonLabel: 'Dismiss'
+                    });
+                });
             }
         }
 });
