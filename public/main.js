@@ -327,7 +327,8 @@ document.addEventListener('init', function (event) {
                 fetchTeams(homePage);
                 ons.notification.toast('Successfully loaded teams', {
                     timeout: 1620,
-                    buttonLabel: 'Dismiss'
+                    buttonLabel: 'Dismiss',
+                    animation: 'fall'
                 });
             }
         }
