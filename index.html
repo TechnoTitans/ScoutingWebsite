@@ -48,6 +48,21 @@
 <template id="teams.html">
     <ons-page id="rank-teams">
         <div id="teams-ranked">
+            <ons-card>
+                <h3>1. 1683 Techno Titans</h3>
+                <ons-row>
+                    <ons-col>Auto Switch <div class="indicator green"></div></ons-col>
+                    <ons-col>Auto Scale <div class="indicator green"></div></ons-col>
+                </ons-row>
+                <ons-row>                    
+                    <ons-col>Teleop Switch <div class="indicator green"></div></ons-col>
+                    <ons-col>Teleop Scale <div class="indicator green"></div></ons-col>
+                </ons-row>
+                <ons-row>
+                    <ons-col>Vault <div class="indicator green"></div></ons-col>
+                    <ons-col>End Game <div class="indicator green"></div></ons-col>
+                </ons-row>
+            </ons-card>
         </div>
     </ons-page>
 </template>
@@ -135,8 +150,8 @@
                     <ons-button modifier="large" data-select="dline">Drive across line</ons-button>
                 </div>
                 <div id="auto-target-result" class="btn-select-menu">
-                    <ons-button disabled data-select="1">Success</ons-button>
-                    <ons-button disabled data-select="0">Failure</ons-button>
+                    <ons-button disabled data-select="true">Success</ons-button>
+                    <ons-button disabled data-select="false">Failure</ons-button>
                 </div>
             </div>
             <hr />
@@ -194,35 +209,35 @@
             <div class = "pitTitle">
                 <h2 style = "font-size: 150"><span id="team-name"></span></h2>
     	    </div>
-            <form>
+            <form class="btns">
                 <div>
-                    <h2 id = "driveTrainHeading" style = "margin-bottom: 0%; padding-bottom: 0%">Drive Train Type:</h2>
-                    <div class="select-one">
-                        <ons-button modifier="large" data-select="0">Tank</ons-button>
-                        <ons-button modifier="large" data-select="1">Swerve</ons-button>
-                        <ons-button modifier="large" data-select="2">Mecanum</ons-button>
-                        <ons-button modifier="large" data-select="3">Slide</ons-button>
-                        <ons-button modifier="large" data-select="4">Holonomic</ons-button>
+                    <h2 id = "driveTrainHeading" style = "font-size: 125%; margin-top: 6%;">Drive Train Type:</h2>
+                    <div class="select-one" id="drivetrain-select">
+                        <ons-button modifier="large" data-select="tank">Tank</ons-button>
+                        <ons-button modifier="large" data-select="swerve">Swerve</ons-button>
+                        <ons-button modifier="large" data-select="mecanum">Mecanum</ons-button>
+                        <ons-button modifier="large" data-select="slide">Slide</ons-button>
+                        <ons-button modifier="large" data-select="holonomic">Holonomic</ons-button>
                     </div>
                 </div>
                 <div class = "pitScout">
                     <h2>Focus:</h2><br />
                     <div class="select-many" id="focus">
-                        <ons-button modifier="large" data-select="0">Switch</ons-button>
-                        <ons-button modifier="large" data-select="1">Scale</ons-button>
-                        <ons-button modifier="large" data-select="2">Defense</ons-button>
+                        <ons-button modifier="large" data-select="switch">Switch</ons-button>
+                        <ons-button modifier="large" data-select="scale">Scale</ons-button>
+                        <ons-button modifier="large" data-select="defense">Defense</ons-button>
                     </div>
                 </div>
                 <div class = "pitScout">
                     <h2>Capabilities:</h2><br />
                     <div class = "CheckBoxPit select-many" id="capabilities">
-                        <ons-button modifier="large" data-select="0">Switch</ons-button>
-                        <ons-button modifier="large" data-select="1">Scale</ons-button>
+                        <ons-button modifier="large" data-select="switch">Switch</ons-button>
+                        <ons-button modifier="large" data-select="scale">Scale</ons-button>
                     </div>
                     
                     <div id = "insertHeight">
                         <h4>Robot's Max Lift Height:</h4>
-                        <ons-input></ons-input> 
+                        <ons-input type="number" id="heightInput" required min="0"></ons-input> 
                         <h5>inches</h5>
                     </div>
                 </div>
@@ -230,8 +245,8 @@
                 <div class="pitScout" style = "margin-top:10%">
                     <h2 style = "margin-top: 4%" >End Game Strategy:</h2>
                     <div class="CheckBoxPit select-one" id="endgame-strategy">
-                        <ons-button modifier="large" data-select="0">Ramps</ons-button>
-                        <ons-button modifier="large" data-select="1">Climb</ons-button>
+                        <ons-button modifier="large" data-select="ramps">Ramps</ons-button>
+                        <ons-button modifier="large" data-select="climb">Climb</ons-button>
                     </div><br/>
                     <textarea placeholder="Additional Systems" id="more-comments"></textarea>
                     <button id="submit-pit" class="button button--material" style="margin-left: auto; margin-right: auto;"> <!-- Slight hack but this should get around form validation -->

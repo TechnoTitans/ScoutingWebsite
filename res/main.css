@@ -147,3 +147,13 @@ ons-splitter-side[animation=overlay] {
     float: right;
     margin-top: -10px;
 }
+.indicator {
+  width: 10px;
+  height: 10px;
+  margin: 0px 5px 0px 5px;
+  border: 1px solid rgba(0, 0, 0, .2);
+  float: left;
+}
+.indicator.green {
+    background-color: #1ad81a;
+}

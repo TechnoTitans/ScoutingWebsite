@@ -37,6 +37,34 @@ var getTeams = function () {
     });
 };
 
+
+// source: https://stackoverflow.com/questions/17242144/javascript-convert-hsb-hsv-color-to-rgb-accurately
+function HSVtoRGB(h, s, v) {
+    var r, g, b, i, f, p, q, t;
+    if (arguments.length === 1) {
+        s = h.s, v = h.v, h = h.h;
+    }
+    i = Math.floor(h * 6);
+    f = h * 6 - i;
+    p = v * (1 - s);
+    q = v * (1 - f * s);
+    t = v * (1 - (1 - f) * s);
+    switch (i % 6) {
+        case 0: r = v, g = t, b = p; break;
+        case 1: r = q, g = v, b = p; break;
+        case 2: r = p, g = v, b = t; break;
+        case 3: r = p, g = q, b = v; break;
+        case 4: r = t, g = p, b = v; break;
+        case 5: r = v, g = p, b = q; break;
+    }
+    return {
+        r: Math.round(r * 255),
+        g: Math.round(g * 255),
+        b: Math.round(b * 255)
+    };
+}
+
+
 var getAllTeamData = function () {
     if (allTeamData) return Promise.resolve(allTeamData);
     return new Promise((resolve, reject) => {
@@ -206,12 +234,12 @@ document.addEventListener('init', function (event) {
             }
         }
     } else if (page.matches("#match-scout")) {
-        var team = page.data.team;
+        let team = page.data.team;
         page.querySelector("#team-num").innerHTML = team.team_number;
         page.querySelector("#team-name").innerHTML = team.nickname;
         // autonomous
         //page.querySelector("#team-title").innerHTML = team.nickname;
-        var target = -1, success = false, chosen = null;
+        let target = -1, success = false, chosen = null;
         //var enableButtons = function(btnContainer, enabled) {
         //    var btns = btnCoontainer.querySelectorAll("ons-button");
         //    for (let button of btns) {
@@ -225,7 +253,7 @@ document.addEventListener('init', function (event) {
         makeSuccessFailureMenu(page.querySelector("#auto-target"), page.querySelector("#auto-target-result"), true);
         makeSuccessFailureMenu(page.querySelector("#end-game-menu"), page.querySelector("#end-game-result"), false);
         page.querySelectorAll("p").forEach(p => createNumInput(p));
-        var submitted = false;
+        let submitted = false;
         page.querySelector("form").onsubmit = function(e) {
             e.preventDefault();
             if (submitted) return false;
@@ -255,7 +283,8 @@ document.addEventListener('init', function (event) {
             return false;
         };
     } else if (page.matches("#pit-scout")) {
-        var team = page.data.team;
+        let team = page.data.team;
+        let submitted = false;
         page.querySelector("#team-num").innerHTML = team.team_number;
         page.querySelector("#team-name").innerHTML = team.nickname;
         page.querySelectorAll(".select-one").forEach(x => createSelectMenu(x));
@@ -304,26 +333,37 @@ document.addEventListener('init', function (event) {
 
 document.addEventListener("show", function(event) {
     var page = event.target;
-    var settings = document.querySelector("#settingsPage");
     if (page.matches("#rank-teams") && teamDataDirty) {
+        var settings = document.querySelector("#settingsPage");
         var teamSubScores = {};
         var teamScores = {};
+        var averageStats = {
+            autoSwitch: 0,
+            autoScale: 0,
+            teleopSwitch: 0,
+            teleopScale: 0,
+            vault: 0,
+            endGame: 0
+        };
+        var totalMatches = 0;
         var calculateScore = function(team, number) {
-            var matches = Object.values(team[currentEventKey]);
+            var matches = Object.values(team[currentEventKey].match);
             matches.sort((x, y) => y.timestamp - x.timestamp);
             var autoMap = {"sscale": "auto-scale-crit", "cscale": "auto-scale-crit", "sswitch": "auto-switch-crit", "cswitch": "auto-switch-crit"};
             var expWeight = -parseInt(settings.querySelector("#bias-crit ons-range").value) / 250;
             var totalScore = 0, totalWeight = 0;
-            var subScores = {auto: 0, teleopSwitch: 0, teleopScale: 0, endGame: 0};      
+            var subScores = {autoSwitch: 0, autoScale: 0, teleopSwitch: 0, teleopScale: 0, endGame: 0, vault: 0};      
             for (let i = 0; i < matches.length; ++i) {
                 let weight = Math.exp(expWeight * i);
                 let mt = matches[i];
                 let score = 0;
                 let nonLines = mt.autoTarget.split(",").filter(x => x !== "dline"); 
-                if (mt.autoSuccess === "1" && nonLines.length > 0) {
-                    score += nonLines.map(target => +settings.querySelector(`#${autoMap[target]} ons-range`).value).reduce((x, y)=>x+y);
-                    subScores.auto += nonLines.length / matches.length;
-                } else if ((nonLines.length === 0) !== (mt.autoSuccess === "0")) {
+                if (mt.autoSuccess === "true" && nonLines.length > 0) {
+                    let add = (x, y) => x + y;
+                    score += nonLines.map(target => +settings.querySelector(`#${autoMap[target]} ons-range`).value).reduce(add);
+                    subScores.autoSwitch += nonLines.map(target => target.indexOf("switch") !== -1).reduce(add) / matches.length;
+                    subScores.autoScale += nonLines.map(target => target.indexOf("scale") !== -1).reduce(add) / matches.length;
+                } else if ((nonLines.length === 0) !== (mt.autoSuccess === "false")) {
                     score += (+settings.querySelector("#auto-switch-crit ons-range").value) + (+settings.querySelector("#auto-scale-crit ons-range").value) / 10;
                     subScores.auto += 0.2 / matches.length;
                 }
@@ -332,6 +372,7 @@ document.addEventListener("show", function(event) {
                 score += mt.teleopScale * (+settings.querySelector("#teleop-scale-crit ons-range").value) / 5;
                 subScores.teleopScale += mt.teleopScale / matches.length;
                 score += mt.teleopVault * (+settings.querySelector("#vault-crit ons-range").value) / 3;
+                subScores.vault += mt.teleopVault / matches.length;
                 subScores.endGame += +(mt.endGameSuccess === "true") / matches.length;
                 score += mt.endGameSuccess === "true" ? +settings.querySelector("#endgame-crit ons-range").value : 0;
                 totalScore += score * weight;
@@ -340,19 +381,109 @@ document.addEventListener("show", function(event) {
             teamScores[number] = totalScore / totalWeight;
             teamSubScores[number] = subScores;
         };
+        var getAverage = function(s) {
+            return averageStats[s] / totalMatches;
+        };
+        var addToAverages = function(team) {
+            var matches = Object.values(team[currentEventKey].match);
+            for (let mt of matches) {
+                let autoTargets = mt.autoSuccess === "true" ? mt.autoTarget.split(",") : [];
+                for (let target of autoTargets) {
+                    averageStats.autoSwitch += target.indexOf("switch") !== -1;
+                    averageStats.autoScale += target.indexOf("scale") !== -1;
+                }
+                averageStats.teleopSwitch += mt.teleopSwitch;
+                averageStats.teleopScale += mt.teleopScale;
+                averageStats.vault += mt.teleopVault;
+                averageStats.endGame += mt.endGameSuccess === "true";
+            }
+            totalMatches += matches.length;
+        };
         Promise.all([getTeams(), getAllTeamData()]).then(function(values) {
             teamDataDirty = false;
             var teams = values[0].slice(), teamData = values[1];
             var teamsWithData = [], teamsWOData = [];
+            var teamExists = function(team) {
+                // must be != (not !==) so that we check for undefined as well
+                return teamData[team.team_number] != null && teamData[team.team_number][currentEventKey] != null && teamData[team.team_number][currentEventKey] != null;
+            }
             for (let team of teams) {
-                if (teamData[team.team_number] != null) {
-                    calculateScore(teamData[team.team_number], team.team_number);
+                if (teamExists(team)) {
+                    addToAverages(teamData[team.team_number]);
                     teamsWithData.push(team);
                 }
                 else teamsWOData.push(team);
             }
+            for (let team of teamsWithData) {
+                calculateScore(teamData[team.team_number], team.team_number);
+            }
             teamsWithData.sort((team1, team2) => teamScores[team2.team_number] - teamScores[team1.team_number]);
-            console.log(teamsWithData, teamScores);
+            var subScoreRanks = {};
+            for (let team of teamsWithData) subScoreRanks[team.team_number] = {};
+            for (let key in averageStats) {
+                let subScoreSorted = teamsWithData.slice().sort((team1, team2) => {
+                    var subScore1 = teamSubScores[team1.team_number][key], subScore2 = teamSubScores[team2.team_number][key];
+                    return subScore2 - subScore1;
+                });
+                for (let i = 0; i < teamsWithData.length; ++i) {
+                    let team = subScoreSorted[i];
+                    subScoreRanks[team.team_number][key] = i + 1;
+                }
+            }
+            console.log(averageStats, teamSubScores, teamScores, subScoreRanks);
+            var createTeamCard = function(team, rank, subScoreRanks) {
+                var subScoreColors = {};
+                var createColor = function(rank) {
+                    var hsvGreen = {h: 1/3, s: 0.8796, v: 0.847},
+                        hsvYellow = {h: 1/6, s: 1, v: 1},
+                        hsvRed = {h: 0, s: 1, v: 0.914};
+                    // TODO: choose colors
+                    // why hsv? because hsv interpolation is better than rgb
+                    if (teamsWithData.length <= 1) return `background-color: black;`
+                    let interp = (rank - 1) / (teamsWithData.length - 1), color;
+                    if (interp > 0.6) color = HSVtoRGB(hsvRed); // everything past 60% is red so we have better resolution on better teams
+                    else {
+                        interp /= 0.6;
+                        let h, s, v;
+                        if (interp < 0.5) {
+                            h = (hsvGreen.h * (0.5 - interp) + hsvYellow.h * interp) * 2;
+                            s = (hsvGreen.s * (0.5 - interp) + hsvYellow.s * interp) * 2;
+                            v = (hsvGreen.v * (0.5 - interp) + hsvYellow.v * interp) * 2;
+                        } else {
+                            h = (hsvYellow.h * (1 - interp) + hsvRed.h * (interp - 0.5)) * 2;
+                            s = (hsvYellow.s * (1 - interp) + hsvRed.s * (interp - 0.5)) * 2;
+                            v = (hsvYellow.v * (1 - interp) + hsvRed.v * (interp - 0.5)) * 2;
+                        }
+                        color = HSVtoRGB(h, s, v);
+                    }
+                    return `background-color: rgb(${color.r}, ${color.g}, ${color.b});`;                
+                };
+                for (let key in subScoreRanks) {
+                    subScoreColors[key] = createColor(subScoreRanks[key]);
+                };
+                console.log(subScoreColors);
+                return ons.createElement(`<ons-card>
+                <h3>${rank}. ${team.team_number} ${team.nickname}</h3>
+                <ons-row>
+                    <ons-col>Auto Switch <div class="indicator" style="${subScoreColors.autoSwitch}"></div></ons-col>
+                    <ons-col>Auto Scale <div class="indicator" style="${subScoreColors.autoScale}"></div></ons-col>
+                </ons-row>
+                <ons-row>                    
+                    <ons-col>Teleop Switch <div class="indicator" style="${subScoreColors.teleopSwitch}"></div></ons-col>
+                    <ons-col>Teleop Scale <div class="indicator" style="${subScoreColors.teleopScale}"></div></ons-col>
+                </ons-row>
+                <ons-row>
+                    <ons-col>Vault <div class="indicator" style="${subScoreColors.vault}"></div></ons-col>
+                    <ons-col>End Game <div class="indicator" style="${subScoreColors.endGame}"></div></ons-col>
+                </ons-row>
+            </ons-card>`);
+            };
+            var ranks = page.querySelector("#teams-ranked");
+            ranks.innerHTML = "";
+            for (var i = 0; i < teamsWithData.length; ++i) {
+                let team = teamsWithData[i];
+                ranks.appendChild(createTeamCard(team, i + 1, subScoreRanks[team.team_number]));
+            }
         });
     }
 });
