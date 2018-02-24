@@ -12,6 +12,7 @@
     <script src="main.js"></script>
     <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
     <link rel="stylesheet" href="res/main.css"/>
+    <link rel="manifest" href="manifest.json">
 </head>
 
 <body>
@@ -271,6 +272,15 @@
         el.classList.toggle("active");
     }
 </script>
-
+<script>
+    // Check that service workers are registered
+    if ('serviceWorker' in navigator) {
+        console.log('sw thing');
+        // Use the window load event to keep the page load performant
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js');
+        });
+    }
+</script>
 </body>
 </html>
