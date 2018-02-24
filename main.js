@@ -21,7 +21,6 @@ var allTeamElems = [];
 var allTeamData = null;
 var teamDataDirty = true;
 var teamListDirty = true;
-var homePage;
 
 var writeScoutingData = function (data, isPit) {
     console.log('sent data for team' + data.teamName, data);
@@ -220,7 +219,6 @@ document.addEventListener('init', function (event) {
         var page = event.target;
         // this.querySelector('ons-toolbar div.center').textContent = this.data.title;
         if (page.matches("#home")) {
-            homePage = page;
             // this.querySelector('ons-toolbar div.center').textContent = this.data.title;
             fetchTeams(page);
             // pullHook.onaction = fetchTeams;
@@ -351,6 +349,8 @@ document.addEventListener('init', function (event) {
                 console.log(event.target.value);
                 eventCode = eventCodes[event.target.value];
                 teamListDirty = teamDataDirty = true;
+                var homePage = document.querySelector("#home");
+                homePage.querySelector("#loading").display = "block";
                 fetchTeams(homePage).then(function() {
                     ons.notification.toast('Successfully loaded teams', {
                         timeout: 1620,
@@ -390,22 +390,23 @@ document.addEventListener("show", function (event) {
                 let score = 0;
                 let nonLines = mt.autoTarget.split(",").filter(x => x !== "dline"); 
                 if (mt.autoSuccess === "true" && nonLines.length > 0) {
-                    let add = (x, y) => x + y;
-                    score += nonLines.map(target => +settings.querySelector(`#${autoMap[target]} ons-range`).value).reduce(add);
-                    subScores.autoSwitch += nonLines.map(target => target.indexOf("switch") !== -1).reduce(add) / matches.length;
-                    subScores.autoScale += nonLines.map(target => target.indexOf("scale") !== -1).reduce(add) / matches.length;
-                } else if ((nonLines.length === 0) !== (mt.autoSuccess === "false")) {
-                    score += (+settings.querySelector("#auto-switch-crit ons-range").value) + (+settings.querySelector("#auto-scale-crit ons-range").value) / 10;
-                    subScores.auto += 0.2 / matches.length;
+                    for (let target of nonLines) {
+                        // so sketchy, relies on the fact that "scale" and "switch" both start with "s"
+                        score += +settings.querySelector(`#${autoMap[target]} ons-range`).value / getAverage("autoS"+target.slice(2));
+                        subScores.autoSwitch += target.indexOf("switch") !== -1;
+                        subScores.autoScale += target.indexOf("scale") !== -1;
+                    }
+                } else if ((nonLines.length === 0) !== (mt.autoSuccess === "false") ) {
+                    score += ((+settings.querySelector("#auto-switch-crit ons-range").value) + (+settings.querySelector("#auto-scale-crit ons-range").value)) / 10;
                 }
-                score += mt.teleopSwitch * (+settings.querySelector("#teleop-switch-crit ons-range").value) / 5;
+                score += mt.teleopSwitch * (+settings.querySelector("#teleop-switch-crit ons-range").value) / getAverage("teleopSwitch");
                 subScores.teleopSwitch += mt.teleopSwitch / matches.length;
-                score += mt.teleopScale * (+settings.querySelector("#teleop-scale-crit ons-range").value) / 5;
+                score += mt.teleopScale * (+settings.querySelector("#teleop-scale-crit ons-range").value) / getAverage("teleopScale");
                 subScores.teleopScale += mt.teleopScale / matches.length;
-                score += mt.teleopVault * (+settings.querySelector("#vault-crit ons-range").value) / 3;
+                score += mt.teleopVault * (+settings.querySelector("#vault-crit ons-range").value) / getAverage("vault");
                 subScores.vault += mt.teleopVault / matches.length;
                 subScores.endGame += +(mt.endGameSuccess === "true") / matches.length;
-                score += mt.endGameSuccess === "true" ? +settings.querySelector("#endgame-crit ons-range").value : 0;
+                score += (mt.endGameSuccess === "true" ? +settings.querySelector("#endgame-crit ons-range").value : 0) / getAverage("endGame");
                 totalScore += score * weight;
                 totalWeight += weight;
             }
@@ -413,7 +414,8 @@ document.addEventListener("show", function (event) {
             teamSubScores[number] = subScores;
         };
         var getAverage = function(s) {
-            return averageStats[s] / totalMatches;
+            // hack to prevent NaNs
+            return averageStats[s] === 0 ? 1e-50 : (averageStats[s] / totalMatches);
         };
         var addToAverages = function(team) {
             var matches = Object.values(team[currentEventKey()].match);
@@ -465,6 +467,7 @@ document.addEventListener("show", function (event) {
             }
             console.log(averageStats, teamSubScores, teamScores, subScoreRanks);
             var createTeamCard = function(team, rank, subScoreRanks) {
+                var DEAD_ZONE = 0.8; // if you are in bottom 80%, you are red, so the top 80% has more resolution
                 var subScoreColors = {};
                 var createColor = function(rank) {
                     var hsvGreen = {h: 1/3, s: 0.8796, v: 0.847},
@@ -474,9 +477,9 @@ document.addEventListener("show", function (event) {
                     // why hsv? because hsv interpolation is better than rgb
                     if (teamsWithData.length <= 1) return `background-color: black;`
                     let interp = (rank - 1) / (teamsWithData.length - 1), color;
-                    if (interp > 0.6) color = HSVtoRGB(hsvRed); // everything past 60% is red so we have better resolution on better teams
+                    if (interp > DEAD_ZONE) color = HSVtoRGB(hsvRed); // everything past 60% is red so we have better resolution on better teams
                     else {
-                        interp /= 0.6;
+                        interp /= DEAD_ZONE ;
                         let h, s, v;
                         if (interp < 0.5) {
                             h = (hsvGreen.h * (0.5 - interp) + hsvYellow.h * interp) * 2;
@@ -494,7 +497,6 @@ document.addEventListener("show", function (event) {
                 for (let key in subScoreRanks) {
                     subScoreColors[key] = createColor(subScoreRanks[key]);
                 };
-                console.log(subScoreColors);
                 return ons.createElement(`<ons-card>
                 <h3>${rank}. ${team.team_number} ${team.nickname}</h3>
                 <ons-row>
