@@ -355,7 +355,7 @@ document.addEventListener('init', function (event) {
                     ons.notification.toast('Successfully loaded teams', {
                         timeout: 1620,
                         buttonLabel: 'Dismiss',
-                        animation: 'Fall'
+                        animation: 'fall'
                     });
                 });
             }
