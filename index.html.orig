@@ -12,7 +12,6 @@
     <script src="main.js"></script>
     <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
     <link rel="stylesheet" href="res/main.css"/>
-    <link rel="manifest" href="manifest.json">
 </head>
 
 <body>
@@ -49,6 +48,21 @@
 <template id="teams.html">
     <ons-page id="rank-teams">
         <div id="teams-ranked">
+            <ons-card>
+                <h3>1. 1683 Techno Titans</h3>
+                <ons-row>
+                    <ons-col>Auto Switch <div class="indicator green"></div></ons-col>
+                    <ons-col>Auto Scale <div class="indicator green"></div></ons-col>
+                </ons-row>
+                <ons-row>                    
+                    <ons-col>Teleop Switch <div class="indicator green"></div></ons-col>
+                    <ons-col>Teleop Scale <div class="indicator green"></div></ons-col>
+                </ons-row>
+                <ons-row>
+                    <ons-col>Vault <div class="indicator green"></div></ons-col>
+                    <ons-col>End Game <div class="indicator green"></div></ons-col>
+                </ons-row>
+            </ons-card>
         </div>
     </ons-page>
 </template>
@@ -193,36 +207,36 @@
             </ons-toolbar>
             <div class = "pitTitle">
                 <h2 style = "font-size: x-small"><span id="team-name"></span></h2>
-    	    </div>
-            <form class="btns">
+            </div>
+            <form>
                 <div>
                     <h2 id = "driveTrainHeading" style = "margin-bottom: 0%; padding-bottom: 0%">Drive Train Type:</h2>
                     <div class="select-one" id="drivetrain-select">
-                        <ons-button modifier="large" data-select="tank">Tank</ons-button>
-                        <ons-button modifier="large" data-select="swerve">Swerve</ons-button>
-                        <ons-button modifier="large" data-select="mecanum">Mecanum</ons-button>
-                        <ons-button modifier="large" data-select="slide">Slide</ons-button>
-                        <ons-button modifier="large" data-select="holonomic">Holonomic</ons-button>
+                        <ons-button modifier="large" data-select="0">Tank</ons-button>
+                        <ons-button modifier="large" data-select="1">Swerve</ons-button>
+                        <ons-button modifier="large" data-select="2">Mecanum</ons-button>
+                        <ons-button modifier="large" data-select="3">Slide</ons-button>
+                        <ons-button modifier="large" data-select="4">Holonomic</ons-button>
                     </div>
                 </div>
                 <div class = "pitScout">
                     <h2>Focus:</h2><br />
                     <div class="select-many" id="focus">
-                        <ons-button modifier="large" data-select="0">Switch</ons-button>
-                        <ons-button modifier="large" data-select="1">Scale</ons-button>
-                        <ons-button modifier="large" data-select="2">Defense</ons-button>
+                        <ons-button modifier="large" data-select="switch">Switch</ons-button>
+                        <ons-button modifier="large" data-select="scale">Scale</ons-button>
+                        <ons-button modifier="large" data-select="defense">Defense</ons-button>
                     </div>
                 </div>
                 <div class = "pitScout">
                     <h2>Capabilities:</h2><br />
                     <div class = "CheckBoxPit select-many" id="capabilities">
-                        <ons-button modifier="large" data-select="0">Switch</ons-button>
-                        <ons-button modifier="large" data-select="1">Scale</ons-button>
+                        <ons-button modifier="large" data-select="switch">Switch</ons-button>
+                        <ons-button modifier="large" data-select="scale">Scale</ons-button>
                     </div>
-                    
-                    <div id = "insertHeight">
+
+                    <div id="insertHeight">
                         <h4>Robot's Max Lift Height:</h4>
-                        <ons-input type="number" id="heightInput" required min="0"></ons-input> 
+                        <ons-input type="number" id="heightInput" required min="0"></ons-input>
                         <h5>inches</h5>
                     </div>
                 </div>
@@ -272,15 +286,6 @@
         el.classList.toggle("active");
     }
 </script>
-<script>
-    // Check that service workers are registered
-    if ('serviceWorker' in navigator) {
-        console.log('sw thing');
-        // Use the window load event to keep the page load performant
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js');
-        });
-    }
-</script>
+
 </body>
 </html>
