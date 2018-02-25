@@ -441,7 +441,7 @@ document.addEventListener("show", function (event) {
                 // must be != (not !==) so that we check for undefined as well
                 return teamData[team.team_number] != null
                         && teamData[team.team_number][currentEventKey()] != null
-                        && teamData[team.team_number][currentEventKey()] != null;
+                        && teamData[team.team_number][currentEventKey()].match != null;
             }
             for (let team of teams) {
                 if (teamExists(team)) {
