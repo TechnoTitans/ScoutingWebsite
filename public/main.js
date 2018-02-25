@@ -226,7 +226,7 @@ document.addEventListener('init', function (event) {
             searchBar.onkeyup = function () {
                 page.querySelector("#teams-list").innerHTML = "";
                 var terms = this.value.toLowerCase().split(" ");
-                addTeams(allTeams, terms);
+                addTeams(allTeams, terms, page);
             };
         } else if (page.matches("#team-scout")) {
             console.log(page.data);
@@ -354,7 +354,8 @@ document.addEventListener('init', function (event) {
                 fetchTeams(homePage).then(function() {
                     ons.notification.toast('Successfully loaded teams', {
                         timeout: 1620,
-                        buttonLabel: 'Dismiss'
+                        buttonLabel: 'Dismiss',
+                        animation: 'Fall'
                     });
                 });
             }
