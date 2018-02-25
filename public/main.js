@@ -413,6 +413,7 @@ document.addEventListener('init', function (event) {
                         scales: {
                             xAxes: [{
                                 stacked: true,
+                                ticks: {autoSkip: false}
                             }],
                             yAxes: [{
                                 stacked: true,
