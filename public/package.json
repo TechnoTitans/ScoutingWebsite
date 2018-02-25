@@ -18,8 +18,11 @@
   "homepage": "https://github.com/TechnoTitans/ScoutingWebsite#readme",
   "dependencies": {
     "axios": "^0.17.1",
+    "chart.js": "^2.7.1",
+    "chartjs": "^0.3.24",
     "express": "^4.16.2",
     "font-awesome-animation": "^0.2.0",
-    "onsenui": "^2.9.2"
+    "onsenui": "^2.9.2",
+    "workbox-sw": "^2.1.2"
   }
 }

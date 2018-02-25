@@ -415,7 +415,9 @@ document.addEventListener('init', function (event) {
                                 stacked: true,
                             }],
                             yAxes: [{
-                                stacked: true
+                                stacked: true,
+                                ticks: {min: 0, max: matches.length, stepSize: 1},
+                                scaleLabel: {display: true, labelString: "Number of Matches"}
                             }]
                         }
                     }
