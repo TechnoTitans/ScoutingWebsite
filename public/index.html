@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="node_modules/font-awesome-animation/dist/font-awesome-animation.min.css">
     <script src="node_modules/axios/dist/axios.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/4.9.1/firebase.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
     <script src="main.js"></script>
     <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
     <link rel="stylesheet" href="res/main.css"/>
@@ -43,6 +44,22 @@
                 }
             });
         </script>
+    </ons-page>
+</template>
+
+<template id="inspect-team-data.html">
+    <ons-page id="inspect-team-data">
+        <ons-toolbar>
+            <div class="left"><ons-back-button>All Teams</ons-back-button></div>
+            <div class="center">Team <span id="team-num"></span></div>
+        </ons-toolbar>
+        <div style="text-align:center; padding: 5px;">
+            <h1 id="team-name"></h2>
+            <div id="autostats">
+                <h2>Autonomous</h2>
+                <canvas id="autochart"></canvas>
+            </div>
+        </div>
     </ons-page>
 </template>
 
@@ -274,13 +291,13 @@
 </script>
 <script>
     // Check that service workers are registered
-    if ('serviceWorker' in navigator) {
-        console.log('sw thing');
+    //if ('serviceWorker' in navigator) {
+    //    console.log('sw thing');
         // Use the window load event to keep the page load performant
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js');
-        });
-    }
+    //    window.addEventListener('load', () => {
+    //        navigator.serviceWorker.register('sw.js');
+    //    });
+    //s}
 </script>
 </body>
 </html>

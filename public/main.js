@@ -359,6 +359,68 @@ document.addEventListener('init', function (event) {
                     });
                 });
             }
+        } else if (page.matches("#inspect-team-data")) {
+            var data = page.data, team = data.team;
+            page.querySelector("#team-num").innerHTML = team.team_number;
+            page.querySelector("#team-name").innerHTML = team.nickname;
+            page.querySelectorAll("canvas").forEach(canvas => {
+                canvas.height = canvas.width = Math.min(300, window.innerWidth - 20);
+            });
+            let autoData = {sswitch: [0, 0], sscale: [0, 0], cswitch: [0, 0], cscale: [0, 0], dline: [0, 0]};
+            var matches = Object.values(data.teamData[team.team_number][currentEventKey()].match); // should always exist
+            for (let match of matches) {
+                let targets = match.autoTarget.split(",").filter(x => x !== "");
+                for (let target of targets) {
+                    autoData[target][1]++;
+                    if (match.autoSuccess === "true") autoData[target][0]++;
+                }
+                if (targets.length === 0) autoData.dline[1]++; // failed to drive over line
+            }
+            let autoConfig = {
+                    type: 'bar',
+                    data: {
+                        datasets: [{
+                            data: [
+                                autoData.sswitch[0], autoData.cswitch[0], autoData.sscale[0], autoData.cscale[0], autoData.dline[0]
+                            ],
+                            backgroundColor: "green",
+                            label: 'Successful autos'
+                        }, {
+                            data: [
+                                autoData.sswitch[1], autoData.cswitch[1], autoData.sscale[1], autoData.cscale[1], autoData.dline[1]
+                            ],
+                            backgroundColor: "rgba(0, 255, 0, 0.5)",
+                            label: 'Failed autos'
+                        }],
+                        labels: [
+                            "Same-side switch",
+                            "Cross-side switch",
+                            "Same-side scale",
+                            "Cross-side scale",
+                            "Across the line"
+                        ]
+                    },
+                    options: {
+                        title:{
+                            display: false,
+                            text: "Autonomous"
+                        },
+                        tooltips: {
+                            mode: 'index',
+                            intersect: true
+                        },
+                        responsive: true,
+                        scales: {
+                            xAxes: [{
+                                stacked: true,
+                            }],
+                            yAxes: [{
+                                stacked: true
+                            }]
+                        }
+                    }
+                };
+            let myPie = new Chart(page.querySelector("#autochart").getContext("2d"), autoConfig);
         }
 });
 
@@ -498,7 +560,7 @@ document.addEventListener("show", function (event) {
                 for (let key in subScoreRanks) {
                     subScoreColors[key] = createColor(subScoreRanks[key]);
                 };
-                return ons.createElement(`<ons-card>
+                var elem = ons.createElement(`<ons-card>
                 <h3>${rank}. ${team.team_number} ${team.nickname}</h3>
                 <ons-row>
                     <ons-col>Auto Switch <div class="indicator" style="${subScoreColors.autoSwitch}"></div></ons-col>
@@ -512,7 +574,13 @@ document.addEventListener("show", function (event) {
                     <ons-col>Vault <div class="indicator" style="${subScoreColors.vault}"></div></ons-col>
                     <ons-col>End Game <div class="indicator" style="${subScoreColors.endGame}"></div></ons-col>
                 </ons-row>
-            </ons-card>`);
+                </ons-card>`);
+                elem.onclick = function() {
+                    document.getElementById("appNavigator").pushPage("inspect-team-data.html", {
+                        data: {averageStats, teamSubScores, teamScores, subScoreRanks, team, teamData}
+                    });
+                };
+                return elem;
             };
             var ranks = page.querySelector("#teams-ranked");
             ranks.innerHTML = "";
