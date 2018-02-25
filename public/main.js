@@ -215,150 +215,150 @@ var fetchTeams = function (page) {
 
 
 document.addEventListener('init', function (event) {
-    console.log("Init", event.target.id);
-    var page = event.target;
-    // this.querySelector('ons-toolbar div.center').textContent = this.data.title;
-    if (page.matches("#home")) {
+        console.log("Init", event.target.id);
+        var page = event.target;
         // this.querySelector('ons-toolbar div.center').textContent = this.data.title;
-        fetchTeams(page);
-        // pullHook.onaction = fetchTeams;
-        var searchBar = page.querySelector("ons-search-input");
-        searchBar.onkeyup = function () {
-            page.querySelector("#teams-list").innerHTML = "";
-            var terms = this.value.toLowerCase().split(" ");
-            addTeams(allTeams, terms);
-        };
-    } else if (page.matches("#team-scout")) {
-        console.log(page.data);
-        var teamNum = page.data.num;
-        var teamObj = getTeamByNumber(teamNum);
-        if (!teamObj) {
-            alert("Could not find team"); // should never happen anyway
-            return;
-        }
-        page.querySelector("#team-title").innerHTML = `${teamObj.nickname}`
-            + `<div style="color: #4c6ef5; padding-left: 0.2em;"><i class="fas fa-circle" style="visibility: hidden;" id="prev-data-icon"></i></div>`;
-        var buttons = page.querySelectorAll("ons-card");
+        if (page.matches("#home")) {
+            // this.querySelector('ons-toolbar div.center').textContent = this.data.title;
+            fetchTeams(page);
+            // pullHook.onaction = fetchTeams;
+            var searchBar = page.querySelector("ons-search-input");
+            searchBar.onkeyup = function () {
+                page.querySelector("#teams-list").innerHTML = "";
+                var terms = this.value.toLowerCase().split(" ");
+                addTeams(allTeams, terms);
+            };
+        } else if (page.matches("#team-scout")) {
+            console.log(page.data);
+            var teamNum = page.data.num;
+            var teamObj = getTeamByNumber(teamNum);
+            if (!teamObj) {
+                alert("Could not find team"); // should never happen anyway
+                return;
+            }
+            page.querySelector("#team-title").innerHTML = `${teamObj.nickname}`
+                + `<div style="color: #4c6ef5; padding-left: 0.2em;"><i class="fas fa-circle" style="visibility: hidden;" id="prev-data-icon"></i></div>`;
+            var buttons = page.querySelectorAll("ons-card");
 
-        // give indication of previous data
-        if (teamHasData(teamNum)) {
-            console.log('team has data');
-            page.querySelector("#prev-data-icon").style.visibility = "visible";
-        }
-        for (let button of buttons) {
-            button.onclick = function () {
-                document.getElementById("appNavigator").pushPage(`${this.id}-scout.html`, {data: {team: teamObj}});
+            // give indication of previous data
+            if (teamHasData(teamNum)) {
+                console.log('team has data');
+                page.querySelector("#prev-data-icon").style.visibility = "visible";
+            }
+            for (let button of buttons) {
+                button.onclick = function () {
+                    document.getElementById("appNavigator").pushPage(`${this.id}-scout.html`, {data: {team: teamObj}});
+                }
+            }
+        } else if (page.matches("#match-scout")) {
+            var team = page.data.team;
+            page.querySelector("#team-num").innerHTML = team.team_number;
+            page.querySelector("#team-name").innerHTML = team.nickname;
+            // autonomous
+            //page.querySelector("#team-title").innerHTML = team.nickname;
+            var target = -1, success = false, chosen = null;
+            //var enableButtons = function(btnContainer, enabled) {
+            //    var btns = btnCoontainer.querySelectorAll("ons-button");
+            //    for (let button of btns) {
+            //        button.disabled = !enabled;
+            //        if (button.classList.contains("chosen") && !enabled) button.classList.remove("chosen");
+            //    }
+            //    if (!enabled) btnContainer.dataset.chosen = "";
+            //};
+            //createSelectMenu(targetBtnsContainer, chosen => enableButtons(resultBtnsContainer, chosen != null));
+            //createSelectMenu(resultBtnsContainer);
+            makeSuccessFailureMenu(page.querySelector("#auto-target"), page.querySelector("#auto-target-result"), true);
+            makeSuccessFailureMenu(page.querySelector("#end-game-menu"), page.querySelector("#end-game-result"), false);
+            page.querySelectorAll("p").forEach(p => createNumInput(p));
+            var submitted = false;
+            page.querySelector("form").onsubmit = function (e) {
+                e.preventDefault();
+                if (submitted) return false;
+                submitted = true;
+                var data = {};
+                data.autoTarget = page.querySelector("#auto-target").dataset.selected;
+                data.autoSuccess = page.querySelector("#auto-target-result").dataset.selected;
+                data.teleopSwitch = parseInt(page.querySelector("#teleop-switch ons-input").value, 10);
+                data.teleopScale = parseInt(page.querySelector("#teleop-scale ons-input").value, 10);
+                data.teleopVault = parseInt(page.querySelector("#teleop-vault ons-input").value, 10);
+                data.endGame = page.querySelector("#end-game-menu").dataset.selected;
+                data.endGameSuccess = page.querySelector("#end-game-result").dataset.selected;
+                data.comments = page.querySelector("textarea").value;
+                data.timestamp = Date.now(); // just for fun idk
+                data.teamName = team.nickname.trim();
+                data.teamNum = team.team_number;
+                data.eventKey = currentEventKey();
+                var btn = this.querySelector("#submit-match");
+                btn.style.width = btn.offsetWidth + "px"; // keep width fixed
+                btn.querySelector("#submit-load").style.display = "initial";
+                btn.querySelector("#submit-text").style.display = "none";
+                writeScoutingData(data, false).then(() => {
+                    btn.querySelector("#submit-load").style.display = "none";
+                    btn.querySelector("#submit-done").style.display = "initial";
+                    btn.style.backgroundColor = "green";
+                });
+                return false;
+            };
+        } else if (page.matches("#pit-scout")) {
+            var team = page.data.team;
+            page.querySelector("#team-num").innerHTML = team.team_number;
+            page.querySelector("#team-name").innerHTML = team.nickname;
+            page.querySelectorAll(".select-one").forEach(x => createSelectMenu(x));
+            page.querySelectorAll(".select-many").forEach(x => createSelectCheckboxMenu(x));
+            page.querySelector("form").onsubmit = function (e) {
+                e.preventDefault();
+                if (submitted) return false;
+                submitted = true;
+                var data = {};
+                data.teamName = team.nickname.trim();
+                data.teamNum = team.team_number;
+                data.eventKey = currentEventKey();
+                data.driveTrain = page.querySelector("#drivetrain-select").dataset.selected;
+                data.focus = page.querySelector("#focus").dataset.selected;
+                data.capabilities = page.querySelector("#capabilities").dataset.selected;
+                data.maxLiftHeight = parseInt(page.querySelector("#heightInput").value);
+                data.comment = page.querySelector("#more-comments").value;
+                data.endGameStrategy = page.querySelector("#endgame-strategy").dataset.selected;
+                var btn = this.querySelector("#submit-pit");
+
+                writeScoutingData(data, true).then(() => {
+                    btn.querySelector("#submit-load").style.display = "none";
+                    btn.querySelector("#submit-done").style.display = "initial";
+                    btn.style.backgroundColor = "green";
+                });
+            }
+        } else if (page.matches("#settingsPage")) {
+            page.querySelectorAll("#rank-criteria p").forEach(function (p) {
+                var range = p.querySelector("ons-range");
+                range.oninput = range.onchange = function () {
+                    teamDataDirty = true;
+                    p.querySelector("span").innerHTML = this.value;
+                };
+                p.querySelector("span").innerHTML = range.value;
+                p.querySelector("ons-button").onclick = function () {
+                    page.querySelectorAll("#rank-criteria p").forEach(function (x) {
+                        var r = x.querySelector("ons-range");
+                        if (x !== p) r.value = 0;
+                        else r.value = 100;
+                        r.onchange();
+                    });
+                };
+            });
+            var tournamentCode = page.querySelector("#tournament");
+            tournamentCode.onchange = function (event) {
+                console.log(event.target.value);
+                eventCode = eventCodes[event.target.value];
+                teamListDirty = teamDataDirty = true;
+                var homePage = document.querySelector("#home");
+                homePage.querySelector("#loading").display = "block";
+                fetchTeams(homePage).then(function() {
+                    ons.notification.toast('Successfully loaded teams', {
+                        timeout: 1620,
+                        buttonLabel: 'Dismiss'
+                    });
+                });
             }
         }
-    } else if (page.matches("#match-scout")) {
-        var team = page.data.team;
-        page.querySelector("#team-num").innerHTML = team.team_number;
-        page.querySelector("#team-name").innerHTML = team.nickname;
-        // autonomous
-        //page.querySelector("#team-title").innerHTML = team.nickname;
-        var target = -1, success = false, chosen = null;
-        //var enableButtons = function(btnContainer, enabled) {
-        //    var btns = btnCoontainer.querySelectorAll("ons-button");
-        //    for (let button of btns) {
-        //        button.disabled = !enabled;
-        //        if (button.classList.contains("chosen") && !enabled) button.classList.remove("chosen");
-        //    }
-        //    if (!enabled) btnContainer.dataset.chosen = "";
-        //};
-        //createSelectMenu(targetBtnsContainer, chosen => enableButtons(resultBtnsContainer, chosen != null));
-        //createSelectMenu(resultBtnsContainer);
-        makeSuccessFailureMenu(page.querySelector("#auto-target"), page.querySelector("#auto-target-result"), true);
-        makeSuccessFailureMenu(page.querySelector("#end-game-menu"), page.querySelector("#end-game-result"), false);
-        page.querySelectorAll("p").forEach(p => createNumInput(p));
-        var submitted = false;
-        page.querySelector("form").onsubmit = function (e) {
-            e.preventDefault();
-            if (submitted) return false;
-            submitted = true;
-            var data = {};
-            data.autoTarget = page.querySelector("#auto-target").dataset.selected;
-            data.autoSuccess = page.querySelector("#auto-target-result").dataset.selected;
-            data.teleopSwitch = parseInt(page.querySelector("#teleop-switch ons-input").value, 10);
-            data.teleopScale = parseInt(page.querySelector("#teleop-scale ons-input").value, 10);
-            data.teleopVault = parseInt(page.querySelector("#teleop-vault ons-input").value, 10);
-            data.endGame = page.querySelector("#end-game-menu").dataset.selected;
-            data.endGameSuccess = page.querySelector("#end-game-result").dataset.selected;
-            data.comments = page.querySelector("textarea").value;
-            data.timestamp = Date.now(); // just for fun idk
-            data.teamName = team.nickname.trim();
-            data.teamNum = team.team_number;
-            data.eventKey = currentEventKey();
-            var btn = this.querySelector("#submit-match");
-            btn.style.width = btn.offsetWidth + "px"; // keep width fixed
-            btn.querySelector("#submit-load").style.display = "initial";
-            btn.querySelector("#submit-text").style.display = "none";
-            writeScoutingData(data, false).then(() => {
-                btn.querySelector("#submit-load").style.display = "none";
-                btn.querySelector("#submit-done").style.display = "initial";
-                btn.style.backgroundColor = "green";
-            });
-            return false;
-        };
-    } else if (page.matches("#pit-scout")) {
-        var team = page.data.team;
-        page.querySelector("#team-num").innerHTML = team.team_number;
-        page.querySelector("#team-name").innerHTML = team.nickname;
-        page.querySelectorAll(".select-one").forEach(x => createSelectMenu(x));
-        page.querySelectorAll(".select-many").forEach(x => createSelectCheckboxMenu(x));
-        page.querySelector("form").onsubmit = function (e) {
-            e.preventDefault();
-            if (submitted) return false;
-            submitted = true;
-            var data = {};
-            data.teamName = team.nickname.trim();
-            data.teamNum = team.team_number;
-            data.eventKey = currentEventKey();
-            data.driveTrain = page.querySelector("#drivetrain-select").dataset.selected;
-            data.focus = page.querySelector("#focus").dataset.selected;
-            data.capabilities = page.querySelector("#capabilities").dataset.selected;
-            data.maxLiftHeight = parseInt(page.querySelector("#heightInput").value);
-            data.comment = page.querySelector("#more-comments").value;
-            data.endGameStrategy = page.querySelector("#endgame-strategy").dataset.selected;
-            var btn = this.querySelector("#submit-pit");
-
-            writeScoutingData(data, true).then(() => {
-                btn.querySelector("#submit-load").style.display = "none";
-                btn.querySelector("#submit-done").style.display = "initial";
-                btn.style.backgroundColor = "green";
-            });
-        }
-    } else if (page.matches("#settingsPage")) {
-        page.querySelectorAll("#rank-criteria p").forEach(function (p) {
-            var range = p.querySelector("ons-range");
-            range.oninput = range.onchange = function () {
-                teamDataDirty = true;
-                p.querySelector("span").innerHTML = this.value;
-            };
-            p.querySelector("span").innerHTML = range.value;
-            p.querySelector("ons-button").onclick = function () {
-                page.querySelectorAll("#rank-criteria p").forEach(function (x) {
-                    var r = x.querySelector("ons-range");
-                    if (x !== p) r.value = 0;
-                    else r.value = 100;
-                    r.onchange();
-                });
-            };
-        });
-        var tournamentCode = page.querySelector("#tournament");
-        tournamentCode.onchange = function (event) {
-            console.log(event.target.value);
-            eventCode = eventCodes[event.target.value];
-            teamListDirty = teamDataDirty = true;
-            var homePage = document.querySelector("#home");
-            homePage.querySelector("#loading").display = "block";
-            fetchTeams(homePage).then(function() {
-                ons.notification.toast('Successfully loaded teams', {
-                    timeout: 1620,
-                    buttonLabel: 'Dismiss'
-                });
-            });
-        }
-    }
 });
 
 document.addEventListener("show", function (event) {
@@ -383,12 +383,12 @@ document.addEventListener("show", function (event) {
             var autoMap = {"sscale": "auto-scale-crit", "cscale": "auto-scale-crit", "sswitch": "auto-switch-crit", "cswitch": "auto-switch-crit"};
             var expWeight = -parseInt(settings.querySelector("#bias-crit ons-range").value) / 250;
             var totalScore = 0, totalWeight = 0;
-            var subScores = {autoSwitch: 0, autoScale: 0, teleopSwitch: 0, teleopScale: 0, endGame: 0, vault: 0};
+            var subScores = {autoSwitch: 0, autoScale: 0, teleopSwitch: 0, teleopScale: 0, endGame: 0, vault: 0};      
             for (let i = 0; i < matches.length; ++i) {
                 let weight = Math.exp(expWeight * i);
                 let mt = matches[i];
                 let score = 0;
-                let nonLines = mt.autoTarget.split(",").filter(x => x !== "dline");
+                let nonLines = mt.autoTarget.split(",").filter(x => x !== "dline"); 
                 if (mt.autoSuccess === "true" && nonLines.length > 0) {
                     for (let target of nonLines) {
                         // so sketchy, relies on the fact that "scale" and "switch" both start with "s"
@@ -439,8 +439,8 @@ document.addEventListener("show", function (event) {
             var teamExists = function(team) {
                 // must be != (not !==) so that we check for undefined as well
                 return teamData[team.team_number] != null
-                    && teamData[team.team_number][currentEventKey()] != null
-                    && teamData[team.team_number][currentEventKey()] != null;
+                        && teamData[team.team_number][currentEventKey()] != null
+                        && teamData[team.team_number][currentEventKey()] != null;
             }
             for (let team of teams) {
                 if (teamExists(team)) {
@@ -492,7 +492,7 @@ document.addEventListener("show", function (event) {
                         }
                         color = HSVtoRGB(h, s, v);
                     }
-                    return `background-color: rgb(${color.r}, ${color.g}, ${color.b});`;
+                    return `background-color: rgb(${color.r}, ${color.g}, ${color.b});`;                
                 };
                 for (let key in subScoreRanks) {
                     subScoreColors[key] = createColor(subScoreRanks[key]);
