@@ -371,8 +371,8 @@ document.addEventListener('init', function (event) {
             for (let match of matches) {
                 let targets = match.autoTarget.split(",").filter(x => x !== "");
                 for (let target of targets) {
-                    autoData[target][1]++;
                     if (match.autoSuccess === "true") autoData[target][0]++;
+                    else autoData[target][1]++;
                 }
                 if (targets.length === 0) autoData.dline[1]++; // failed to drive over line
             }
