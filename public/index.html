@@ -10,6 +10,7 @@
     <script src="node_modules/axios/dist/axios.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/4.9.1/firebase.js"></script>
     <script src="node_modules/chart.js/dist/Chart.min.js"></script>
+    <script src="node_modules/chartjs-chart-box-and-violin-plot/build/Chart.BoxPlot.js"></script>
     <script src="main.js"></script>
     <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
     <link rel="stylesheet" href="res/main.css"/>
@@ -58,6 +59,11 @@
             <div id="autostats">
                 <h2>Autonomous</h2>
                 <canvas id="autochart"></canvas>
+            </div>
+            <hr />
+            <div id="teleopstats">
+                <h2>Teleop</h2>
+                <canvas id="teleopchart"></canvas>
             </div>
         </div>
     </ons-page>

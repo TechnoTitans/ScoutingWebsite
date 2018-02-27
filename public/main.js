@@ -368,6 +368,7 @@ document.addEventListener('init', function (event) {
             });
             let autoData = {sswitch: [0, 0], sscale: [0, 0], cswitch: [0, 0], cscale: [0, 0], dline: [0, 0]};
             var matches = Object.values(data.teamData[team.team_number][currentEventKey()].match); // should always exist
+            matches.sort((x, y) => y.timestamp - x.timestamp);
             for (let match of matches) {
                 let targets = match.autoTarget.split(",").filter(x => x !== "");
                 for (let target of targets) {
@@ -423,7 +424,47 @@ document.addEventListener('init', function (event) {
                         }
                     }
                 };
-            let myPie = new Chart(page.querySelector("#autochart").getContext("2d"), autoConfig);
+            let autoChart = new Chart(page.querySelector("#autochart").getContext("2d"), autoConfig);
+            let teleopData = {switch: [], scale: [], vault: []};
+            for (let match of matches) {
+                teleopData.switch.push(match.teleopSwitch);
+                teleopData.scale.push(match.teleopScale);
+                teleopData.vault.push(match.teleopVault);
+            }
+            let boxplotData = {
+                labels: ["Switch", "Scale", "Vault"],
+                datasets: [{
+                    label: "Teleop",
+                    backgroundColor: "rgba(0, 0, 255, 0.7)",
+                    data: [teleopData.switch, teleopData.scale, teleopData.vault],
+                    padding: 10,
+                    itemBackgroundColor: "rgb(255, 0, 0)"
+                }]
+            };
+            console.log("Box plot", boxplotData);
+            new Chart(page.querySelector("#teleopchart"), {
+                type: 'boxplot',
+                data: boxplotData,
+                options: {
+                    responsive: true,
+                    legend: {
+                        display: false,
+                    },
+                    title: {
+                        display: true,
+                        text: 'Teleop scores'
+                    },
+                    scales: {
+                        yAxes: [{
+                            display: true,
+                            ticks: {
+                                beginAtZero: true,
+                                step: 1
+                            }
+                        }]
+                    }
+                }
+            });
         }
 });
 
