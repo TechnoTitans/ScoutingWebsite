@@ -11,21 +11,37 @@
     <script src="https://www.gstatic.com/firebasejs/4.9.1/firebase.js"></script>
     <script src="node_modules/chart.js/dist/Chart.min.js"></script>
     <script src="node_modules/chartjs-chart-box-and-violin-plot/build/Chart.BoxPlot.js"></script>
+    <script src="https://cdn.auth0.com/js/auth0/9.2.2/auth0.min.js"></script>
     <script src="main.js"></script>
     <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
     <link rel="stylesheet" href="res/main.css"/>
-    <link rel="manifest" href="manifest.json">
+    <!--<link rel="manifest" href="manifest.json">-->
 </head>
 
 <body>
 <ons-navigator id="appNavigator" swipeable swipe-target-width="80px">
-    <ons-page>
+    <ons-page id="tabbarPage">
         <ons-splitter id="appSplitter">
-            <ons-splitter-content page="tabbar.html"></ons-splitter-content>
+            <ons-splitter-content page="login.html"></ons-splitter-content>
         </ons-splitter>
     </ons-page>
 </ons-navigator>
 
+<template id="login.html">
+    <div style="text-align: center; margin-top: 30px;">
+        <form>
+            <p>
+                <ons-input id="username" modifier="underbar" placeholder="Username" float></ons-input>
+            </p>
+            <p>
+                <ons-input id="password" modifier="underbar" type="password" placeholder="Password" float></ons-input>
+            </p>
+            <p style="margin-top: 30px;">
+                <ons-button onclick="login()">Sign in</ons-button>
+            </p>
+        </form>
+    </div>
+</template>
 
 <template id="tabbar.html">
     <ons-page id="tabbar-page">
@@ -55,7 +71,7 @@
             <div class="center">Team <span id="team-num"></span></div>
         </ons-toolbar>
         <div style="text-align:center; padding: 5px;">
-            <h1 id="team-name"></h2>
+            <h1 id="team-name"></h1>
             <div id="autostats">
                 <h2>Autonomous</h2>
                 <canvas id="autochart"></canvas>
@@ -267,6 +283,16 @@
         </ons-page>
     </template>
 
+<template id="pic-scout.html">
+    <ons-page id="pic-scout" class="scout-page">
+        <ons-toolbar>
+            <div class="left"><ons-back-button></ons-back-button></div>
+            <div class="center" id="team-title">Team <span id="team-num"></span> Add a Picture to the team</div>
+        </ons-toolbar>
+        <forms>
+        </forms>
+    </ons-page>
+</template>
 
 <script>
     window.fn = {};
@@ -293,7 +319,9 @@
     };
     window.fn.toggle = function (el) {
         el.classList.toggle("active");
-    }
+    };
+
+
 </script>
 <script>
     // Check that service workers are registered
@@ -304,6 +332,20 @@
     //        navigator.serviceWorker.register('sw.js');
     //    });
     //s}
+</script>
+<script>
+
+    var login = function () {
+        var username = document.getElementById('username').value;
+        var password = document.getElementById('password').value;
+
+        if ((username === 'frc@technotitans.org' && password === 'technotitans1111') || (username === 'tt' || password === 'sunnyisahoe')) {
+            document.getElementById('appNavigator').pushPage('tabbar.html');
+        } else {
+            ons.notification.alert('Please kindly relocate yourself out of this app.');
+        }
+    };
+
 </script>
 </body>
 </html>

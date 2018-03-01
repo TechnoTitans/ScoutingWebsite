@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/TechnoTitans/ScoutingWebsite#readme",
   "dependencies": {
+    "auth0-js": "^9.3.0",
     "axios": "^0.17.1",
     "chart.js": "^2.7.1",
     "chartjs": "^0.3.24",
