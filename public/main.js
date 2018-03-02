@@ -240,6 +240,11 @@ var fetchTeams = function (page) {
 document.addEventListener('init', function (event) {
     console.log("Init", event.target.id);
     var page = event.target;
+
+    if (page.matches("#login")) {
+        window.fn.checkForPrevAuth();
+    }
+
     // this.querySelector('ons-toolbar div.center').textContent = this.data.title;
     if (page.matches("#home")) {
         // this.querySelector('ons-toolbar div.center').textContent = this.data.title;

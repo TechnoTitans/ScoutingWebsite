@@ -157,3 +157,7 @@ ons-splitter-side[animation=overlay] {
 .indicator.green {
     background-color: #1ad81a;
 }
+
+#login p {
+    margin-top: 0.8em;
+}

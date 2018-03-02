@@ -28,19 +28,21 @@
 </ons-navigator>
 
 <template id="login.html">
-    <div style="text-align: center; margin-top: 30px;">
-        <form>
-            <p>
-                <ons-input id="username" modifier="underbar" placeholder="Username" float></ons-input>
-            </p>
-            <p>
-                <ons-input id="password" modifier="underbar" type="password" placeholder="Password" float></ons-input>
-            </p>
-            <p style="margin-top: 30px;">
-                <ons-button onclick="login()">Sign in</ons-button>
-            </p>
-        </form>
-    </div>
+    <ons-page id="login">
+        <div style="text-align: center; margin-top: 30px;">
+            <form>
+                <p>
+                    <ons-input id="username" modifier="underbar" placeholder="Username" float></ons-input>
+                </p>
+                <p>
+                    <ons-input id="password" modifier="underbar" type="password" placeholder="Password" float></ons-input>
+                </p>
+                <p style="margin-top: 30px;">
+                    <ons-button onclick="login()">Sign in</ons-button>
+                </p>
+            </form>
+        </div>
+    </ons-page>
 </template>
 
 <template id="tabbar.html">
@@ -321,6 +323,12 @@
         el.classList.toggle("active");
     };
 
+    window.fn.checkForPrevAuth = function () {
+
+        if (localStorage.auth === "1") {
+            document.getElementById('appNavigator').pushPage('tabbar.html');
+        }
+    };
 
 </script>
 <script>
@@ -339,8 +347,11 @@
         var username = document.getElementById('username').value;
         var password = document.getElementById('password').value;
 
-        if ((username === 'frc@technotitans.org' && password === 'technotitans1111') || (username === 'tt' || password === 'sunnyisahoe')) {
+        if (!username || !password) {
+            // do nothing
+        } else if ((username === 'frc@technotitans.org' && password === 'technotitans1111') || (username === 'tt' && password === 'sunnyisahoe')) {
             document.getElementById('appNavigator').pushPage('tabbar.html');
+            localStorage.auth = "1"; // added security
         } else {
             ons.notification.alert('Please kindly relocate yourself out of this app.');
         }
