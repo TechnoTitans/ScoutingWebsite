@@ -23,6 +23,7 @@
     "chartjs": "^0.3.24",
     "chartjs-chart-box-and-violin-plot": "^1.0.0",
     "express": "^4.16.2",
+    "firebaseui": "^2.6.2",
     "font-awesome-animation": "^0.2.0",
     "onsenui": "^2.9.2",
     "workbox-sw": "^2.1.2"
