@@ -9,21 +9,32 @@
     <link rel="stylesheet" href="node_modules/font-awesome-animation/dist/font-awesome-animation.min.css">
     <script src="node_modules/axios/dist/axios.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/4.9.1/firebase.js"></script>
+    <script src="node_modules/chart.js/dist/Chart.min.js"></script>
+    <script src="node_modules/chartjs-chart-box-and-violin-plot/build/Chart.BoxPlot.js"></script>
+    <!-- <script src="https://cdn.auth0.com/js/auth0/9.2.2/auth0.min.js"></script> -->
+    <script src="node_modules/firebaseui/dist/firebaseui.js"></script>
+    <link type="text/css" rel="stylesheet" href="node_modules/firebaseui/dist/firebaseui.css" />
     <script src="main.js"></script>
     <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
     <link rel="stylesheet" href="res/main.css"/>
-    <link rel="manifest" href="manifest.json">
+    <!--<link rel="manifest" href="manifest.json">-->
 </head>
 
 <body>
 <ons-navigator id="appNavigator" swipeable swipe-target-width="80px">
-    <ons-page>
+    <ons-page id="tabbarPage">
         <ons-splitter id="appSplitter">
-            <ons-splitter-content page="tabbar.html"></ons-splitter-content>
+            <ons-splitter-content page="login.html"></ons-splitter-content>
         </ons-splitter>
     </ons-page>
 </ons-navigator>
 
+<template id="login.html">
+    <ons-page id="login">
+        <div style="text-align: center; margin-top: 30px;" id="firebaseui-auth-container">
+        </div>
+    </ons-page>
+</template>
 
 <template id="tabbar.html">
     <ons-page id="tabbar-page">
@@ -43,6 +54,27 @@
                 }
             });
         </script>
+    </ons-page>
+</template>
+
+<template id="inspect-team-data.html">
+    <ons-page id="inspect-team-data">
+        <ons-toolbar>
+            <div class="left"><ons-back-button>All Teams</ons-back-button></div>
+            <div class="center">Team <span id="team-num"></span></div>
+        </ons-toolbar>
+        <div style="text-align:center; padding: 5px;">
+            <h1 id="team-name"></h1>
+            <div id="autostats">
+                <h2>Autonomous</h2>
+                <canvas id="autochart"></canvas>
+            </div>
+            <hr />
+            <div id="teleopstats">
+                <h2>Teleop</h2>
+                <canvas id="teleopchart"></canvas>
+            </div>
+        </div>
     </ons-page>
 </template>
 
@@ -135,8 +167,8 @@
                     <ons-button modifier="large" data-select="dline">Drive across line</ons-button>
                 </div>
                 <div id="auto-target-result" class="btn-select-menu">
-                    <ons-button disabled data-select="1">Success</ons-button>
-                    <ons-button disabled data-select="0">Failure</ons-button>
+                    <ons-button disabled data-select="true">Success</ons-button>
+                    <ons-button disabled data-select="false">Failure</ons-button>
                 </div>
             </div>
             <hr />
@@ -193,16 +225,16 @@
             </ons-toolbar>
             <div class = "pitTitle">
                 <h2 style = "font-size: x-small"><span id="team-name"></span></h2>
-            </div>
-            <form>
+    	    </div>
+            <form class="btns">
                 <div>
                     <h2 id = "driveTrainHeading" style = "margin-bottom: 0%; padding-bottom: 0%">Drive Train Type:</h2>
                     <div class="select-one" id="drivetrain-select">
-                        <ons-button modifier="large" data-select="0">Tank</ons-button>
-                        <ons-button modifier="large" data-select="1">Swerve</ons-button>
-                        <ons-button modifier="large" data-select="2">Mecanum</ons-button>
-                        <ons-button modifier="large" data-select="3">Slide</ons-button>
-                        <ons-button modifier="large" data-select="4">Holonomic</ons-button>
+                        <ons-button modifier="large" data-select="tank">Tank</ons-button>
+                        <ons-button modifier="large" data-select="swerve">Swerve</ons-button>
+                        <ons-button modifier="large" data-select="mecanum">Mecanum</ons-button>
+                        <ons-button modifier="large" data-select="slide">Slide</ons-button>
+                        <ons-button modifier="large" data-select="holonomic">Holonomic</ons-button>
                     </div>
                 </div>
                 <div class = "pitScout">
@@ -219,10 +251,10 @@
                         <ons-button modifier="large" data-select="0">Switch</ons-button>
                         <ons-button modifier="large" data-select="1">Scale</ons-button>
                     </div>
-
-                    <div id="insertHeight">
+                    
+                    <div id = "insertHeight">
                         <h4>Robot's Max Lift Height:</h4>
-                        <ons-input type="number" id="heightInput" required></ons-input>
+                        <ons-input type="number" id="heightInput" required min="0"></ons-input> 
                         <h5>inches</h5>
                     </div>
                 </div>
@@ -230,8 +262,8 @@
                 <div class="pitScout" style = "margin-top:10%">
                     <h2 style="margin-top: 4%" >End Game Strategy:</h2>
                     <div class="CheckBoxPit select-one" id="endgame-strategy">
-                        <ons-button modifier="large" data-select="0">Ramps</ons-button>
-                        <ons-button modifier="large" data-select="1">Climb</ons-button>
+                        <ons-button modifier="large" data-select="ramps">Ramps</ons-button>
+                        <ons-button modifier="large" data-select="climb">Climb</ons-button>
                     </div><br/>
                     <textarea placeholder="Additional Systems" id="more-comments"></textarea>
                     <button id="submit-pit" class="button button--material" style="margin-left: auto; margin-right: auto;"> <!-- Slight hack but this should get around form validation -->
@@ -244,6 +276,16 @@
         </ons-page>
     </template>
 
+<template id="pic-scout.html">
+    <ons-page id="pic-scout" class="scout-page">
+        <ons-toolbar>
+            <div class="left"><ons-back-button></ons-back-button></div>
+            <div class="center" id="team-title">Team <span id="team-num"></span> Add a Picture to the team</div>
+        </ons-toolbar>
+        <forms>
+        </forms>
+    </ons-page>
+</template>
 
 <script>
     window.fn = {};
@@ -270,17 +312,25 @@
     };
     window.fn.toggle = function (el) {
         el.classList.toggle("active");
-    }
+    };
+
+    window.fn.checkForPrevAuth = function () {
+
+        if (localStorage.auth === "1") {
+            document.getElementById('appNavigator').pushPage('tabbar.html');
+        }
+    };
+
 </script>
 <script>
     // Check that service workers are registered
-    if ('serviceWorker' in navigator) {
-        console.log('sw thing');
+    //if ('serviceWorker' in navigator) {
+    //    console.log('sw thing');
         // Use the window load event to keep the page load performant
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js');
-        });
-    }
+    //    window.addEventListener('load', () => {
+    //        navigator.serviceWorker.register('sw.js');
+    //    });
+    //s}
 </script>
 </body>
 </html>
