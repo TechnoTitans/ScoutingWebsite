@@ -312,6 +312,7 @@ document.addEventListener('init', function (event) {
             if (submitted) return false;
             submitted = true;
             var data = {};
+            data.user = firebase.auth().currentUser.displayName;
             data.autoTarget = page.querySelector("#auto-target").dataset.selected;
             data.autoSuccess = page.querySelector("#auto-target-result").dataset.selected;
             data.teleopSwitch = parseInt(page.querySelector("#teleop-switch ons-input").value, 10);
@@ -346,6 +347,7 @@ document.addEventListener('init', function (event) {
             if (submitted) return false;
             submitted = true;
             var data = {};
+            data.user = firebase.auth().currentUser.displayName;
             data.teamName = team.nickname.trim();
             data.teamNum = team.team_number;
             data.eventKey = currentEventKey();
