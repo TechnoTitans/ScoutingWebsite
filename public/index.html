@@ -11,7 +11,7 @@
     <script src="https://www.gstatic.com/firebasejs/4.9.1/firebase.js"></script>
     <script src="node_modules/chart.js/dist/Chart.min.js"></script>
     <script src="node_modules/chartjs-chart-box-and-violin-plot/build/Chart.BoxPlot.js"></script>
-    <script src="https://cdn.auth0.com/js/auth0/9.2.2/auth0.min.js"></script>
+    <!-- <script src="https://cdn.auth0.com/js/auth0/9.2.2/auth0.min.js"></script> -->
     <script src="node_modules/firebaseui/dist/firebaseui.js"></script>
     <link type="text/css" rel="stylesheet" href="node_modules/firebaseui/dist/firebaseui.css" />
     <script src="main.js"></script>
@@ -31,18 +31,7 @@
 
 <template id="login.html">
     <ons-page id="login">
-        <div style="text-align: center; margin-top: 30px;">
-            <form>
-                <p>
-                    <ons-input id="username" modifier="underbar" placeholder="Username" float></ons-input>
-                </p>
-                <p>
-                    <ons-input id="password" modifier="underbar" type="password" placeholder="Password" float></ons-input>
-                </p>
-                <p style="margin-top: 30px;">
-                    <ons-button onclick="login()">Sign in</ons-button>
-                </p>
-            </form>
+        <div style="text-align: center; margin-top: 30px;" id="firebaseui-auth-container">
         </div>
     </ons-page>
 </template>
@@ -342,23 +331,6 @@
     //        navigator.serviceWorker.register('sw.js');
     //    });
     //s}
-</script>
-<script>
-
-    var login = function () {
-        var username = document.getElementById('username').value;
-        var password = document.getElementById('password').value;
-
-        if (!username || !password) {
-            // do nothing
-        } else if ((username === 'frc@technotitans.org' && password === 'technotitans1111') || (username === 'tt' && password === 'sunnyisahoe')) {
-            document.getElementById('appNavigator').pushPage('tabbar.html');
-            localStorage.auth = "1"; // added security
-        } else {
-            ons.notification.alert('Please kindly relocate yourself out of this app.');
-        }
-    };
-
 </script>
 </body>
 </html>
