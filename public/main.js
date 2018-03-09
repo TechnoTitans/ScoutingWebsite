@@ -147,17 +147,24 @@ var createSelectCheckboxMenu = function (div, onchange) {
     }
 };
 
+var enableButtons = function (container, enabled) {
+    var btns = container.querySelectorAll("ons-button");
+    for (let button of btns) {
+        button.disabled = !enabled;
+        if (button.classList.contains("chosen")) button.classList.remove("chosen");
+    }
+};
+
 var makeSuccessFailureMenu = function (main, succ, isCheckbox) {
-    var enableButtons = function (enabled) {
-        var btns = succ.querySelectorAll("ons-button");
-        for (let button of btns) {
-            button.disabled = !enabled;
-            if (button.classList.contains("chosen") && !enabled) button.classList.remove("chosen");
+    var callback = function (enabled) {
+        enableButtons(succ, enabled);
+        if (!enabled) {
+            main.dataset.chosen = "";
+            succ.dataset.chosen = "";
         }
-        if (!enabled) main.dataset.chosen = "";
     };
-    if (isCheckbox) createSelectCheckboxMenu(main, selected => enableButtons(selected.length > 0));
-    else createSelectMenu(main, chosen => enableButtons(chosen != null));
+    if (isCheckbox) createSelectCheckboxMenu(main, selected => callback(selected.length > 0));
+    else createSelectMenu(main, chosen => callback(chosen != null));
     createSelectMenu(succ);
 };
 
@@ -287,26 +294,36 @@ document.addEventListener('init', function (event) {
             }
         }
     } else if (page.matches("#match-scout")) {
-        var team = page.data.team;
+        let team = page.data.team;
         page.querySelector("#team-num").innerHTML = team.team_number;
         page.querySelector("#team-name").innerHTML = team.nickname;
         // autonomous
         //page.querySelector("#team-title").innerHTML = team.nickname;
-        var target = -1, success = false, chosen = null;
-        //var enableButtons = function(btnContainer, enabled) {
-        //    var btns = btnCoontainer.querySelectorAll("ons-button");
-        //    for (let button of btns) {
-        //        button.disabled = !enabled;
-        //        if (button.classList.contains("chosen") && !enabled) button.classList.remove("chosen");
-        //    }
-        //    if (!enabled) btnContainer.dataset.chosen = "";
-        //};
         //createSelectMenu(targetBtnsContainer, chosen => enableButtons(resultBtnsContainer, chosen != null));
         //createSelectMenu(resultBtnsContainer);
-        makeSuccessFailureMenu(page.querySelector("#auto-target"), page.querySelector("#auto-target-result"), true);
+        let autoMove = page.querySelector("#auto-move"), autoTarget = page.querySelector("#auto-target"), autoSucc = page.querySelector("#auto-target-result");
+        createSelectMenu(autoMove, chosen => {
+            if (chosen.dataset.select === "dline") {
+                enableButtons(autoTarget, true);
+            } else {
+                enableButtons(autoTarget, false);
+                enableButtons(autoSucc, false);
+                autoTarget.dataset.selected = "";
+                autoSucc.dataset.selected = "";
+            }
+        });
+        createSelectMenu(autoTarget, chosen => {
+            if (chosen != null) {
+                enableButtons(autoSucc, true);
+            } else {
+                enableButtons(autoSucc, false);
+                autoSucc.dataset.selected = "";
+            }
+        });
+        createSelectMenu(autoSucc);
         makeSuccessFailureMenu(page.querySelector("#end-game-menu"), page.querySelector("#end-game-result"), false);
         page.querySelectorAll("p").forEach(p => createNumInput(p));
-        var submitted = false;
+        let submitted = false;
         page.querySelector("form").onsubmit = function (e) {
             e.preventDefault();
             if (submitted) return false;
@@ -337,7 +354,7 @@ document.addEventListener('init', function (event) {
             return false;
         };
     } else if (page.matches("#pit-scout")) {
-        var team = page.data.team;
+        let team = page.data.team;
         page.querySelector("#team-num").innerHTML = team.team_number;
         page.querySelector("#team-name").innerHTML = team.nickname;
         page.querySelectorAll(".select-one").forEach(x => createSelectMenu(x));

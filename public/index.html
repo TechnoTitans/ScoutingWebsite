@@ -158,13 +158,18 @@
             <form style="padding: 5px;">
             <div id="autonomous">
                 <h3>Autonomous</h3>
+                Did they move:<br />
+                <div id="auto-move" class="btn-select-menu">
+                    <ons-button modifier="large" data-select="dline">Drive across line</ons-button>
+                    <ons-button modifier="large" data-select="move">Moved but did not cross line</ons-button>
+                    <ons-button modifier="large" data-select="none">Did not move</ons-button>
+                </div>
                 Choose target:<br />
                 <div id="auto-target" class="btn-select-menu">
-                    <ons-button modifier="large" data-select="sswitch">Switch (Same side)</ons-button>
-                    <ons-button modifier="large" data-select="cswitch">Switch (Cross side)</ons-button>
-                    <ons-button modifier="large" data-select="sscale">Scale (Same side)</ons-button>
-                    <ons-button modifier="large" data-select="cscale">Scale (Cross side)</ons-button>
-                    <ons-button modifier="large" data-select="dline">Drive across line</ons-button>
+                    <ons-button modifier="large" data-select="sswitch" disabled>Switch (Same side)</ons-button>
+                    <ons-button modifier="large" data-select="cswitch" disabled>Switch (Cross side)</ons-button>
+                    <ons-button modifier="large" data-select="sscale" disabled>Scale (Same side)</ons-button>
+                    <ons-button modifier="large" data-select="cscale" disabled>Scale (Cross side)</ons-button>
                 </div>
                 <div id="auto-target-result" class="btn-select-menu">
                     <ons-button disabled data-select="true">Success</ons-button>
