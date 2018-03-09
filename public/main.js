@@ -147,17 +147,24 @@ var createSelectCheckboxMenu = function (div, onchange) {
     }
 };
 
+var enableButtons = function (container, enabled) {
+    var btns = container.querySelectorAll("ons-button");
+    for (let button of btns) {
+        button.disabled = !enabled;
+        if (button.classList.contains("chosen")) button.classList.remove("chosen");
+    }
+};
+
 var makeSuccessFailureMenu = function (main, succ, isCheckbox) {
-    var enableButtons = function (enabled) {
-        var btns = succ.querySelectorAll("ons-button");
-        for (let button of btns) {
-            button.disabled = !enabled;
-            if (button.classList.contains("chosen") && !enabled) button.classList.remove("chosen");
+    var callback = function (enabled) {
+        enableButtons(succ, enabled);
+        if (!enabled) {
+            main.dataset.chosen = "";
+            succ.dataset.chosen = "";
         }
-        if (!enabled) main.dataset.chosen = "";
     };
-    if (isCheckbox) createSelectCheckboxMenu(main, selected => enableButtons(selected.length > 0));
-    else createSelectMenu(main, chosen => enableButtons(chosen != null));
+    if (isCheckbox) createSelectCheckboxMenu(main, selected => callback(selected.length > 0));
+    else createSelectMenu(main, chosen => callback(chosen != null));
     createSelectMenu(succ);
 };
 
@@ -287,32 +294,43 @@ document.addEventListener('init', function (event) {
             }
         }
     } else if (page.matches("#match-scout")) {
-        var team = page.data.team;
+        let team = page.data.team;
         page.querySelector("#team-num").innerHTML = team.team_number;
         page.querySelector("#team-name").innerHTML = team.nickname;
         // autonomous
         //page.querySelector("#team-title").innerHTML = team.nickname;
-        var target = -1, success = false, chosen = null;
-        //var enableButtons = function(btnContainer, enabled) {
-        //    var btns = btnCoontainer.querySelectorAll("ons-button");
-        //    for (let button of btns) {
-        //        button.disabled = !enabled;
-        //        if (button.classList.contains("chosen") && !enabled) button.classList.remove("chosen");
-        //    }
-        //    if (!enabled) btnContainer.dataset.chosen = "";
-        //};
         //createSelectMenu(targetBtnsContainer, chosen => enableButtons(resultBtnsContainer, chosen != null));
         //createSelectMenu(resultBtnsContainer);
-        makeSuccessFailureMenu(page.querySelector("#auto-target"), page.querySelector("#auto-target-result"), true);
+        let autoMove = page.querySelector("#auto-move"), autoTarget = page.querySelector("#auto-target"), autoSucc = page.querySelector("#auto-target-result");
+        createSelectMenu(autoMove, chosen => {
+            if (chosen.dataset.select === "dline") {
+                enableButtons(autoTarget, true);
+            } else {
+                enableButtons(autoTarget, false);
+                enableButtons(autoSucc, false);
+                autoTarget.dataset.selected = "";
+                autoSucc.dataset.selected = "";
+            }
+        });
+        createSelectMenu(autoTarget, chosen => {
+            if (chosen != null) {
+                enableButtons(autoSucc, true);
+            } else {
+                enableButtons(autoSucc, false);
+                autoSucc.dataset.selected = "";
+            }
+        });
+        createSelectMenu(autoSucc);
         makeSuccessFailureMenu(page.querySelector("#end-game-menu"), page.querySelector("#end-game-result"), false);
         page.querySelectorAll("p").forEach(p => createNumInput(p));
-        var submitted = false;
+        let submitted = false;
         page.querySelector("form").onsubmit = function (e) {
             e.preventDefault();
             if (submitted) return false;
             submitted = true;
             var data = {};
             data.user = firebase.auth().currentUser.displayName;
+            data.autoMove = page.querySelector("#auto-move").dataset.selected;
             data.autoTarget = page.querySelector("#auto-target").dataset.selected;
             data.autoSuccess = page.querySelector("#auto-target-result").dataset.selected;
             data.teleopSwitch = parseInt(page.querySelector("#teleop-switch ons-input").value, 10);
@@ -337,7 +355,7 @@ document.addEventListener('init', function (event) {
             return false;
         };
     } else if (page.matches("#pit-scout")) {
-        var team = page.data.team;
+        let team = page.data.team;
         page.querySelector("#team-num").innerHTML = team.team_number;
         page.querySelector("#team-name").innerHTML = team.nickname;
         page.querySelectorAll(".select-one").forEach(x => createSelectMenu(x));
@@ -404,29 +422,29 @@ document.addEventListener('init', function (event) {
         page.querySelectorAll("canvas").forEach(canvas => {
             canvas.height = canvas.width = Math.min(300, window.innerWidth - 20);
         });
-        let autoData = {sswitch: [0, 0], sscale: [0, 0], cswitch: [0, 0], cscale: [0, 0], dline: [0, 0]};
+        let autoData = {sswitch: [0, 0], sscale: [0, 0], cswitch: [0, 0], cscale: [0, 0]};
+        let autoMoveData = {dline: 0, move: 0, none: 0};
         var matches = Object.values(data.teamData[team.team_number][currentEventKey()].match); // should always exist
         matches.sort((x, y) => y.timestamp - x.timestamp);
         for (let match of matches) {
-            let targets = match.autoTarget.split(",").filter(x => x !== "");
-            for (let target of targets) {
-                if (match.autoSuccess === "true") autoData[target][0]++;
-                else autoData[target][1]++;
+            if (match.autoTarget) {
+                if (match.autoSuccess === "true") autoData[match.autoTarget][0]++;
+                else autoData[match.autoTarget][1]++;
             }
-            if (targets.length === 0) autoData.dline[1]++; // failed to drive over line
+            autoMoveData[match.autoMove ? match.autoMove : "none"] += 1/matches.length;
         }
         let autoConfig = {
             type: 'bar',
             data: {
                 datasets: [{
                     data: [
-                        autoData.sswitch[0], autoData.cswitch[0], autoData.sscale[0], autoData.cscale[0], autoData.dline[0]
+                        autoData.sswitch[0], autoData.cswitch[0], autoData.sscale[0], autoData.cscale[0]
                     ],
                     backgroundColor: "green",
                     label: 'Successful autos'
                 }, {
                     data: [
-                        autoData.sswitch[1], autoData.cswitch[1], autoData.sscale[1], autoData.cscale[1], autoData.dline[1]
+                        autoData.sswitch[1], autoData.cswitch[1], autoData.sscale[1], autoData.cscale[1]
                     ],
                     backgroundColor: "rgba(0, 255, 0, 0.5)",
                     label: 'Failed autos'
@@ -435,8 +453,7 @@ document.addEventListener('init', function (event) {
                     "Same-side switch",
                     "Cross-side switch",
                     "Same-side scale",
-                    "Cross-side scale",
-                    "Across the line"
+                    "Cross-side scale"
                 ]
             },
             options: {
@@ -538,16 +555,13 @@ document.addEventListener("show", function (event) {
                 let weight = Math.exp(expWeight * i);
                 let mt = matches[i];
                 let score = 0;
-                let nonLines = mt.autoTarget.split(",").filter(x => x !== "dline");
-                if (mt.autoSuccess === "true" && nonLines.length > 0) {
-                    for (let target of nonLines) {
-                        // so sketchy, relies on the fact that "scale" and "switch" both start with "s"
-                        score += +settings.querySelector(`#${autoMap[target]} ons-range`).value / getAverage("autoS" + target.slice(2));
-                        subScores.autoSwitch += target.indexOf("switch") !== -1;
-                        subScores.autoScale += target.indexOf("scale") !== -1;
-                    }
-                } else if ((nonLines.length === 0) !== (mt.autoSuccess === "false")) {
-                    score += ((+settings.querySelector("#auto-switch-crit ons-range").value) + (+settings.querySelector("#auto-scale-crit ons-range").value)) / 10;
+                if (mt.autoTarget && mt.autoSuccess) {
+                // so sketchy, relies on the fact that "scale" and "switch" both start with "s"
+                    score += +settings.querySelector(`#auto-${mt.autoTarget.slice(1)}-crit ons-range`).value / getAverage("autoS" + mt.autoTarget.slice(2));
+                    subScores.autoSwitch += mt.autoTarget.indexOf("switch") !== -1;
+                    subScores.autoScale += mt.autoTarget.indexOf("scale") !== -1;
+                } else if (mt.autoMove === "dline") {
+                    score += ((+settings.querySelector("#auto-switch-crit ons-range").value) + (+settings.querySelector("#auto-scale-crit ons-range").value)) / 8;
                 }
                 score += mt.teleopSwitch * (+settings.querySelector("#teleop-switch-crit ons-range").value) / getAverage("teleopSwitch");
                 subScores.teleopSwitch += mt.teleopSwitch / matches.length;
@@ -570,11 +584,8 @@ document.addEventListener("show", function (event) {
         var addToAverages = function (team) {
             var matches = Object.values(team[currentEventKey()].match);
             for (let mt of matches) {
-                let autoTargets = mt.autoSuccess === "true" ? mt.autoTarget.split(",") : [];
-                for (let target of autoTargets) {
-                    averageStats.autoSwitch += target.indexOf("switch") !== -1;
-                    averageStats.autoScale += target.indexOf("scale") !== -1;
-                }
+                averageStats.autoSwitch += mt.autoTarget.indexOf("switch") !== -1;
+                averageStats.autoScale += mt.autoTarget.indexOf("scale") !== -1;
                 averageStats.teleopSwitch += mt.teleopSwitch;
                 averageStats.teleopScale += mt.teleopScale;
                 averageStats.vault += mt.teleopVault;
