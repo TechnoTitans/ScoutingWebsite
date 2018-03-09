@@ -22,11 +22,13 @@ var allTeamElems = [];
 var allTeamData = null;
 var teamDataDirty = true;
 var teamListDirty = true;
+var allScouters = {};
 
 var writeScoutingData = function (data, isPit) {
     console.log('sent data for team' + data.teamName, data);
     return db.ref("data").child(data.teamNum.toString()).child(data.eventKey).child(isPit ? 'pit' : 'match').push().set(data);
 };
+
 
 var getTeams = function () {
     if (allTeams.length > 0 && !teamListDirty) return Promise.resolve(allTeams);
@@ -94,8 +96,6 @@ var getAllTeamData = function () {
 
 var teamHasData = function (teamNum) {
     db.ref('/data/' + teamNum).once('value').then(snapshot => {
-        // console.log(snapshot.val());
-        console.log('returning data');
         return snapshot.val() !== null;
     })
 };
@@ -269,7 +269,6 @@ document.addEventListener('init', function (event) {
             addTeams(allTeams, terms, page);
         };
     } else if (page.matches("#team-scout")) {
-        console.log(page.data);
         var teamNum = page.data.num;
         var teamObj = getTeamByNumber(teamNum);
         if (!teamObj) {
@@ -281,10 +280,10 @@ document.addEventListener('init', function (event) {
         var buttons = page.querySelectorAll("ons-card");
 
         // give indication of previous data
-        if (teamHasData(teamNum)) {
-            console.log('team has data');
-            page.querySelector("#prev-data-icon").style.visibility = "visible";
-        }
+        //if (teamHasData(teamNum)) {
+        //    console.log('team has data');
+        //    page.querySelector("#prev-data-icon").style.visibility = "visible";
+        //}
         for (let button of buttons) {
             button.onclick = function () {
                 document.getElementById("appNavigator").pushPage(`${this.id}-scout.html`, {data: {team: teamObj}});
@@ -507,7 +506,6 @@ document.addEventListener('init', function (event) {
                 padding: 10
             }]
         };
-        console.log("Box plot", boxplotData);
         new Chart(page.querySelector("#teleopchart"), {
             type: 'boxplot',
             data: boxplotData,
