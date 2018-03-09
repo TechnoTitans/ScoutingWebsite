@@ -498,12 +498,13 @@ document.addEventListener('init', function (event) {
             labels: ["Switch", "Scale", "Vault"],
             datasets: [{
                 label: "Teleop",
-                backgroundColor: "rgba(0, 0, 255, 0.7)",
+                backgroundColor: "rgba(54, 162, 235, 0.5)",
                 data: [teleopData.switch, teleopData.scale, teleopData.vault],
                 padding: 10,
                 itemBackgroundColor: "rgb(255, 0, 0)",
-                borderWidth: 3,
-                strokeColor: "blue"
+                borderWidth: 2,
+                borderColor: "rgba(54, 162, 235, 0.5)",
+                padding: 10
             }]
         };
         console.log("Box plot", boxplotData);
@@ -523,7 +524,8 @@ document.addEventListener('init', function (event) {
                     yAxes: [{
                         display: true,
                         ticks: {
-                            beginAtZero: true,
+                            min: 0,
+                            suggestedMax: 10,
                             step: 1
                         }
                     }]
@@ -565,8 +567,8 @@ document.addEventListener("show", function (event) {
                 let weight = Math.exp(expWeight * i);
                 let mt = matches[i];
                 let score = 0;
-                if (mt.autoTarget && mt.autoSuccess) {
-                // so sketchy, relies on the fact that "scale" and "switch" both start with "s"
+                if (mt.autoTarget && mt.autoSuccess === "true") {
+                    // so sketchy, relies on the fact that "scale" and "switch" both start with "s"
                     score += +settings.querySelector(`#auto-${mt.autoTarget.slice(1)}-crit ons-range`).value / getAverage("autoS" + mt.autoTarget.slice(2));
                     subScores.autoSwitch += mt.autoTarget.indexOf("switch") !== -1;
                     subScores.autoScale += mt.autoTarget.indexOf("scale") !== -1;
