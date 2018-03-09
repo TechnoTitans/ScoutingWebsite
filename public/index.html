@@ -111,15 +111,16 @@
                 <p id="endgame-crit">Endgame: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
                 <p id="bias-crit">Bias toward recent games: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
             </div>
-	    <div>
-		<h4 style = "padding-right: 8%; font-size: 99%">Tournament:</h4>
+	        <div>
+		        <h4 style = "padding-right: 8%; font-size: 99%">Tournament:</h4>
                 <ons-select id="tournament" style = "float: left">
                     <option value="Gainesville">Gainesville</option>
                     <option value="Albany">Albany</option>
                     <option value="Peachtree">Peachtree</option>
-                    <!--<option value="Houston">Houston</option>-->
+                            <!--<option value="Houston">Houston</option>-->
                 </ons-select>
-	    </div>
+	        </div><br />
+            <p style="margin-top: 20px;"><ons-button onclick="firebase.auth().signOut().then(() => location.reload())">Logout</ons-button></p>
         </div>
     </ons-page>
 </template>
