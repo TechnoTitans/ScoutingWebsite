@@ -14,7 +14,7 @@ firebase.initializeApp(config);
 console.log('fb conslog', firebase);
 var db = firebase.database();
 
-var state = 'ga', eventCode = 'gai', year = 2018; // todo determine eventcode by date
+var state = 'ga', eventCode = 'alb', year = 2018; // todo determine eventcode by date
 var currentEventKey = () => year + state + eventCode;
 var eventCodes = {'Gainesville': 'gai', 'Houston': 'cmptx', 'Peachtree': 'cmp', 'Albany': 'alb'};
 var allTeams = [];
@@ -215,6 +215,7 @@ var createTeam = function (team) {
             `
     );
     elem.onclick = teamClick;
+    allTeamElems.push(elem);
     return elem;
     // allTeamElems.push(elem);
 };
@@ -222,6 +223,7 @@ var createTeam = function (team) {
 var teamClick = function () {
     var teamNumber = this.dataset.teamNum;
     document.getElementById("appNavigator").pushPage("team-scout.html", {data: {num: teamNumber}});
+    // todo add firebase db code here
 };
 
 var fetchTeams = function (page) {
@@ -233,10 +235,31 @@ var fetchTeams = function (page) {
     });
 };
 
+var getElemByTeamNum = function (teamNum) {
+    return document.querySelector(`[data-team-num~="${teamNum}"]`); //https://stackoverflow.com/a/13449757/3807967
+};
+
+var setTeamBusy = function (teamNum) {
+    var team = getElemByTeamNum(teamNum);
+    console.log(team);
+    team.appendChild(ons.createElement('<ons-icon icon="fa-circle" id="in-progress"></ons-icon>', {
+        append: true
+    }))
+};
+
+var releaseTeamBusy = function (teamNum) {
+    var team = getElemByTeamNum(teamNum);
+    team.removeChild(document.querySelector('#in-progress'));
+};
 
 document.addEventListener('init', function (event) {
     console.log("Init", event.target.id);
     var page = event.target;
+
+    // todo add fb db code to set teams as busy here
+    // socket.on('scout-in-prg', function(teamNum) {
+    //     setTeamBusy(teamNum);
+    // });
 
     if (page.matches("#login")) {
         let ui = new firebaseui.auth.AuthUI(firebase.auth());
@@ -356,6 +379,7 @@ document.addEventListener('init', function (event) {
         };
     } else if (page.matches("#pit-scout")) {
         let team = page.data.team;
+        let submitted = false; // todo check if correct
         page.querySelector("#team-num").innerHTML = team.team_number;
         page.querySelector("#team-name").innerHTML = team.nickname;
         page.querySelectorAll(".select-one").forEach(x => createSelectMenu(x));
