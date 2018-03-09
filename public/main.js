@@ -431,7 +431,7 @@ document.addEventListener('init', function (event) {
                 if (match.autoSuccess === "true") autoData[match.autoTarget][0]++;
                 else autoData[match.autoTarget][1]++;
             }
-            autoMoveData[match.autoMove ? match.autoMove : "none"] += 1/matches.length;
+            autoMoveData[match.autoMove ? match.autoMove : "none"] += 1;
         }
         let autoConfig = {
             type: 'bar',
@@ -479,6 +479,17 @@ document.addEventListener('init', function (event) {
                 }
             }
         };
+        new Chart(page.querySelector("#autoMove").getContext("2d"), {
+            type: 'pie',
+            data: {
+                datasets: [{
+                    data: [autoMoveData.dline, autoMoveData.move, autoMoveData.none],
+                    backgroundColor: ['green', 'orange', 'red']
+                }],
+                labels: ['Drive line', 'Moved', 'None']
+            },
+            
+        });
         let autoChart = new Chart(page.querySelector("#autochart").getContext("2d"), autoConfig);
         let teleopData = {switch: [], scale: [], vault: []};
         for (let match of matches) {
@@ -493,7 +504,9 @@ document.addEventListener('init', function (event) {
                 backgroundColor: "rgba(0, 0, 255, 0.7)",
                 data: [teleopData.switch, teleopData.scale, teleopData.vault],
                 padding: 10,
-                itemBackgroundColor: "rgb(255, 0, 0)"
+                itemBackgroundColor: "rgb(255, 0, 0)",
+                borderWidth: 3,
+                strokeColor: "blue"
             }]
         };
         console.log("Box plot", boxplotData);
