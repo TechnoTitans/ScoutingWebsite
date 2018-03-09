@@ -28,6 +28,22 @@ var writeScoutingData = function (data, isPit) {
     return db.ref("data").child(data.teamNum.toString()).child(data.eventKey).child(isPit ? 'pit' : 'match').push().set(data);
 };
 
+var getPrettyTimestamp = function () {
+    return moment.unix(Date.now() / 1000).format('llll');
+};
+
+var writeSessionData = function () {
+    var data = {};
+    var currentUser = firebase.auth().currentUser;
+    if(!currentUser) {
+        console.log("Error: no user signed in");
+        return;
+    }
+    data.user = currentUser;
+    data.timestamp = getPrettyTimestamp();
+    return db.ref('current-scouting').child(data.teamNum.toString()).set(data);
+};
+
 var getTeams = function () {
     if (allTeams.length > 0 && !teamListDirty) return Promise.resolve(allTeams);
     return axios({
@@ -362,7 +378,7 @@ document.addEventListener('init', function (event) {
             data.endGame = page.querySelector("#end-game-menu").dataset.selected;
             data.endGameSuccess = page.querySelector("#end-game-result").dataset.selected;
             data.comments = page.querySelector("textarea").value;
-            data.timestamp = Date.now(); // just for fun idk
+            data.timestamp = getPrettyTimestamp();
             data.teamName = team.nickname.trim();
             data.teamNum = team.team_number;
             data.eventKey = currentEventKey();
