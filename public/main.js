@@ -419,7 +419,8 @@ document.addEventListener('init', function (event) {
             data.endGame = page.querySelector("#end-game-menu").dataset.selected;
             data.endGameSuccess = page.querySelector("#end-game-result").dataset.selected;
             data.comments = page.querySelector("textarea").value;
-            data.timestamp = getPrettyTimestamp();
+            data.prettydate = getPrettyTimestamp();
+            data.timestamp = Date.now();
             data.teamName = team.nickname.trim();
             data.teamNum = team.team_number;
             data.eventKey = currentEventKey();
