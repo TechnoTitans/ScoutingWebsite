@@ -530,6 +530,35 @@ document.addEventListener('init', function (event) {
                 }
             }
         });
+        let endGameData = {parked: [0, 0], ramps: [0, 0], none: 0, climb: [0, 0], other: [0, 0]};
+        for (let mt of matches) {
+            let ind = mt.endGameSuccess === "true" ? 0 : 1;
+            if (mt.endGame) endGameData[mt.endGame][ind]++;
+            else endGameData.none++;
+        }
+        let endGameDataArray = [endGameData.none, endGameData.parked[0], endGameData.parked[1], endGameData.ramps[0], endGameData.ramps[1],
+                            endGameData.climb[0], endGameData.climb[1], endGameData.other[0], endGameData.other[1]];
+        let endGameLabels = ['None', 'Parked', 'Attempted park', 'Ramps', 'Attempted ramps', 'Climbed', 'Attempted climb', 'Other', 'Attempted other'];
+        let endGameColors = ['red', 'rgb(255, 173, 51)', 'rgba(255, 173, 51, 0.5',
+                                        'rgb(6, 198, 6)', 'rgba(6, 198, 6, 0.5)',
+                                        'rgb(51, 153, 255)', 'rgba(51, 153, 255, 0.5)',
+                                        'rgb(204, 102, 153)', 'rgba(204, 102, 153, 0.5)'];
+        let inds = [];
+        for (let i = 0; i < endGameDataArray.length; ++i)
+            if (endGameDataArray[i] !== 0)
+                inds.push(i);
+
+        new Chart(page.querySelector("#endgamechart").getContext("2d"), {
+            type: 'pie',
+            data: {
+                datasets: [{
+                    data: inds.map(x => endGameDataArray[x]),
+                    backgroundColor: inds.map(x => endGameColors[x])
+                }],
+                labels: inds.map(x => endGameLabels[x])
+            },
+            
+        });
     }
 });
 
