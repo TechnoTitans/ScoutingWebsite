@@ -76,6 +76,11 @@
                 <h2>Teleop</h2>
                 <canvas id="teleopchart"></canvas>
             </div>
+            <hr />
+            <div id="endgamestats">
+                <h2>End Game</h2>
+                <canvas id="endgamechart"></canvas>
+            </div>
         </div>
     </ons-page>
 </template>
@@ -203,10 +208,12 @@
             <hr />
             <div id="end-game">
                 <h3>End Game</h3>
+                <p>Leave blank for none</p>
                 <div id="end-game-menu" class="btn-select-menu">
                     <ons-button modifier="large" data-select="climb">Climb (e.g. with rope/hook)</ons-button>
                     <ons-button modifier="large" data-select="ramps">Ramps</ons-button>
-                    <ons-button modifier="large" data-select="other">Other</ons-button>
+                    <ons-button modifier="large" data-select="other">Other (raised)</ons-button>
+                    <ons-button modifier="large" data-select="parked">Parked (not raised)</ons-button>
                 </div>
                 <div id="end-game-result" class="btn-select-menu">
                     <ons-button disabled data-select="true">Success</ons-button>

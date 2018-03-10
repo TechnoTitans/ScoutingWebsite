@@ -159,8 +159,8 @@ var makeSuccessFailureMenu = function (main, succ, isCheckbox) {
     var callback = function (enabled) {
         enableButtons(succ, enabled);
         if (!enabled) {
-            main.dataset.chosen = "";
-            succ.dataset.chosen = "";
+            main.dataset.selected = "";
+            succ.dataset.selected = "";
         }
     };
     if (isCheckbox) createSelectCheckboxMenu(main, selected => callback(selected.length > 0));
@@ -318,7 +318,7 @@ document.addEventListener('init', function (event) {
         });
         createSelectMenu(autoSucc);
         makeSuccessFailureMenu(page.querySelector("#end-game-menu"), page.querySelector("#end-game-result"), false);
-        page.querySelectorAll("p").forEach(p => createNumInput(p));
+        page.querySelectorAll("#teleop-run p").forEach(p => createNumInput(p));
         let submitted = false;
         page.querySelector("form").onsubmit = function (e) {
             e.preventDefault();
@@ -530,6 +530,35 @@ document.addEventListener('init', function (event) {
                 }
             }
         });
+        let endGameData = {parked: [0, 0], ramps: [0, 0], none: 0, climb: [0, 0], other: [0, 0]};
+        for (let mt of matches) {
+            let ind = mt.endGameSuccess === "true" ? 0 : 1;
+            if (mt.endGame) endGameData[mt.endGame][ind]++;
+            else endGameData.none++;
+        }
+        let endGameDataArray = [endGameData.none, endGameData.parked[0], endGameData.parked[1], endGameData.ramps[0], endGameData.ramps[1],
+                            endGameData.climb[0], endGameData.climb[1], endGameData.other[0], endGameData.other[1]];
+        let endGameLabels = ['None', 'Parked', 'Attempted park', 'Ramps', 'Attempted ramps', 'Climbed', 'Attempted climb', 'Other', 'Attempted other'];
+        let endGameColors = ['red', 'rgb(255, 173, 51)', 'rgba(255, 173, 51, 0.5',
+                                        'rgb(6, 198, 6)', 'rgba(6, 198, 6, 0.5)',
+                                        'rgb(51, 153, 255)', 'rgba(51, 153, 255, 0.5)',
+                                        'rgb(204, 102, 153)', 'rgba(204, 102, 153, 0.5)'];
+        let inds = [];
+        for (let i = 0; i < endGameDataArray.length; ++i)
+            if (endGameDataArray[i] !== 0)
+                inds.push(i);
+
+        new Chart(page.querySelector("#endgamechart").getContext("2d"), {
+            type: 'pie',
+            data: {
+                datasets: [{
+                    data: inds.map(x => endGameDataArray[x]),
+                    backgroundColor: inds.map(x => endGameColors[x])
+                }],
+                labels: inds.map(x => endGameLabels[x])
+            },
+            
+        });
     }
 });
 
@@ -579,8 +608,9 @@ document.addEventListener("show", function (event) {
                 subScores.teleopScale += mt.teleopScale / matches.length;
                 score += mt.teleopVault * (+settings.querySelector("#vault-crit ons-range").value) / getAverage("vault");
                 subScores.vault += mt.teleopVault / matches.length;
-                subScores.endGame += +(mt.endGameSuccess === "true") / matches.length;
-                score += (mt.endGameSuccess === "true" ? +settings.querySelector("#endgame-crit ons-range").value : 0) / getAverage("endGame");
+                let climbed = mt.endGameSuccess === "true" && mt.endGame !== "parked";
+                subScores.endGame += +climbed / matches.length;
+                score += (climbed ? +settings.querySelector("#endgame-crit ons-range").value : 0) / getAverage("endGame");
                 totalScore += score * weight;
                 totalWeight += weight;
             }
@@ -599,7 +629,7 @@ document.addEventListener("show", function (event) {
                 averageStats.teleopSwitch += mt.teleopSwitch;
                 averageStats.teleopScale += mt.teleopScale;
                 averageStats.vault += mt.teleopVault;
-                averageStats.endGame += mt.endGameSuccess === "true";
+                averageStats.endGame += mt.endGameSuccess === "true" && mt.endGame !== "parked";
             }
             totalMatches += matches.length;
         };
@@ -632,9 +662,17 @@ document.addEventListener("show", function (event) {
                         subScore2 = teamSubScores[team2.team_number][key];
                     return subScore2 - subScore1;
                 });
-                for (let i = 0; i < teamsWithData.length; ++i) {
+                let prevRank = teamsWithData.length, prevScore = -Infinity;
+                for (let i = teamsWithData.length - 1; i >= 0; --i) {
                     let team = subScoreSorted[i];
-                    subScoreRanks[team.team_number][key] = i + 1;
+                    let newScore = teamSubScores[team.team_number][key];
+                    if (newScore - prevScore < 0.0001) {
+                        subScoreRanks[team.team_number][key] = prevRank;
+                    } else {
+                        subScoreRanks[team.team_number][key] = i + 1;
+                        prevScore = newScore;
+                        prevRank = i + 1;
+                    }
                 }
             }
             console.log(averageStats, teamSubScores, teamScores, subScoreRanks);
@@ -649,7 +687,7 @@ document.addEventListener("show", function (event) {
                     // why hsv? because hsv interpolation is better than rgb
                     if (teamsWithData.length <= 1) return `background-color: black;`
                     let interp = (rank - 1) / (teamsWithData.length - 1), color;
-                    if (interp > DEAD_ZONE) color = HSVtoRGB(hsvRed); // everything past 60% is red so we have better resolution on better teams
+                    if (interp > DEAD_ZONE) color = HSVtoRGB(hsvRed); // everything past 80% is red so we have better resolution on better teams
                     else {
                         interp /= DEAD_ZONE;
                         let h, s, v;
