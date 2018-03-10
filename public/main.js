@@ -51,8 +51,15 @@ var writeSessionData = function (teamNum) {
     return db.ref('current-scouting').child("Team " + teamNum.toString()).set(data);
 };
 
+// init session hack
+var writeInitSessData = function () {
+    var seed = Math.floor((Math.random()) * 1000);
+    db.ref('current-scouting').child(`init ${seed}`).set('refreshing data');
+    db.ref('current-scouting').child(`init ${seed}`).remove();
+};
+
 var removeSessionData = function (teamNum) {
-    return db.ref('current-scouting').remove();
+    return db.ref('current-scouting').child(`Team ${teamNum}`).remove();
 };
 
 var getTeams = function () {
@@ -236,7 +243,7 @@ var addTeams = function (teams, query, page) {
 var createTeam = function (team) {
     var elem = ons.createElement(`
               <ons-list-item data-team-num="${team.team_number}">
-              <div>
+              <div id="team-name">
                 ${team.nickname} - ${team.team_number}
                 </div>
               </ons-list-item>
@@ -268,32 +275,33 @@ var getElemByTeamNum = function (teamNum) {
     return document.querySelector(`[data-team-num~="${teamNum}"]`); //https://stackoverflow.com/a/13449757/3807967
 };
 
-var setTeamBusy = function (teamNum) {
+var setTeamBusy = function (teamNum, username) {
     var team = getElemByTeamNum(teamNum);
-    console.log('teambusy', team);
-    if(_.has(allBusyTeams, teamNum.toString())){
+
+    if(_.includes(allBusyTeams, teamNum.toString())){
         console.log('already there');
     } else {
         allBusyTeams.push(teamNum);
-
-        team.appendChild(ons.createElement('<ons-icon icon="fa-circle" id="in-progress"></ons-icon>', {
+        // allBusyTeams = _.uniq(allBusyTeams); // very dirty hack
+        team.appendChild(ons.createElement(`<div id="in-progress"><ons-icon icon="fa-circle"></ons-icon><span class="list-item__subtitle">${username}</span></div>`, {
             append: true
-        }))
+        }));
     }
 };
 
 var releaseTeamBusy = function (teamNum) {
     var team = getElemByTeamNum(teamNum);
     console.log(team);
-    team.removeChild(document.querySelector('#in-progress'));
+    team.removeChild(team.querySelector('#in-progress'));
 };
 
 document.addEventListener('destroy', function (event) {
     var page = event.target;
-    let team = page.data.team;
+    let num = page.data.num;
     if(page.matches('#team-scout')){
         // releaseTeamBusy(team.teamNum);
-        releaseTeamBusy(page.data.num);
+        releaseTeamBusy(num);
+        removeSessionData(num);
     }
 });
 
@@ -301,15 +309,23 @@ document.addEventListener('init', function (event) {
     console.log("Init", event.target.id);
     var page = event.target;
 
+
     db.ref('current-scouting').on('value', function (snapshot) {
         var data = snapshot.val();
         console.log('curr scout data', data);
         const currentTeams = _.values(data);
         console.log(currentTeams);
         _.each(currentTeams, (team) => {
-            setTeamBusy(team.teamNum);
+            setTeamBusy(team.teamNum, team.username);
         })
         // setTeamBusy(data);
+    });
+    // todo fix removal of the busy team
+    db.ref('current-scouting').on("child_removed", function(snapshot) {
+        const unscoutedTeams = _.values(snapshot.val());
+        _.each(unscoutedTeams, (team) => {
+            releaseTeamBusy(team.teamNum);
+        })
     });
 
     // todo add fb db code to set teams as busy here
@@ -619,6 +635,7 @@ document.addEventListener('init', function (event) {
 });
 
 document.addEventListener("show", function (event) {
+    writeInitSessData(); // this works
     var page = event.target;
     var settings = document.querySelector("#settingsPage");
     if (page.matches("#rank-teams") && teamDataDirty) {
