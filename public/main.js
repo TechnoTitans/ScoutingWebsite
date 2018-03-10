@@ -19,11 +19,16 @@ var currentEventKey = () => year + state + eventCode;
 var eventCodes = {'Gainesville': 'gai', 'Houston': 'cmptx', 'Peachtree': 'cmp', 'Albany': 'alb'};
 var allTeams = [];
 var allTeamElems = [];
+var allBusyTeams = [];
 var allTeamData = null;
 var teamDataDirty = true;
 var teamListDirty = true;
 
 var writeScoutingData = function (data, isPit) {
+    if(!data || data === undefined) {
+        console.log('tried to send invalid data')
+        return;
+    }
     console.log('sent data for team' + data.teamName, data);
     return db.ref("data").child(data.teamNum.toString()).child(data.eventKey).child(isPit ? 'pit' : 'match').push().set(data);
 };
@@ -32,16 +37,22 @@ var getPrettyTimestamp = function () {
     return moment.unix(Date.now() / 1000).format('llll');
 };
 
-var writeSessionData = function () {
+var writeSessionData = function (teamNum) {
     var data = {};
     var currentUser = firebase.auth().currentUser;
     if(!currentUser) {
         console.log("Error: no user signed in");
         return;
     }
-    data.user = currentUser;
+    data.username = currentUser.displayName;
     data.timestamp = getPrettyTimestamp();
-    return db.ref('current-scouting').child(data.teamNum.toString()).set(data);
+    data.unix = Date.now();
+    data.teamNum = teamNum;
+    return db.ref('current-scouting').child("Team " + teamNum.toString()).set(data);
+};
+
+var removeSessionData = function (teamNum) {
+    return db.ref('current-scouting').remove();
 };
 
 var getTeams = function () {
@@ -203,6 +214,7 @@ var addTeams = function (teams, query, page) {
     // we need to remove the teams that are not present at the event
     var teamList = page.querySelector("#teams-list");
     allTeamElems = [];
+    allBusyTeams = [];
     teamList.innerHTML = ''; // hacky way to delete previous teams
     for (let team of teams) {
         if (query.every(term => team.nickname.toLowerCase().indexOf(term) !== -1
@@ -240,6 +252,7 @@ var teamClick = function () {
     var teamNumber = this.dataset.teamNum;
     document.getElementById("appNavigator").pushPage("team-scout.html", {data: {num: teamNumber}});
     // todo add firebase db code here
+    writeSessionData(teamNumber);
 };
 
 var fetchTeams = function (page) {
@@ -257,20 +270,47 @@ var getElemByTeamNum = function (teamNum) {
 
 var setTeamBusy = function (teamNum) {
     var team = getElemByTeamNum(teamNum);
-    console.log(team);
-    team.appendChild(ons.createElement('<ons-icon icon="fa-circle" id="in-progress"></ons-icon>', {
-        append: true
-    }))
+    console.log('teambusy', team);
+    if(_.has(allBusyTeams, teamNum.toString())){
+        console.log('already there');
+    } else {
+        allBusyTeams.push(teamNum);
+
+        team.appendChild(ons.createElement('<ons-icon icon="fa-circle" id="in-progress"></ons-icon>', {
+            append: true
+        }))
+    }
 };
 
 var releaseTeamBusy = function (teamNum) {
     var team = getElemByTeamNum(teamNum);
+    console.log(team);
     team.removeChild(document.querySelector('#in-progress'));
 };
+
+document.addEventListener('destroy', function (event) {
+    var page = event.target;
+    let team = page.data.team;
+    if(page.matches('#team-scout')){
+        // releaseTeamBusy(team.teamNum);
+        releaseTeamBusy(page.data.num);
+    }
+});
 
 document.addEventListener('init', function (event) {
     console.log("Init", event.target.id);
     var page = event.target;
+
+    db.ref('current-scouting').on('value', function (snapshot) {
+        var data = snapshot.val();
+        console.log('curr scout data', data);
+        const currentTeams = _.values(data);
+        console.log(currentTeams);
+        _.each(currentTeams, (team) => {
+            setTeamBusy(team.teamNum);
+        })
+        // setTeamBusy(data);
+    });
 
     // todo add fb db code to set teams as busy here
     // socket.on('scout-in-prg', function(teamNum) {
@@ -314,6 +354,7 @@ document.addEventListener('init', function (event) {
         console.log(page.data);
         var teamNum = page.data.num;
         var teamObj = getTeamByNumber(teamNum);
+
         if (!teamObj) {
             alert("Could not find team"); // should never happen anyway
             return;
