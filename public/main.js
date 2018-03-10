@@ -159,8 +159,8 @@ var makeSuccessFailureMenu = function (main, succ, isCheckbox) {
     var callback = function (enabled) {
         enableButtons(succ, enabled);
         if (!enabled) {
-            main.dataset.chosen = "";
-            succ.dataset.chosen = "";
+            main.dataset.selected = "";
+            succ.dataset.selected = "";
         }
     };
     if (isCheckbox) createSelectCheckboxMenu(main, selected => callback(selected.length > 0));
@@ -318,7 +318,7 @@ document.addEventListener('init', function (event) {
         });
         createSelectMenu(autoSucc);
         makeSuccessFailureMenu(page.querySelector("#end-game-menu"), page.querySelector("#end-game-result"), false);
-        page.querySelectorAll("p").forEach(p => createNumInput(p));
+        page.querySelectorAll("#teleop-run p").forEach(p => createNumInput(p));
         let submitted = false;
         page.querySelector("form").onsubmit = function (e) {
             e.preventDefault();
