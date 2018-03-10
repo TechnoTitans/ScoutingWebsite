@@ -299,7 +299,7 @@ document.addEventListener('init', function (event) {
         //createSelectMenu(resultBtnsContainer);
         let autoMove = page.querySelector("#auto-move"), autoTarget = page.querySelector("#auto-target"), autoSucc = page.querySelector("#auto-target-result");
         createSelectMenu(autoMove, chosen => {
-            if (chosen.dataset.select === "dline") {
+            if (chosen && chosen.dataset.select === "dline") {
                 enableButtons(autoTarget, true);
             } else {
                 enableButtons(autoTarget, false);
