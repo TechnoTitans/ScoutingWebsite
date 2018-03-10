@@ -14,16 +14,6 @@ firebase.initializeApp(config);
 console.log('fb conslog', firebase);
 var db = firebase.database();
 
-
-var webAuth = new auth0.WebAuth({
-    domain: 'tpgauthserver.auth0.com',
-    clientID: 'VFolMJhfyg76aySCcM1Pg79E1sWfjH9E',
-    responseType: 'token id_token',
-    scope: 'openid',
-    audience: 'https://tpgauthserver.auth0.com/userinfo',
-    redirectUri: window.location.href
-});
-
 var state = 'ga', eventCode = 'gai', year = 2018; // todo determine eventcode by date
 var currentEventKey = () => year + state + eventCode;
 var eventCodes = {'Gainesville': 'gai', 'Houston': 'cmptx', 'Peachtree': 'cmp', 'Albany': 'alb'};
@@ -242,7 +232,25 @@ document.addEventListener('init', function (event) {
     var page = event.target;
 
     if (page.matches("#login")) {
-        window.fn.checkForPrevAuth();
+        let ui = new firebaseui.auth.AuthUI(firebase.auth());
+        let uiConfig = {
+          callbacks: {
+            signInSuccess: function(currentUser, credential, redirectUrl) {
+              // User successfully signed in.
+              // Return type determines whether we continue the redirect automatically
+              // or whether we leave that to developer to handle.
+              if (currentUser) document.getElementById('appNavigator').pushPage('tabbar.html');
+              return false;
+            }
+          },
+          // Will use popup for IDP Providers sign-in flow instead of the default, redirect.
+          signInOptions: [
+            // Leave the lines as is for the providers you want to offer your users.
+            firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+            firebase.auth.EmailAuthProvider.PROVIDER_ID,
+          ],
+        };
+        ui.start('#firebaseui-auth-container', uiConfig);
     }
 
     // this.querySelector('ons-toolbar div.center').textContent = this.data.title;
