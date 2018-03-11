@@ -81,9 +81,52 @@ function HSVtoRGB(h, s, v) {
     };
 };
 
-var csvExport = function() {
-    var file = "";
-    
+var csvExport = function(settings) { // TODO: use settings, maybe make configurable?
+    let wb = {SheetNames: [], Sheets: {}};
+    var header = "Match Number,Movement in Autonomous,Autonomous Target,Autonomous Success,Teleop Switch,Teleop Scale,Teleop Vault,End Game,End Game Success,Comments".split(",");
+    var strMap = {
+        "dline": "Drove across line",
+        "move": "Moved but did not cross",
+        "none": "Did not move",
+        "sswitch": "Same-side switch",
+        "sscale": "Same-side scale",
+        "cswitch": "Cross-side switch",
+        "cscale": "Cross-side scale",
+        "": "None",
+        "climb": "Climbed",
+        "ramps": "Deployed ramps",
+        "other": "Other lifting mechanism",
+        "parked": "Parked on platforms"
+    };
+    let teamsWithData = getTeamsWithData(allTeams, allTeamData);
+    for (let i = 0; i < teamsWithData.length; ++i) {
+        let team = allTeams[i];
+        let ws = XLSX.utils.aoa_to_sheet([header]);
+        let teamData = allTeamData[team.team_number][currentEventKey()].match;
+        let allMatches = [];
+        for (let matchKey in teamData) {
+            let match = teamData[matchKey];
+            allMatches.push([
+                0, // match number not implemented yet
+                strMap[match.autoMove],
+                strMap[match.autoTarget],
+                match.autoSuccess,
+                match.teleopSwitch,
+                match.teleopScale,
+                match.teleopVault,
+                strMap[match.endGame],
+                match.endGameSuccess,
+                match.comments
+            ]);
+        }
+        XLSX.utils.sheet_add_aoa(ws, allMatches, {origin: "A2"});
+        let sheetName = `${team.team_number} - ${team.nickname}`;
+        // wtf for some reason sheet names cannot be longer than 31 chars
+        if (sheetName.length > 31) sheetName = sheetName.slice(0, 28) + "...";
+        wb.Sheets[sheetName] = ws;
+        wb.SheetNames.push(sheetName);
+    }
+    return wb;
 };
 
 
@@ -96,6 +139,16 @@ var getAllTeamData = function () {
             resolve(allTeamData);
         });
     });
+};
+
+var getTeamsWithData = function(teams, teamData) {
+    var teamExists = function (team) {
+        // must be != (not !==) so that we check for undefined as well
+        return teamData[team.team_number] != null
+            && teamData[team.team_number][currentEventKey()] != null
+            && teamData[team.team_number][currentEventKey()].match != null;
+    }
+    return teams.filter(t => teamExists(t));
 };
 
 var teamHasData = function (teamNum) {
@@ -636,20 +689,12 @@ document.addEventListener("show", function (event) {
         Promise.all([getTeams(), getAllTeamData()]).then(function (values) {
             teamDataDirty = false;
             var teams = values[0].slice(), teamData = values[1];
-            var teamsWithData = [], teamsWOData = [];
-            var teamExists = function (team) {
-                // must be != (not !==) so that we check for undefined as well
-                return teamData[team.team_number] != null
-                    && teamData[team.team_number][currentEventKey()] != null
-                    && teamData[team.team_number][currentEventKey()].match != null;
+            var teamsWithData = getTeamsWithData(teams, teamData);
+
+            for (let team of teamsWithData) {
+                addToAverages(teamData[team.team_number]);
             }
-            for (let team of teams) {
-                if (teamExists(team)) {
-                    addToAverages(teamData[team.team_number]);
-                    teamsWithData.push(team);
-                }
-                else teamsWOData.push(team);
-            }
+            // all averages must be calculated before scores
             for (let team of teamsWithData) {
                 calculateScore(teamData[team.team_number], team.team_number);
             }
