@@ -26,7 +26,7 @@ var teamListDirty = true;
 
 var writeScoutingData = function (data, isPit) {
     if(!data || data === undefined) {
-        console.log('tried to send invalid data')
+        console.log('tried to send invalid data');
         return;
     }
     console.log('sent data for team' + data.teamName, data);
@@ -54,7 +54,7 @@ var writeSessionData = function (teamNum) {
 // init session hack
 var writeInitSessData = function () {
     var seed = Math.floor((Math.random()) * 1000);
-    db.ref('current-scouting').child(`init ${seed}`).set('refreshing data');
+    db.ref('current-scouting').child(`init ${seed}`).set('init-data');
     db.ref('current-scouting').child(`init ${seed}`).remove();
 };
 
@@ -277,7 +277,9 @@ var getElemByTeamNum = function (teamNum) {
 
 var setTeamBusy = function (teamNum, username) {
     var team = getElemByTeamNum(teamNum);
-
+    if(!teamNum || teamNum === null || teamNum === undefined) {
+        return;
+    }
     if(_.includes(allBusyTeams, teamNum.toString())){
         console.log('already there');
     } else {
@@ -290,9 +292,14 @@ var setTeamBusy = function (teamNum, username) {
 };
 
 var releaseTeamBusy = function (teamNum) {
+
     var team = getElemByTeamNum(teamNum);
-    console.log(team);
-    team.removeChild(team.querySelector('#in-progress'));
+    console.log('team to release', teamNum);
+    try {
+        team.removeChild(team.querySelector('#in-progress'));
+    } catch (e) {
+        console.log('couldnt remove child', teamNum, 'e:', e);
+    }
 };
 
 document.addEventListener('destroy', function (event) {
@@ -322,10 +329,13 @@ document.addEventListener('init', function (event) {
     });
     // todo fix removal of the busy team
     db.ref('current-scouting').on("child_removed", function(snapshot) {
-        const unscoutedTeams = _.values(snapshot.val());
-        _.each(unscoutedTeams, (team) => {
-            releaseTeamBusy(team.teamNum);
-        })
+        if(snapshot.val() === 'init-data') {
+            return; // don't do anything, simply refresh thing
+        }
+
+        const unscoutedTeam = snapshot.val();
+        console.log(unscoutedTeam, 'unscout');
+        releaseTeamBusy(unscoutedTeam.teamNum)
     });
 
     // todo add fb db code to set teams as busy here
