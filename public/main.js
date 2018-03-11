@@ -25,8 +25,7 @@ var teamListDirty = true;
 var allScouters = {};
 
 var writeScoutingData = function (data, isPit) {
-    console.log('sent data for team' + data.teamName, data);
-    return db.ref("data").child(data.teamNum.toString()).child(data.eventKey).child(isPit ? 'pit' : 'match').push().set(data);
+    return db.ref("data").child(data.teamNum.toString()).child(currentEventKey()).child(isPit ? 'pit' : 'match').push().set(data);
 };
 
 
@@ -80,7 +79,12 @@ function HSVtoRGB(h, s, v) {
         g: Math.round(g * 255),
         b: Math.round(b * 255)
     };
-}
+};
+
+var csvExport = function() {
+    var file = "";
+    
+};
 
 
 var getAllTeamData = function () {
@@ -336,9 +340,7 @@ document.addEventListener('init', function (event) {
             data.endGameSuccess = page.querySelector("#end-game-result").dataset.selected;
             data.comments = page.querySelector("textarea").value;
             data.timestamp = Date.now(); // just for fun idk
-            data.teamName = team.nickname.trim();
             data.teamNum = team.team_number;
-            data.eventKey = currentEventKey();
             var btn = this.querySelector("#submit-match");
             btn.style.width = btn.offsetWidth + "px"; // keep width fixed
             btn.querySelector("#submit-load").style.display = "initial";
@@ -362,9 +364,7 @@ document.addEventListener('init', function (event) {
             submitted = true;
             var data = {};
             data.user = firebase.auth().currentUser.displayName;
-            data.teamName = team.nickname.trim();
             data.teamNum = team.team_number;
-            data.eventKey = currentEventKey();
             data.driveTrain = page.querySelector("#drivetrain-select").dataset.selected;
             data.focus = page.querySelector("#focus").dataset.selected;
             data.capabilities = page.querySelector("#capabilities").dataset.selected;
