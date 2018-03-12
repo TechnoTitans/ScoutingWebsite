@@ -51,7 +51,8 @@ var writeSessionData = function (teamNum) {
     data.timestamp = getPrettyTimestamp();
     data.unix = Date.now();
     data.teamNum = teamNum;
-    return db.ref('current-scouting').child("Team " + teamNum.toString()).set(data);
+    var tm = db.ref('current-scouting').child("Team " + teamNum);
+    return Promise.all([tm.onDisconnect().remove(), tm.set(data)]);
 };
 
 var removeSessionData = function (teamNum) {
