@@ -283,7 +283,9 @@ var setTeamBusy = function (teamNum, username) {
     } else {
         allBusyTeams.push(teamNum);
         // allBusyTeams = _.uniq(allBusyTeams); // very dirty hack
-        team.appendChild(ons.createElement(`<div id="in-progress" class="right list-item__right"><ons-icon icon="fa-circle"></ons-icon><span class="list-item__subtitle">${username}</span></div>`, {
+        team.appendChild(ons.createElement(`<div id="in-progress" class="right list-item__right">
+            <ons-icon icon="fa-circle"></ons-icon><span class="list-item__subtitle" style="margin-left: 5px;">${username}</span>
+        </div>`, {
             append: true
         }));
     }
