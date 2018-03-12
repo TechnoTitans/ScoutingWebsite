@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="">
 <head>
     <meta charset="UTF-8">
     <title>Scouting App</title>
@@ -15,6 +15,8 @@
     <script src="node_modules/firebaseui/dist/firebaseui.js"></script>
     <link type="text/css" rel="stylesheet" href="node_modules/firebaseui/dist/firebaseui.css" />
     <script src="main.js"></script>
+    <script src="node_modules/moment/min/moment.min.js"></script>
+    <script src="node_modules/lodash/lodash.min.js"></script>
     <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
     <link rel="stylesheet" href="res/main.css"/>
     <!--<link rel="manifest" href="manifest.json">-->
@@ -120,8 +122,8 @@
 	        <div>
 		        <h4 style = "padding-right: 8%; font-size: 99%">Tournament:</h4>
                 <ons-select id="tournament" style = "float: left">
-                    <option value="Gainesville">Gainesville</option>
                     <option value="Albany">Albany</option>
+                    <option value="Gainesville">Gainesville</option>
                     <option value="Peachtree">Peachtree</option>
                             <!--<option value="Houston">Houston</option>-->
                 </ons-select>
@@ -338,14 +340,7 @@
 
 </script>
 <script>
-    // Check that service workers are registered
-    //if ('serviceWorker' in navigator) {
-    //    console.log('sw thing');
-        // Use the window load event to keep the page load performant
-    //    window.addEventListener('load', () => {
-    //        navigator.serviceWorker.register('sw.js');
-    //    });
-    //s}
+
 </script>
 </body>
 </html>

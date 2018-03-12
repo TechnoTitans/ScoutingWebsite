@@ -14,19 +14,49 @@ firebase.initializeApp(config);
 console.log('fb conslog', firebase);
 var db = firebase.database();
 
-var state = 'ga', eventCode = 'gai', year = 2018; // todo determine eventcode by date
+var state = 'ga', eventCode = 'alb', year = 2018; // todo determine eventcode by date
 var currentEventKey = () => year + state + eventCode;
 var eventCodes = {'Gainesville': 'gai', 'Houston': 'cmptx', 'Peachtree': 'cmp', 'Albany': 'alb'};
 var allTeams = [];
-var allTeamElems = [];
+// var allTeamElems = [];
+var allBusyTeams = [];
+var allBusyTeamsBuffer = [];
 var allTeamData = null;
 var teamDataDirty = true;
 var teamListDirty = true;
 var allScouters = {};
 
 var writeScoutingData = function (data, isPit) {
+    if(!data || data === undefined) {
+        console.log('tried to send invalid data');
+        return;
+    }
     console.log('sent data for team' + data.teamName, data);
     return db.ref("data").child(data.teamNum.toString()).child(data.eventKey).child(isPit ? 'pit' : 'match').push().set(data);
+};
+
+
+var getPrettyTimestamp = function () {
+    return moment.unix(Date.now() / 1000).format('llll');
+};
+
+var writeSessionData = function (teamNum) {
+    var data = {};
+    var currentUser = firebase.auth().currentUser;
+    if(!currentUser) {
+        console.log("Error: no user signed in");
+        return;
+    }
+    data.username = currentUser.displayName;
+    data.timestamp = getPrettyTimestamp();
+    data.unix = Date.now();
+    data.teamNum = teamNum;
+    var tm = db.ref('current-scouting').child("Team " + teamNum);
+    return Promise.all([tm.onDisconnect().remove(), tm.set(data)]);
+};
+
+var removeSessionData = function (teamNum) {
+    return db.ref('current-scouting').child(`Team ${teamNum}`).remove();
 };
 
 
@@ -86,7 +116,7 @@ function HSVtoRGB(h, s, v) {
 var getAllTeamData = function () {
     if (allTeamData) return Promise.resolve(allTeamData);
     return new Promise((resolve, reject) => {
-        db.ref("data").on("value", function (snapshot) {
+        db.ref("data").on("value", function (snapshot) { // TODO: fix this, this seems sketchy, what happens when you switch tournaments?
             allTeamData = snapshot.val();
             teamDataDirty = true;
             resolve(allTeamData);
@@ -186,7 +216,8 @@ var createNumInput = function (container) {
 var addTeams = function (teams, query, page) {
     // we need to remove the teams that are not present at the event
     var teamList = page.querySelector("#teams-list");
-    allTeamElems = [];
+    // allTeamElems = [];
+    allBusyTeams = [];
     teamList.innerHTML = ''; // hacky way to delete previous teams
     for (let team of teams) {
         if (query.every(term => team.nickname.toLowerCase().indexOf(term) !== -1
@@ -208,13 +239,14 @@ var addTeams = function (teams, query, page) {
 var createTeam = function (team) {
     var elem = ons.createElement(`
               <ons-list-item data-team-num="${team.team_number}">
-              <div>
+              <div id="team-name">
                 ${team.nickname} - ${team.team_number}
                 </div>
               </ons-list-item>
             `
     );
     elem.onclick = teamClick;
+    // allTeamElems.push(elem);
     return elem;
     // allTeamElems.push(elem);
 };
@@ -222,6 +254,8 @@ var createTeam = function (team) {
 var teamClick = function () {
     var teamNumber = this.dataset.teamNum;
     document.getElementById("appNavigator").pushPage("team-scout.html", {data: {num: teamNumber}});
+    // todo add firebase db code here
+    writeSessionData(teamNumber);
 };
 
 var fetchTeams = function (page) {
@@ -233,10 +267,58 @@ var fetchTeams = function (page) {
     });
 };
 
+var getElemByTeamNum = function (teamNum) {
+    return document.querySelector(`[data-team-num~="${teamNum}"]`); //https://stackoverflow.com/a/13449757/3807967
+};
+
+var setTeamBusy = function (teamNum, username) {
+    var team = getElemByTeamNum(teamNum);
+    if(!team) {
+        console.log("Will do", teamNum, "later");
+        allBusyTeamsBuffer.push({num: teamNum, user: username}); // will do later when page loads
+        return;
+    }
+    if(_.includes(allBusyTeams, teamNum.toString())){
+        console.log('already there');
+    } else {
+        allBusyTeams.push(teamNum);
+        // allBusyTeams = _.uniq(allBusyTeams); // very dirty hack
+        team.appendChild(ons.createElement(`<div id="in-progress" class="right list-item__right">
+            <ons-icon icon="fa-circle"></ons-icon><span class="list-item__subtitle" style="margin-left: 5px;">${username}</span>
+        </div>`, {
+            append: true
+        }));
+    }
+};
+
+var releaseTeamBusy = function (teamNum) {
+    var team = getElemByTeamNum(teamNum);
+    console.log('team to release', teamNum);
+    let toRemove = team.querySelector("#in-progress");
+    if (toRemove) team.removeChild(toRemove);
+    _.remove(allBusyTeams, x => x === teamNum);
+};
+
+
+
+document.addEventListener('destroy', function (event) {
+    var page = event.target;
+    let num = page.data.num;
+    if(page.matches('#team-scout')){
+        // releaseTeamBusy(team.teamNum);
+        // releaseTeamBusy(num); // this will already be called when from remove session data
+        removeSessionData(num);
+    }
+});
 
 document.addEventListener('init', function (event) {
     console.log("Init", event.target.id);
     var page = event.target;
+
+    // todo add fb db code to set teams as busy here
+    // socket.on('scout-in-prg', function(teamNum) {
+    //     setTeamBusy(teamNum);
+    // });
 
     if (page.matches("#login")) {
         let ui = new firebaseui.auth.AuthUI(firebase.auth());
@@ -259,8 +341,24 @@ document.addEventListener('init', function (event) {
 
     // this.querySelector('ons-toolbar div.center').textContent = this.data.title;
     if (page.matches("#home")) {
+        db.ref('current-scouting').on('child_added', function (snapshot) {
+            var team = snapshot.val();
+            console.log('curr scout data', team);
+            setTeamBusy(team.teamNum, team.username);
+        });
+        // todo fix removal of the busy team
+        db.ref('current-scouting').on("child_removed", function(snapshot) {
+            const unscoutedTeam = snapshot.val();
+            console.log(unscoutedTeam, 'unscout');
+            releaseTeamBusy(unscoutedTeam.teamNum)
+        });
         // this.querySelector('ons-toolbar div.center').textContent = this.data.title;
-        fetchTeams(page);
+        fetchTeams(page).then(function() {
+            while (allBusyTeamsBuffer.length > 0) {
+                let team = allBusyTeamsBuffer.pop();
+                setTeamBusy(team.num, team.user);
+            }
+        });
         // pullHook.onaction = fetchTeams;
         var searchBar = page.querySelector("ons-search-input");
         searchBar.onkeyup = function () {
@@ -271,6 +369,7 @@ document.addEventListener('init', function (event) {
     } else if (page.matches("#team-scout")) {
         var teamNum = page.data.num;
         var teamObj = getTeamByNumber(teamNum);
+
         if (!teamObj) {
             alert("Could not find team"); // should never happen anyway
             return;
@@ -335,7 +434,8 @@ document.addEventListener('init', function (event) {
             data.endGame = page.querySelector("#end-game-menu").dataset.selected;
             data.endGameSuccess = page.querySelector("#end-game-result").dataset.selected;
             data.comments = page.querySelector("textarea").value;
-            data.timestamp = Date.now(); // just for fun idk
+            data.prettydate = getPrettyTimestamp();
+            data.timestamp = Date.now();
             data.teamName = team.nickname.trim();
             data.teamNum = team.team_number;
             data.eventKey = currentEventKey();
@@ -352,6 +452,7 @@ document.addEventListener('init', function (event) {
         };
     } else if (page.matches("#pit-scout")) {
         let team = page.data.team;
+        let submitted = false; // todo check if correct
         page.querySelector("#team-num").innerHTML = team.team_number;
         page.querySelector("#team-name").innerHTML = team.nickname;
         page.querySelectorAll(".select-one").forEach(x => createSelectMenu(x));
