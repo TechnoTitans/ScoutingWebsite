@@ -25,6 +25,8 @@
     "express": "^4.16.2",
     "firebaseui": "^2.6.2",
     "font-awesome-animation": "^0.2.0",
+    "lodash": "^4.17.5",
+    "moment": "^2.21.0",
     "onsenui": "^2.9.2",
     "workbox-sw": "^2.1.2"
   }

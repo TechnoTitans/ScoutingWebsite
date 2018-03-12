@@ -14,18 +14,49 @@ firebase.initializeApp(config);
 console.log('fb conslog', firebase);
 var db = firebase.database();
 
-var state = 'ga', eventCode = 'gai', year = 2018; // todo determine eventcode by date
+var state = 'ga', eventCode = 'alb', year = 2018; // todo determine eventcode by date
 var currentEventKey = () => year + state + eventCode;
 var eventCodes = {'Gainesville': 'gai', 'Houston': 'cmptx', 'Peachtree': 'cmp', 'Albany': 'alb'};
 var allTeams = [];
-var allTeamElems = [];
+// var allTeamElems = [];
+var allBusyTeams = [];
+var allBusyTeamsBuffer = [];
 var allTeamData = null;
 var teamDataDirty = true;
 var teamListDirty = true;
 var allScouters = {};
 
 var writeScoutingData = function (data, isPit) {
-    return db.ref("data").child(data.teamNum.toString()).child(currentEventKey()).child(isPit ? 'pit' : 'match').push().set(data);
+    if(!data) {
+        console.log('tried to send invalid data');
+        return;
+    }
+    console.log('sent data for team' + data.teamName, data);
+    return db.ref("data").child(data.teamNum.toString()).child(data.eventKey).child(isPit ? 'pit' : 'match').push().set(data);
+};
+
+
+var getPrettyTimestamp = function () {
+    return moment.unix(Date.now() / 1000).format('llll');
+};
+
+var writeSessionData = function (teamNum) {
+    var data = {};
+    var currentUser = firebase.auth().currentUser;
+    if(!currentUser) {
+        console.log("Error: no user signed in");
+        return;
+    }
+    data.username = currentUser.displayName;
+    data.timestamp = getPrettyTimestamp();
+    data.unix = Date.now();
+    data.teamNum = teamNum;
+    var tm = db.ref('current-scouting').child("Team " + teamNum);
+    return Promise.all([tm.onDisconnect().remove(), tm.set(data)]);
+};
+
+var removeSessionData = function (teamNum) {
+    return db.ref('current-scouting').child(`Team ${teamNum}`).remove();
 };
 
 
@@ -243,7 +274,8 @@ var createNumInput = function (container) {
 var addTeams = function (teams, query, page) {
     // we need to remove the teams that are not present at the event
     var teamList = page.querySelector("#teams-list");
-    allTeamElems = [];
+    // allTeamElems = [];
+    allBusyTeams = [];
     teamList.innerHTML = ''; // hacky way to delete previous teams
     for (let team of teams) {
         if (query.every(term => team.nickname.toLowerCase().indexOf(term) !== -1
@@ -279,6 +311,8 @@ var createTeam = function (team) {
 var teamClick = function () {
     var teamNumber = this.dataset.teamNum;
     document.getElementById("appNavigator").pushPage("team-scout.html", {data: {num: teamNumber}});
+    // todo add firebase db code here
+    writeSessionData(teamNumber);
 };
 
 var fetchTeams = function (page) {
@@ -290,6 +324,49 @@ var fetchTeams = function (page) {
     });
 };
 
+var getElemByTeamNum = function (teamNum) {
+    return document.querySelector(`[data-team-num~="${teamNum}"]`); //https://stackoverflow.com/a/13449757/3807967
+};
+
+var setTeamBusy = function (teamNum, username) {
+    var team = getElemByTeamNum(teamNum);
+    if(!team) {
+        console.log("Will do", teamNum, "later");
+        allBusyTeamsBuffer.push({num: teamNum, user: username}); // will do later when page loads
+        return;
+    }
+    if(_.includes(allBusyTeams, teamNum.toString())){
+        console.log('already there');
+    } else {
+        allBusyTeams.push(teamNum);
+        // allBusyTeams = _.uniq(allBusyTeams); // very dirty hack
+        team.appendChild(ons.createElement(`<div id="in-progress" class="right list-item__right">
+            <ons-icon icon="fa-circle"></ons-icon><span class="list-item__subtitle" style="margin-left: 5px;">${username}</span>
+        </div>`, {
+            append: true
+        }));
+    }
+};
+
+var releaseTeamBusy = function (teamNum) {
+    var team = getElemByTeamNum(teamNum);
+    console.log('team to release', teamNum);
+    let toRemove = team.querySelector("#in-progress");
+    if (toRemove) team.removeChild(toRemove);
+    _.remove(allBusyTeams, x => x === teamNum);
+};
+
+
+
+document.addEventListener('destroy', function (event) {
+    var page = event.target;
+    let num = page.data.num;
+    if(page.matches('#team-scout')){
+        // releaseTeamBusy(team.teamNum);
+        // releaseTeamBusy(num); // this will already be called when from remove session data
+        removeSessionData(num);
+    }
+});
 
 document.addEventListener('init', function (event) {
     console.log("Init", event.target.id);
@@ -316,8 +393,24 @@ document.addEventListener('init', function (event) {
 
     // this.querySelector('ons-toolbar div.center').textContent = this.data.title;
     if (page.matches("#home")) {
+        db.ref('current-scouting').on('child_added', function (snapshot) {
+            var team = snapshot.val();
+            console.log('curr scout data', team);
+            setTeamBusy(team.teamNum, team.username);
+        });
+        // todo fix removal of the busy team
+        db.ref('current-scouting').on("child_removed", function(snapshot) {
+            const unscoutedTeam = snapshot.val();
+            console.log(unscoutedTeam, 'unscout');
+            releaseTeamBusy(unscoutedTeam.teamNum)
+        });
         // this.querySelector('ons-toolbar div.center').textContent = this.data.title;
-        fetchTeams(page);
+        fetchTeams(page).then(function() {
+            while (allBusyTeamsBuffer.length > 0) {
+                let team = allBusyTeamsBuffer.pop();
+                setTeamBusy(team.num, team.user);
+            }
+        });
         // pullHook.onaction = fetchTeams;
         var searchBar = page.querySelector("ons-search-input");
         searchBar.onkeyup = function () {
@@ -392,7 +485,8 @@ document.addEventListener('init', function (event) {
             data.endGame = page.querySelector("#end-game-menu").dataset.selected;
             data.endGameSuccess = page.querySelector("#end-game-result").dataset.selected;
             data.comments = page.querySelector("textarea").value;
-            data.timestamp = Date.now(); // just for fun idk
+            data.prettydate = getPrettyTimestamp();
+            data.timestamp = Date.now();
             data.teamNum = team.team_number;
             var btn = this.querySelector("#submit-match");
             btn.style.width = btn.offsetWidth + "px"; // keep width fixed
