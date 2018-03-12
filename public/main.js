@@ -18,8 +18,9 @@ var state = 'ga', eventCode = 'alb', year = 2018; // todo determine eventcode by
 var currentEventKey = () => year + state + eventCode;
 var eventCodes = {'Gainesville': 'gai', 'Houston': 'cmptx', 'Peachtree': 'cmp', 'Albany': 'alb'};
 var allTeams = [];
-var allTeamElems = [];
+// var allTeamElems = [];
 var allBusyTeams = [];
+var allBusyTeamsBuffer = [];
 var allTeamData = null;
 var teamDataDirty = true;
 var teamListDirty = true;
@@ -51,13 +52,6 @@ var writeSessionData = function (teamNum) {
     data.unix = Date.now();
     data.teamNum = teamNum;
     return db.ref('current-scouting').child("Team " + teamNum.toString()).set(data);
-};
-
-// init session hack
-var writeInitSessData = function () {
-    var seed = Math.floor((Math.random()) * 1000);
-    db.ref('current-scouting').child(`init ${seed}`).set('init-data');
-    db.ref('current-scouting').child(`init ${seed}`).remove();
 };
 
 var removeSessionData = function (teamNum) {
@@ -121,7 +115,7 @@ function HSVtoRGB(h, s, v) {
 var getAllTeamData = function () {
     if (allTeamData) return Promise.resolve(allTeamData);
     return new Promise((resolve, reject) => {
-        db.ref("data").on("value", function (snapshot) {
+        db.ref("data").on("value", function (snapshot) { // TODO: fix this, this seems sketchy, what happens when you switch tournaments?
             allTeamData = snapshot.val();
             teamDataDirty = true;
             resolve(allTeamData);
@@ -221,7 +215,7 @@ var createNumInput = function (container) {
 var addTeams = function (teams, query, page) {
     // we need to remove the teams that are not present at the event
     var teamList = page.querySelector("#teams-list");
-    allTeamElems = [];
+    // allTeamElems = [];
     allBusyTeams = [];
     teamList.innerHTML = ''; // hacky way to delete previous teams
     for (let team of teams) {
@@ -251,7 +245,7 @@ var createTeam = function (team) {
             `
     );
     elem.onclick = teamClick;
-    allTeamElems.push(elem);
+    // allTeamElems.push(elem);
     return elem;
     // allTeamElems.push(elem);
 };
@@ -278,7 +272,9 @@ var getElemByTeamNum = function (teamNum) {
 
 var setTeamBusy = function (teamNum, username) {
     var team = getElemByTeamNum(teamNum);
-    if(!teamNum || teamNum === null || teamNum === undefined) {
+    if(!team) {
+        console.log("Will do", teamNum, "later");
+        allBusyTeamsBuffer.push({num: teamNum, user: username}); // will do later when page loads
         return;
     }
     if(_.includes(allBusyTeams, teamNum.toString())){
@@ -286,29 +282,27 @@ var setTeamBusy = function (teamNum, username) {
     } else {
         allBusyTeams.push(teamNum);
         // allBusyTeams = _.uniq(allBusyTeams); // very dirty hack
-        team.appendChild(ons.createElement(`<div id="in-progress"><ons-icon icon="fa-circle"></ons-icon><span class="list-item__subtitle">${username}</span></div>`, {
+        team.appendChild(ons.createElement(`<div id="in-progress" class="right list-item__right"><ons-icon icon="fa-circle"></ons-icon><span class="list-item__subtitle">${username}</span></div>`, {
             append: true
         }));
     }
 };
 
 var releaseTeamBusy = function (teamNum) {
-
     var team = getElemByTeamNum(teamNum);
     console.log('team to release', teamNum);
-    try {
-        team.removeChild(team.querySelector('#in-progress'));
-    } catch (e) {
-        console.log('couldnt remove child', teamNum, 'e:', e);
-    }
+    let toRemove = team.querySelector("#in-progress");
+    if (toRemove) team.removeChild(toRemove);
 };
+
+
 
 document.addEventListener('destroy', function (event) {
     var page = event.target;
     let num = page.data.num;
     if(page.matches('#team-scout')){
         // releaseTeamBusy(team.teamNum);
-        releaseTeamBusy(num);
+        // releaseTeamBusy(num); // this will already be called when from remove session data
         removeSessionData(num);
     }
 });
@@ -316,28 +310,6 @@ document.addEventListener('destroy', function (event) {
 document.addEventListener('init', function (event) {
     console.log("Init", event.target.id);
     var page = event.target;
-
-
-    db.ref('current-scouting').on('value', function (snapshot) {
-        var data = snapshot.val();
-        console.log('curr scout data', data);
-        const currentTeams = _.values(data);
-        console.log(currentTeams);
-        _.each(currentTeams, (team) => {
-            setTeamBusy(team.teamNum, team.username);
-        })
-        // setTeamBusy(data);
-    });
-    // todo fix removal of the busy team
-    db.ref('current-scouting').on("child_removed", function(snapshot) {
-        if(snapshot.val() === 'init-data') {
-            return; // don't do anything, simply refresh thing
-        }
-
-        const unscoutedTeam = snapshot.val();
-        console.log(unscoutedTeam, 'unscout');
-        releaseTeamBusy(unscoutedTeam.teamNum)
-    });
 
     // todo add fb db code to set teams as busy here
     // socket.on('scout-in-prg', function(teamNum) {
@@ -365,8 +337,24 @@ document.addEventListener('init', function (event) {
 
     // this.querySelector('ons-toolbar div.center').textContent = this.data.title;
     if (page.matches("#home")) {
+        db.ref('current-scouting').on('child_added', function (snapshot) {
+            var team = snapshot.val();
+            console.log('curr scout data', team);
+            setTeamBusy(team.teamNum, team.username);
+        });
+        // todo fix removal of the busy team
+        db.ref('current-scouting').on("child_removed", function(snapshot) {
+            const unscoutedTeam = snapshot.val();
+            console.log(unscoutedTeam, 'unscout');
+            releaseTeamBusy(unscoutedTeam.teamNum)
+        });
         // this.querySelector('ons-toolbar div.center').textContent = this.data.title;
-        fetchTeams(page);
+        fetchTeams(page).then(function() {
+            while (allBusyTeamsBuffer.length > 0) {
+                let team = allBusyTeamsBuffer.pop();
+                setTeamBusy(team.num, team.user);
+            }
+        });
         // pullHook.onaction = fetchTeams;
         var searchBar = page.querySelector("ons-search-input");
         searchBar.onkeyup = function () {
@@ -672,7 +660,6 @@ document.addEventListener('init', function (event) {
 });
 
 document.addEventListener("show", function (event) {
-    writeInitSessData(); // this works
     var page = event.target;
     var settings = document.querySelector("#settingsPage");
     if (page.matches("#rank-teams") && teamDataDirty) {
