@@ -293,6 +293,7 @@ var releaseTeamBusy = function (teamNum) {
     console.log('team to release', teamNum);
     let toRemove = team.querySelector("#in-progress");
     if (toRemove) team.removeChild(toRemove);
+    delete allBusyTeams[teamNum];
 };
 
 
