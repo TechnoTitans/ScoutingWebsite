@@ -482,6 +482,7 @@ document.addEventListener('init', function (event) {
             submitted = true;
             var data = {};
             data.user = firebase.auth().currentUser.displayName;
+            data.matchNum = parseInt(page.querySelector("#match-num").value);
             data.autoMove = page.querySelector("#auto-move").dataset.selected;
             data.autoTarget = page.querySelector("#auto-target").dataset.selected;
             data.autoSuccess = page.querySelector("#auto-target-result").dataset.selected;
