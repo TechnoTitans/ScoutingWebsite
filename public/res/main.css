@@ -166,3 +166,10 @@ ons-splitter-side[animation=overlay] {
     color: #4c6ef5;
     padding-right: 0.3em;
 }
+
+#settings-btns {
+    margin-top: 20px;
+}
+#settings-btns ons-button {
+    margin: 10px 0px;
+}

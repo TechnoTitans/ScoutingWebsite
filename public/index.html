@@ -129,7 +129,9 @@
                             <!--<option value="Houston">Houston</option>-->
                 </ons-select>
 	        </div><br />
-            <p style="margin-top: 20px;"><ons-button onclick="firebase.auth().signOut().then(() => location.reload())">Logout</ons-button></p>
+            <p id="settings-btns"><ons-button onclick="firebase.auth().signOut().then(() => location.reload())">Logout</ons-button>
+            <ons-button onclick="matchesExport().then(wb => XLSX.writeFile(wb, 'scouting-data.ods'));">Export Match Scouting Data</ons-button>
+            <ons-button onclick="alert('Not implemented')">Export Pit Scouting Data</ons-button></p>
         </div>
     </ons-page>
 </template>

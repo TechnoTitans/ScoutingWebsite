@@ -112,54 +112,60 @@ function HSVtoRGB(h, s, v) {
     };
 };
 
-var csvExport = function(settings) { // TODO: use settings, maybe make configurable?
-    let wb = {SheetNames: [], Sheets: {}};
-    var header = "Match Number,Movement in Autonomous,Autonomous Target,Autonomous Success,Teleop Switch,Teleop Scale,Teleop Vault,End Game,End Game Success,Comments".split(",");
-    var strMap = {
-        "dline": "Drove across line",
-        "move": "Moved but did not cross",
-        "none": "Did not move",
-        "sswitch": "Same-side switch",
-        "sscale": "Same-side scale",
-        "cswitch": "Cross-side switch",
-        "cscale": "Cross-side scale",
-        "": "None",
-        "climb": "Climbed",
-        "ramps": "Deployed ramps",
-        "other": "Other lifting mechanism",
-        "parked": "Parked on platforms"
-    };
-    let teamsWithData = getTeamsWithData(allTeams, allTeamData);
-    for (let i = 0; i < teamsWithData.length; ++i) {
-        let team = allTeams[i];
-        let ws = XLSX.utils.aoa_to_sheet([header]);
-        let teamData = allTeamData[team.team_number][currentEventKey()].match;
-        let allMatches = [];
-        for (let matchKey in teamData) {
-            let match = teamData[matchKey];
-            allMatches.push([
-                0, // match number not implemented yet
-                strMap[match.autoMove],
-                strMap[match.autoTarget],
-                match.autoSuccess,
-                match.teleopSwitch,
-                match.teleopScale,
-                match.teleopVault,
-                strMap[match.endGame],
-                match.endGameSuccess,
-                match.comments
-            ]);
+var matchesExport = function() { // TODO: use settings, maybe make configurable?
+    return Promise.all([getTeams(), getAllTeamData()]).then(function (values) {
+        let allTeams = values[0], allTeamData = values[1];
+        let wb = {SheetNames: [], Sheets: {}};
+        var header = "Match Number,Movement in Autonomous,Autonomous Target,Autonomous Success,Teleop Switch,Teleop Scale,Teleop Vault,End Game,End Game Success,Comments".split(",");
+        var strMap = {
+            "dline": "Drove across line",
+            "move": "Moved but did not cross",
+            "none": "Did not move",
+            "sswitch": "Same-side switch",
+            "sscale": "Same-side scale",
+            "cswitch": "Cross-side switch",
+            "cscale": "Cross-side scale",
+            "": "None",
+            "climb": "Climbed",
+            "ramps": "Deployed ramps",
+            "other": "Other lifting mechanism",
+            "parked": "Parked on platforms"
+        };
+        let teamsWithData = getTeamsWithData(allTeams, allTeamData);
+        for (let i = 0; i < teamsWithData.length; ++i) {
+            let team = allTeams[i];
+            let ws = XLSX.utils.aoa_to_sheet([header]);
+            let teamData = allTeamData[team.team_number][currentEventKey()].match;
+            let allMatches = [];
+            for (let matchKey in teamData) {
+                let match = teamData[matchKey];
+                allMatches.push([
+                    0, // match number not implemented yet
+                    strMap[match.autoMove],
+                    strMap[match.autoTarget],
+                    match.autoSuccess,
+                    match.teleopSwitch,
+                    match.teleopScale,
+                    match.teleopVault,
+                    strMap[match.endGame],
+                    match.endGameSuccess,
+                    match.comments
+                ]);
+            }
+            XLSX.utils.sheet_add_aoa(ws, allMatches, {origin: "A2"});
+            let sheetName = `${team.team_number} - ${team.nickname}`;
+            // wtf for some reason sheet names cannot be longer than 31 chars
+            if (sheetName.length > 31) sheetName = sheetName.slice(0, 28) + "...";
+            wb.Sheets[sheetName] = ws;
+            wb.SheetNames.push(sheetName);
         }
-        XLSX.utils.sheet_add_aoa(ws, allMatches, {origin: "A2"});
-        let sheetName = `${team.team_number} - ${team.nickname}`;
-        // wtf for some reason sheet names cannot be longer than 31 chars
-        if (sheetName.length > 31) sheetName = sheetName.slice(0, 28) + "...";
-        wb.Sheets[sheetName] = ws;
-        wb.SheetNames.push(sheetName);
-    }
-    return wb;
+        return wb;
+    });
 };
 
+var pitExport = function() {
+    // TODO
+};
 
 var getAllTeamData = function () {
     if (allTeamData) return Promise.resolve(allTeamData);
