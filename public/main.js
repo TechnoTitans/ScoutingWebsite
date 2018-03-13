@@ -32,7 +32,7 @@ var writeScoutingData = function (data, isPit) {
         return;
     }
     console.log('sent data for team' + data.teamName, data);
-    return db.ref("data").child(data.teamNum.toString()).child(data.eventKey).child(isPit ? 'pit' : 'match').push().set(data);
+    return db.ref("data").child(data.teamNum.toString()).child(currentEventKey()).child(isPit ? 'pit' : 'match').push().set(data);
 };
 
 
