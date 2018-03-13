@@ -480,6 +480,7 @@ document.addEventListener('init', function (event) {
                 }
             };
             if (minMatch >= 0) page.querySelector("#match-num").value = minMatch;
+            else page.querySelector("#match-num").value = 0;
         });
         let autoMove = page.querySelector("#auto-move"), autoTarget = page.querySelector("#auto-target"), autoSucc = page.querySelector("#auto-target-result");
         createSelectMenu(autoMove, chosen => {
@@ -582,7 +583,7 @@ document.addEventListener('init', function (event) {
         tournamentCode.onchange = function (event) {
             console.log(event.target.value);
             eventCode = eventCodes[event.target.value];
-            teamListDirty = teamDataDirty = true;
+            matchListDirty = teamListDirty = teamDataDirty = true;
             var homePage = document.querySelector("#home");
             homePage.querySelector("#loading").display = "block";
             fetchTeams(homePage).then(function () {
