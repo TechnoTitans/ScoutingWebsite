@@ -21,7 +21,6 @@ ons-splitter-side[animation=overlay] {
 
 .scout-page .btns {
     text-align: center;
-    margin-top: 20px;
     padding: 0.1em;
 }
 
@@ -114,9 +113,11 @@ ons-splitter-side[animation=overlay] {
     margin: 20px;
 }
 
-.scout-page #teleop-run .text-input {
+.scout-page .text-input {
     text-align: center;
     font-size: x-large;
+    position: relative;
+    top: -5px;
 }
 
 .scout-page #teleop-run ons-input {
@@ -124,7 +125,7 @@ ons-splitter-side[animation=overlay] {
     width: 3em;
 }
 
-.scout-page #teleop-run input:invalid {
+.scout-page input:invalid {
     box-shadow: 0 0 5px 1px red;
 }
 
