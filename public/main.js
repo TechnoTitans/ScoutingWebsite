@@ -154,7 +154,7 @@ var matchesExport = function() { // TODO: use settings, maybe make configurable?
             for (let matchKey in teamData) {
                 let match = teamData[matchKey];
                 allMatches.push([
-                    0, // match number not implemented yet
+                    match.matchNum || 0,
                     strMap[match.autoMove],
                     strMap[match.autoTarget],
                     match.autoSuccess,
@@ -309,7 +309,7 @@ var addTeams = function (teams, query, page) {
         //});
     }
     if (teamList.innerHTML === '') {
-        teamList.innerHTML = '<div>No competition data for this event yet</div>'; // todo fix styling
+        teamList.innerHTML = '<div>No results</div>'; // todo fix styling
     }
 
 };
@@ -331,7 +331,6 @@ var createTeam = function (team) {
 var teamClick = function () {
     var teamNumber = this.dataset.teamNum;
     document.getElementById("appNavigator").pushPage("team-scout.html", {data: {num: teamNumber}});
-    // todo add firebase db code here
     writeSessionData(teamNumber);
 };
 
@@ -418,7 +417,6 @@ document.addEventListener('init', function (event) {
             console.log('curr scout data', team);
             setTeamBusy(team.teamNum, team.username);
         });
-        // todo fix removal of the busy team
         db.ref('current-scouting').on("child_removed", function(snapshot) {
             const unscoutedTeam = snapshot.val();
             console.log(unscoutedTeam, 'unscout');
@@ -858,7 +856,6 @@ document.addEventListener("show", function (event) {
                     var hsvGreen = {h: 1 / 3, s: 0.8796, v: 0.847},
                         hsvYellow = {h: 1 / 6, s: 1, v: 1},
                         hsvRed = {h: 0, s: 1, v: 0.914};
-                    // TODO: choose colors
                     // why hsv? because hsv interpolation is better than rgb
                     if (teamsWithData.length <= 1) return `background-color: black;`
                     let interp = (rank - 1) / (teamsWithData.length - 1), color;
