@@ -703,12 +703,26 @@ document.addEventListener('init', function (event) {
                     yAxes: [{
                         display: true,
                         ticks: {
-                            min: 0,
+                            min: -2,
                             suggestedMax: 10,
                             step: 1
                         }
                     }]
-                }
+                },
+	            tooltips: {
+		            callbacks: {
+			            label: function label(item, data) {
+				            var datasetLabel = data.datasets[item.datasetIndex].label || '';
+				            var value = data.datasets[item.datasetIndex].data[item.index];
+				            var b = value.__stats; // kind of sketchy
+				            var label = datasetLabel + ' ' + (typeof item.xLabel === 'string' ? item.xLabel : item.yLabel);
+				            if (!b) {
+					            return label + 'NaN';
+				            }
+				            return [`q1 ${b.q1}`, `median: ${b.median}`, `q3: ${b.q3}`];
+			            }
+		            }
+	            }
             }
         });
         let endGameData = {parked: [0, 0], ramps: [0, 0], none: 0, climb: [0, 0], other: [0, 0]};
