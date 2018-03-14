@@ -174,3 +174,25 @@ ons-splitter-side[animation=overlay] {
 #settings-btns ons-button {
     margin: 10px 0px;
 }
+
+#match-view > div {
+    text-align: left;
+}
+
+#match-view .section-head {
+    background-color: white;
+    padding: 11px;
+    border-radius: 3px;
+}
+
+#match-view .section-content {
+    max-height: 0px;
+    overflow: hidden;
+    transition: 1s all linear;
+}
+
+#match-view .section-content.active {
+    max-height: 500px;
+}
+
+

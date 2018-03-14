@@ -18,14 +18,12 @@ var state = 'ga', eventCode = 'alb', year = 2018; // todo determine eventcode by
 var currentEventKey = () => year + state + eventCode;
 var eventCodes = {'Gainesville': 'gai', 'Houston': 'cmptx', 'Peachtree': 'cmp', 'Albany': 'alb'};
 var allTeams = [];
-var allMatches = [];
 // var allTeamElems = [];
 var allBusyTeams = [];
 var allBusyTeamsBuffer = [];
 var allTeamData = null;
 var teamDataDirty = true;
 var teamListDirty = true;
-var matchListDirty = true;
 var allScouters = {};
 
 var writeScoutingData = function (data, isPit) {
@@ -75,15 +73,22 @@ var getTeams = function () {
     });
 };
 
-var getMatches = function () {
-    if (allMatches.length > 0 && !matchListDirty) return Promise.resolve(allMatches);
+var getMatches = function (teamNum) {
     return axios({
         method: 'get',
-        url: `https://www.thebluealliance.com/api/v3/event/${currentEventKey()}/matches/simple`,
+        url: "https://www.thebluealliance.com/api/v3/" + (teamNum ? `team/frc${teamNum}/` : "") + `event/${currentEventKey()}/matches`,
         headers: {'X-TBA-Auth-Key': 'S59CP2qkqLt0DuimRWKRByClsvqzgib2lyCJAUhIfdb59Mmxd54WAcK0B2vs6D0e'}
     }).then(function (response) {
-        matchListDirty = false;
-        allMatches = response.data;
+        return response.data;
+    });
+};
+
+var getStatus = function(teamNum) {
+    return axios({
+        method: 'get',
+        url: `https://www.thebluealliance.com/api/v3/team/frc${teamNum}/event/${currentEventKey()}/status`,
+        headers: {'X-TBA-Auth-Key': 'S59CP2qkqLt0DuimRWKRByClsvqzgib2lyCJAUhIfdb59Mmxd54WAcK0B2vs6D0e'}
+    }).then(function (response) {
         return response.data;
     });
 };
@@ -361,9 +366,7 @@ var setTeamBusy = function (teamNum, username) {
         // allBusyTeams = _.uniq(allBusyTeams); // very dirty hack
         team.appendChild(ons.createElement(`<div id="in-progress" class="right list-item__right">
             <ons-icon icon="fa-circle"></ons-icon><span class="list-item__subtitle" style="margin-left: 5px;">${username}</span>
-        </div>`, {
-            append: true
-        }));
+        </div>`));
     }
 };
 
@@ -375,7 +378,25 @@ var releaseTeamBusy = function (teamNum) {
     _.remove(allBusyTeams, x => x === teamNum);
 };
 
-
+var createMatchViewElem = function(teamNum, blueMatch, ourMatch) {
+    var div = ons.createElement(`<div>
+        <div class="section-head">Match ${ourMatch.matchNum}</div>
+        <div class="section-content">
+            <pre>
+            Blue Alliance
+            ----------------
+            ${JSON.stringify(blueMatch.score_breakdown, null, 4)}
+            Us
+            ----------------
+            ${JSON.stringify(ourMatch, null, 4)}
+            </pre>
+        </div>
+    </div>`);
+    div.querySelector(".section-head").onclick = function() {
+        div.querySelector(".section-content").classList.toggle("active");
+    };
+    return div;
+};
 
 document.addEventListener('destroy', function (event) {
     var page = event.target;
@@ -465,7 +486,7 @@ document.addEventListener('init', function (event) {
         //page.querySelector("#team-title").innerHTML = team.nickname;
         //createSelectMenu(targetBtnsContainer, chosen => enableButtons(resultBtnsContainer, chosen != null));
         //createSelectMenu(resultBtnsContainer);
-        getMatches().then(matches => {
+        getMatches(team.team_number).then(matches => {
             let minDist = Infinity, minMatch = -1;
             for (let match of matches) {
                 if (match.comp_level !== "qm") continue;
@@ -581,7 +602,7 @@ document.addEventListener('init', function (event) {
         tournamentCode.onchange = function (event) {
             console.log(event.target.value);
             eventCode = eventCodes[event.target.value];
-            matchListDirty = teamListDirty = teamDataDirty = true;
+            teamListDirty = teamDataDirty = true;
             var homePage = document.querySelector("#home");
             homePage.querySelector("#loading").display = "block";
             fetchTeams(homePage).then(function () {
@@ -734,7 +755,7 @@ document.addEventListener('init', function (event) {
         let endGameDataArray = [endGameData.none, endGameData.parked[0], endGameData.parked[1], endGameData.ramps[0], endGameData.ramps[1],
                             endGameData.climb[0], endGameData.climb[1], endGameData.other[0], endGameData.other[1]];
         let endGameLabels = ['None', 'Parked', 'Attempted park', 'Ramps', 'Attempted ramps', 'Climbed', 'Attempted climb', 'Other', 'Attempted other'];
-        let endGameColors = ['red', 'rgb(255, 173, 51)', 'rgba(255, 173, 51, 0.5',
+        let endGameColors = ['red', 'rgb(255, 173, 51)', 'rgba(255, 173, 51, 0.5)',
                                         'rgb(6, 198, 6)', 'rgba(6, 198, 6, 0.5)',
                                         'rgb(51, 153, 255)', 'rgba(51, 153, 255, 0.5)',
                                         'rgb(204, 102, 153)', 'rgba(204, 102, 153, 0.5)'];
@@ -753,6 +774,18 @@ document.addEventListener('init', function (event) {
                 labels: inds.map(x => endGameLabels[x])
             },
             
+        });
+        Promise.all([getMatches(team.team_number), getStatus(team.team_number)]).then(function(values) {
+            var blueMatches = values[0], stats = values[1];
+            page.querySelector("#record-win").innerHTML = stats.qual.ranking.record.wins;
+            page.querySelector("#record-loss").innerHTML = stats.qual.ranking.record.losses;
+            page.querySelector("#qual-rank").innerHTML = stats.qual.ranking.rank;
+            blueMatches.sort((a, b) => a.match_number - b.match_number);
+            blueMatches.forEach(match => {
+                if (match.comp_level !== "qm") return;
+                let scoutMatch = matches.filter(m => m.matchNum === match.match_number);
+                if (scoutMatch.length > 0) page.querySelector("#match-view").appendChild(createMatchViewElem(team.team_number, match, scoutMatch[0]));
+            });
         });
     }
 });
