@@ -28,6 +28,7 @@
     "lodash": "^4.17.5",
     "moment": "^2.21.0",
     "onsenui": "^2.9.2",
-    "workbox-sw": "^2.1.2"
+    "workbox-sw": "^2.1.2",
+    "xlsx": "^0.12.5"
   }
 }
