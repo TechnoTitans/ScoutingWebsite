@@ -539,6 +539,7 @@ document.addEventListener('init', function (event) {
         page.querySelector("#team-name").innerHTML = team.nickname;
         page.querySelectorAll(".select-one").forEach(x => createSelectMenu(x));
         page.querySelectorAll(".select-many").forEach(x => createSelectCheckboxMenu(x));
+        let submitted = false;
         page.querySelector("form").onsubmit = function (e) {
             e.preventDefault();
             if (submitted) return false;
@@ -684,7 +685,6 @@ document.addEventListener('init', function (event) {
                 itemBackgroundColor: "rgb(255, 0, 0)",
                 borderWidth: 2,
                 borderColor: "rgba(54, 162, 235, 0.5)",
-                padding: 10
             }]
         };
         new Chart(page.querySelector("#teleopchart"), {
