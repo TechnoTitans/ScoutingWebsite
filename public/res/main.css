@@ -192,7 +192,17 @@ ons-splitter-side[animation=overlay] {
 }
 
 #match-view .section-content.active {
-    max-height: 500px;
+    max-height: 41em;
+    overflow: scroll;
+    padding: 5px;
 }
 
+.table-view-data table {
+    border-collapse: collapse;
+}
+
+.table-view-data td {
+    padding: 15px;
+    border: 1px solid black;
+}
 

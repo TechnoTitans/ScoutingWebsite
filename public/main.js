@@ -131,11 +131,7 @@ function HSVtoRGB(h, s, v) {
     };
 };
 
-var matchesExport = function() { // TODO: use settings, maybe make configurable?
-    return Promise.all([getTeams(), getAllTeamData()]).then(function (values) {
-        let allTeams = values[0], allTeamData = values[1];
-        let wb = {SheetNames: [], Sheets: {}};
-        var header = "Match Number,Movement in Autonomous,Autonomous Target,Autonomous Success,Teleop Switch,Teleop Scale,Teleop Vault,End Game,End Game Success,Comments".split(",");
+var createMatchArr = function(match) {
         var strMap = {
             "dline": "Drove across line",
             "move": "Moved but did not cross",
@@ -150,15 +146,7 @@ var matchesExport = function() { // TODO: use settings, maybe make configurable?
             "other": "Other lifting mechanism",
             "parked": "Parked on platforms"
         };
-        let teamsWithData = getTeamsWithData(allTeams, allTeamData);
-        for (let i = 0; i < teamsWithData.length; ++i) {
-            let team = allTeams[i];
-            let ws = XLSX.utils.aoa_to_sheet([header]);
-            let teamData = allTeamData[team.team_number][currentEventKey()].match;
-            let allMatches = [];
-            for (let matchKey in teamData) {
-                let match = teamData[matchKey];
-                allMatches.push([
+    return [
                     match.matchNum || 0,
                     strMap[match.autoMove],
                     strMap[match.autoTarget],
@@ -169,7 +157,23 @@ var matchesExport = function() { // TODO: use settings, maybe make configurable?
                     strMap[match.endGame],
                     match.endGameSuccess,
                     match.comments
-                ]);
+                ];
+};
+var matchesExport = function() { // TODO: use settings, maybe make configurable?
+    return Promise.all([getTeams(), getAllTeamData()]).then(function (values) {
+        let allTeams = values[0], allTeamData = values[1];
+        let wb = {SheetNames: [], Sheets: {}};
+        var header = "Match Number,Movement in Autonomous,Autonomous Target,Autonomous Success,Teleop Switch,Teleop Scale,Teleop Vault,End Game,End Game Success,Comments".split(",");
+
+        let teamsWithData = getTeamsWithData(allTeams, allTeamData);
+        for (let i = 0; i < teamsWithData.length; ++i) {
+            let team = allTeams[i];
+            let ws = XLSX.utils.aoa_to_sheet([header]);
+            let teamData = allTeamData[team.team_number][currentEventKey()].match;
+            let allMatches = [];
+            for (let matchKey in teamData) {
+                let match = teamData[matchKey];
+                allMatches.push(createMatchArr(match));
             }
             XLSX.utils.sheet_add_aoa(ws, allMatches, {origin: "A2"});
             let sheetName = `${team.team_number} - ${team.nickname}`;
@@ -379,17 +383,30 @@ var releaseTeamBusy = function (teamNum) {
 };
 
 var createMatchViewElem = function(teamNum, blueMatch, ourMatch) {
+    console.log(ourMatch);
+    let matchArr = createMatchArr(ourMatch);
+    console.log(matchArr);
     var div = ons.createElement(`<div>
         <div class="section-head">Match ${ourMatch.matchNum}</div>
-        <div class="section-content">
-            <pre>
-            Blue Alliance
-            ----------------
-            ${JSON.stringify(blueMatch.score_breakdown, null, 4)}
-            Us
-            ----------------
-            ${JSON.stringify(ourMatch, null, 4)}
-            </pre>
+        <div class="section-content table-view-data">
+            <table>
+                <thead>
+                    <th>Item</th><th>Value</th>
+                </thead>
+                <tbody>
+                    <tr><td>Scouter</td><td>${ourMatch.user}</td></tr>
+                    <tr><td>Comments</td><td>${matchArr[9]}</td></tr>
+                    <tr><td>Auto Move</td><td>${matchArr[1]}</td></tr>
+                    <tr><td>Auto Target</td><td>${matchArr[2]}</td></tr>
+                    <tr><td>Auto Success</td><td>${matchArr[3]}</td></tr>
+                    <tr><td>Teleop Switch</td><td>${matchArr[4]}</td></tr>
+                    <tr><td>Teleop Scale</td><td>${matchArr[5]}</td></tr>
+                    <tr><td>Teleop Vault</td><td>${matchArr[6]}</td></tr>
+                    <tr><td>End Game</td><td>${matchArr[7]}</td></tr>
+                    <tr><td>End Game Success</td><td>${matchArr[8]}</td></tr>
+                </tbody>
+            </table>
+            <a href="https://www.thebluealliance.com/match/${currentEventKey()}_qm${ourMatch.matchNum}" target="_blank">Blue Alliance View</a>
         </div>
     </div>`);
     div.querySelector(".section-head").onclick = function() {
