@@ -160,34 +160,28 @@ var createMatchArr = function(match) {
                 ];
 };
 var matchesExport = function() { // TODO: use settings, maybe make configurable?
-    return Promise.all([getTeams(), getAllTeamData()]).then(function (values) {
+    return Promise.all([getTeams(), getAllTeamData(), getMatches()]).then(function (values) {
         let allTeams = values[0], allTeamData = values[1];
         let wb = {SheetNames: [], Sheets: {}};
-        var header = "Match Number,Movement in Autonomous,Autonomous Target,Autonomous Success,Teleop Switch,Teleop Scale,Teleop Vault,End Game,End Game Success,Comments".split(",");
+        var header = "Team,Match Number,Movement in Autonomous,Autonomous Target,Autonomous Success,Teleop Switch,Teleop Scale,Teleop Vault,End Game,End Game Success,Comments".split(",");
 
         let teamsWithData = getTeamsWithData(allTeams, allTeamData);
+        let finalMatchWs = [header];
         for (let i = 0; i < teamsWithData.length; ++i) {
             let team = allTeams[i];
-            let ws = XLSX.utils.aoa_to_sheet([header]);
             let teamData = allTeamData[team.team_number][currentEventKey()].match;
-            let allMatches = [];
+            let isFirst = true;
             for (let matchKey in teamData) {
                 let match = teamData[matchKey];
-                allMatches.push(createMatchArr(match));
+                let matchArr = (isFirst ? [team.nickname + " -- " + team.team_number] : [""]).concat(createMatchArr(match));
+                finalMatchWs.push(matchArr);
+                isFirst = false;
             }
-            XLSX.utils.sheet_add_aoa(ws, allMatches, {origin: "A2"});
-            let sheetName = `${team.team_number} - ${team.nickname}`;
-            // wtf for some reason sheet names cannot be longer than 31 chars
-            if (sheetName.length > 31) sheetName = sheetName.slice(0, 28) + "...";
-            wb.Sheets[sheetName] = ws;
-            wb.SheetNames.push(sheetName);
         }
+        wb.SheetNames.push("Teams");
+        wb.Sheets.Teams = XLSX.utils.aoa_to_sheet(finalMatchWs);
         return wb;
     });
-};
-
-var pitExport = function() {
-    // TODO
 };
 
 var getAllTeamData = function () {
