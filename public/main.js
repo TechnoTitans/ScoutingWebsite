@@ -503,7 +503,7 @@ document.addEventListener('init', function (event) {
                 if (match.comp_level !== "qm") continue;
                 let tm = match.actual_time || match.predicted_time || match.time;
                 if (!tm) continue;
-                let dist = Math.abs(Date.now() - tm);
+                let dist = Math.abs(Date.now()/1000 - tm);
                 if (dist < minDist) {
                     minDist = dist;
                     minMatch = match.match_number;
