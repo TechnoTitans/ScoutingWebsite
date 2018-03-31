@@ -45,7 +45,8 @@
             <div class="center">Home</div>
         </ons-toolbar>
         <ons-tabbar swipeable id="appTabbar" position="auto">
-            <ons-tab label="Home" icon="ion-home" page="home.html" active></ons-tab>
+            <ons-tab label="Matches" icon="ion-edit" page="scout-matches.html" active></ons-tab>
+            <ons-tab label="Teams" icon="ion-home" page="home.html"></ons-tab>
             <ons-tab label="View Teams" icon="ion-edit" page="teams.html"></ons-tab>
             <ons-tab label="Settings" icon="ion-settings" page="settings.html"></ons-tab>
         </ons-tabbar>
@@ -102,13 +103,26 @@
     </ons-page>
 </template>
 
-<!-- this just gets all the info from bluealliance-->
+<template id="scout-matches.html">
+    <ons-page id="scout-matches">
+        <ons-toolbar>
+            <ons-list-item class="center" style="margin-top: 5px;">
+                <div>View Past Matches</div>
+                <div style="margin-left: 20px;"><ons-switch></ons-switch></div>
+            </ons-list-item>
+        </ons-toolbar>
+        <div class="loading"><ons-icon id="loading-icon" size="22px" spin="true" icon="fa-spinner"></ons-icon></div>
+        <ons-list id="matches-list">
+        </ons-list>
+    </ons-page>
+</template>
+
 <template id="home.html">
     <ons-page id="home">
         <ons-toolbar>
             <div class="center" style="margin-top: 5px"><ons-search-input class="center"></ons-search-input></div>
         </ons-toolbar>
-        <div id="loading" style="text-align: center; margin: 10px 0px;"><ons-icon id="loading-icon" size="22px" spin="true" icon="fa-spinner"></ons-icon></div>
+        <div class="loading"><ons-icon id="loading-icon" size="22px" spin="true" icon="fa-spinner"></ons-icon></div>
         <ons-list id="teams-list">
         </ons-list>
     </ons-page>

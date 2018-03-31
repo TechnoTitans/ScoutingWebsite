@@ -317,6 +317,18 @@ var addTeams = function (teams, query, page) {
 
 };
 
+var addMatches = function (mts, page) {
+    if (mts.length === 0) {
+        page.querySelector("#matches-list").innerHTML = 'No match data found';
+    }
+    let showPassed = page.querySelector("ons-switch").checked;
+    for (let mt of mts) {
+        if (!mt.actual_time || showPassed) { // hasn't happened yet
+            page.querySelector("#matches-list").appendChild(createMatch(mt));
+        }
+    };
+};
+
 var createTeam = function (team) {
     var elem = ons.createElement(`
               <ons-list-item data-team-num="${team.team_number}">
@@ -331,18 +343,36 @@ var createTeam = function (team) {
     // allTeamElems.push(elem);
 };
 
+var createMatch = function (mt) {
+    let mom = moment.unix(mt.actual_time || mt.predicted_time || mt.time);
+    var elem = ons.createElement(`
+            <ons-list-item data-match-num="${mt.match_number}">
+                <div>
+                    Match ${mt.match_number} <em>(${mom.fromNow()} at ${mom.format('ddd h:s A')})</em>
+                </div>
+            </ons-list-item>
+    `);
+    elem.onclick = matchClick;
+    return elem;
+}
+
 var teamClick = function () {
     var teamNumber = this.dataset.teamNum;
     document.getElementById("appNavigator").pushPage("team-scout.html", {data: {num: teamNumber}});
     writeSessionData(teamNumber);
 };
 
+var matchClick = function () {
+    var matchNumber = this.dataset.matchNum;
+    console.log("Showing", matchNumber);
+};
+
 var fetchTeams = function (page) {
     return getTeams().then(function (teams) {
         addTeams(teams, [], page);
-        page.querySelector("#loading").style.display = "none";
+        page.querySelector(".loading").style.display = "none";
     }).catch(function (error) {
-        page.querySelector("#loading").innerHTML = `<p style="color: red;">Could not load data<br />${error}<br />Check internet connection</p>`;
+        page.querySelector(".loading").innerHTML = `<p style="color: red;">Could not load data<br />${error}<br />Check internet connection</p>`;
     });
 };
 
@@ -468,6 +498,16 @@ document.addEventListener('init', function (event) {
             var terms = this.value.toLowerCase().split(" ");
             addTeams(allTeams, terms, page);
         };
+    } else if (page.matches("#scout-matches")) {
+        getMatches().then(function (result) {
+            page.querySelector(".loading").style.display = "none";
+            let matches = result.filter(x => x.comp_level === 'qm').sort((a, b) => a.match_number - b.match_number);
+            addMatches(matches, page);
+            page.querySelector("ons-switch").onchange = function() {
+                page.querySelector("#matches-list").innerHTML = "";
+                addMatches(matches, page);
+            };
+        });
     } else if (page.matches("#team-scout")) {
         var teamNum = page.data.num;
         var teamObj = getTeamByNumber(teamNum);
@@ -616,7 +656,7 @@ document.addEventListener('init', function (event) {
             eventCode = eventCodes[event.target.value];
             teamListDirty = teamDataDirty = true;
             var homePage = document.querySelector("#home");
-            homePage.querySelector("#loading").display = "block";
+            homePage.querySelector(".loading").display = "block";
             fetchTeams(homePage).then(function () {
                 ons.notification.toast('Successfully loaded teams', {
                     timeout: 1620,

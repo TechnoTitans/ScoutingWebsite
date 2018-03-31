@@ -32,6 +32,11 @@ ons-splitter-side[animation=overlay] {
     background-color: #025aa5;
 }
 
+.loading {
+    text-align: center;
+    margin: 10px 0px;
+}
+
 #team-scout ons-card .title {
     font-size: xx-large;
 }
