@@ -19,7 +19,7 @@ var currentEventKey = () => year + state + eventCode;
 var eventCodes = {'Gainesville': 'gai', 'Houston': 'cmptx', 'Peachtree': 'cmp', 'Albany': 'alb'};
 var allTeams = [];
 // var allTeamElems = [];
-var allBusyTeams = [];
+var allBusyTeams = {};
 var allBusyTeamsBuffer = [];
 var allTeamData = null;
 var teamDataDirty = true;
@@ -298,14 +298,17 @@ var addTeams = function (teams, query, page) {
     // we need to remove the teams that are not present at the event
     var teamList = page.querySelector("#teams-list");
     // allTeamElems = [];
-    allBusyTeams = [];
     teamList.innerHTML = ''; // hacky way to delete previous teams
     for (let team of teams) {
         if (query.every(term => team.nickname.toLowerCase().indexOf(term) !== -1
                 || team.team_number.toString().indexOf(term) !== -1)
             || (query.join(" ") === "the best team" && team.team_number === 1683)) { // lol easter egg
             // page.querySelector("#teams-list").appendChild(createTeam(team));
-            teamList.appendChild(createTeam(team));
+            let created = createTeam(team);
+            if (allBusyTeams[team.team_number]) {
+                created.appendChild(makeBusyMarker(allBusyTeams[team.team_number]));
+            }
+            teamList.appendChild(created);
         }
         //allTeamElems.forEach(teamEl => {
         //    teamList.appendChild(teamEl);
@@ -352,7 +355,7 @@ var createMatch = function (mt) {
                 </div>
             </ons-list-item>
     `);
-    elem.onclick = matchClick;
+    elem.onclick = matchClick(mt);
     return elem;
 }
 
@@ -362,9 +365,10 @@ var teamClick = function () {
     writeSessionData(teamNumber);
 };
 
-var matchClick = function () {
-    var matchNumber = this.dataset.matchNum;
-    console.log("Showing", matchNumber);
+var matchClick = function (match) {
+    return function() {
+        document.getElementById("appNavigator").pushPage("view-match-scout.html", {data: {mt: match}});
+    };
 };
 
 var fetchTeams = function (page) {
@@ -387,23 +391,26 @@ var setTeamBusy = function (teamNum, username) {
         allBusyTeamsBuffer.push({num: teamNum, user: username}); // will do later when page loads
         return;
     }
-    if(_.includes(allBusyTeams, teamNum.toString())){
+    if(allBusyTeams[teamNum]){
         console.log('already there');
     } else {
-        allBusyTeams.push(teamNum);
-        // allBusyTeams = _.uniq(allBusyTeams); // very dirty hack
-        team.appendChild(ons.createElement(`<div id="in-progress" class="right list-item__right">
-            <ons-icon icon="fa-circle"></ons-icon><span class="list-item__subtitle" style="margin-left: 5px;">${username}</span>
-        </div>`));
+        allBusyTeams[teamNum] = username;
+        team.appendChild(makeBusyMarker(username));
     }
 };
+
+var makeBusyMarker = function(username) {
+    return ons.createElement(`<div id="in-progress" class="right list-item__right">
+        <ons-icon icon="fa-circle"></ons-icon><span class="list-item__subtitle" style="margin-left: 5px;">${username}</span>
+    </div>`);
+}
 
 var releaseTeamBusy = function (teamNum) {
     var team = getElemByTeamNum(teamNum);
     console.log('team to release', teamNum);
     let toRemove = team.querySelector("#in-progress");
     if (toRemove) team.removeChild(toRemove);
-    _.remove(allBusyTeams, x => x === teamNum);
+    delete allBusyTeams[teamNum];
 };
 
 var createMatchViewElem = function(teamNum, blueMatch, ourMatch) {
@@ -498,16 +505,6 @@ document.addEventListener('init', function (event) {
             var terms = this.value.toLowerCase().split(" ");
             addTeams(allTeams, terms, page);
         };
-    } else if (page.matches("#scout-matches")) {
-        getMatches().then(function (result) {
-            page.querySelector(".loading").style.display = "none";
-            let matches = result.filter(x => x.comp_level === 'qm').sort((a, b) => a.match_number - b.match_number);
-            addMatches(matches, page);
-            page.querySelector("ons-switch").onchange = function() {
-                page.querySelector("#matches-list").innerHTML = "";
-                addMatches(matches, page);
-            };
-        });
     } else if (page.matches("#team-scout")) {
         var teamNum = page.data.num;
         var teamObj = getTeamByNumber(teamNum);
@@ -656,7 +653,7 @@ document.addEventListener('init', function (event) {
             eventCode = eventCodes[event.target.value];
             teamListDirty = teamDataDirty = true;
             var homePage = document.querySelector("#home");
-            homePage.querySelector(".loading").display = "block";
+            homePage.querySelectorAll(".loading").forEach(x => x.display = "block");
             fetchTeams(homePage).then(function () {
                 ons.notification.toast('Successfully loaded teams', {
                     timeout: 1620,
@@ -838,17 +835,31 @@ document.addEventListener('init', function (event) {
                 if (scoutMatch.length > 0) page.querySelector("#match-view").appendChild(createMatchViewElem(team.team_number, match, scoutMatch[0]));
             });
         });
+    } else if (page.matches("#view-match-scout")) {
+        getTeams().then(function(teams) {
+            let mt = page.data.mt;
+            console.log(mt);
+            page.querySelector("#match-number").innerHTML = mt.match_number;
+            let allianceMembers = mt.alliances.red.team_keys.concat(mt.alliances.blue.team_keys).map(key => _.find(teams, team => team.key === key));
+            console.log(allianceMembers)
+            for (let i = 0; i < allianceMembers.length; ++i) {
+                let team = allianceMembers[i];
+                page.querySelectorAll(".tdteam")[i].innerHTML = `${team.team_number}<br/>${team.nickname}`;
+                page.querySelectorAll("tbody tr")[i].onclick = function() {
+                    console.log("Going to team scout team", team.team_number, "match #", mt.match_number);
+                };
+            }
+        });
     }
 });
 
 document.addEventListener("show", function (event) {
     var page = event.target;
-    var settings = document.querySelector("#settingsPage");
     if (page.matches("#rank-teams") && teamDataDirty) {
-        var settings = document.querySelector("#settingsPage");
-        var teamSubScores = {};
-        var teamScores = {};
-        var averageStats = {
+        let settings = document.querySelector("#settingsPage");
+        let teamSubScores = {};
+        let teamScores = {};
+        let averageStats = {
             autoSwitch: 0,
             autoScale: 0,
             teleopSwitch: 0,
@@ -856,8 +867,8 @@ document.addEventListener("show", function (event) {
             vault: 0,
             endGame: 0
         };
-        var totalMatches = 0;
-        var calculateScore = function (team, number) {
+        let totalMatches = 0;
+        let calculateScore = function (team, number) {
             var matches = Object.values(team[currentEventKey()].match);
             matches.sort((x, y) => y.timestamp - x.timestamp);
             var autoMap = {
@@ -896,11 +907,11 @@ document.addEventListener("show", function (event) {
             teamScores[number] = totalScore / totalWeight;
             teamSubScores[number] = subScores;
         };
-        var getAverage = function (s) {
+        let getAverage = function (s) {
             // hack to prevent NaNs
             return averageStats[s] === 0 ? 1e-50 : (averageStats[s] / totalMatches);
         };
-        var addToAverages = function (team) {
+        let addToAverages = function (team) {
             var matches = Object.values(team[currentEventKey()].match);
             for (let mt of matches) {
                 averageStats.autoSwitch += mt.autoTarget.indexOf("switch") !== -1;
@@ -1006,5 +1017,16 @@ document.addEventListener("show", function (event) {
                 ranks.appendChild(createTeamCard(team, i + 1, subScoreRanks[team.team_number]));
             }
         });
-    }
+    } else if (page.matches("#scout-matches")) {
+        getMatches().then(function (result) {
+            page.querySelector(".loading").style.display = "none";
+            page.querySelector("#matches-list").innerHTML = "";
+            let matches = result.filter(x => x.comp_level === 'qm').sort((a, b) => a.match_number - b.match_number);
+            addMatches(matches, page);
+            page.querySelector("ons-switch").onchange = function() {
+                page.querySelector("#matches-list").innerHTML = "";
+                addMatches(matches, page);
+            };
+        });
+    } 
 });

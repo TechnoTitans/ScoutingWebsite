@@ -202,7 +202,7 @@ ons-splitter-side[animation=overlay] {
     padding: 5px;
 }
 
-.table-view-data table {
+table {
     border-collapse: collapse;
 }
 
@@ -211,3 +211,33 @@ ons-splitter-side[animation=overlay] {
     border: 1px solid black;
 }
 
+#view-match-scout table {
+    width: 100%;
+    height: 100%;
+    text-align: center;
+}
+
+#view-match-scout th {
+    padding: 30px;
+}
+
+
+#view-match-scout thead tr {
+    background-color: #f0f0f0;
+}
+
+#view-match-scout th, #view-match-scout td {
+    border: 1px solid #ddd;
+}
+
+#view-match-scout td {
+    padding: 10px;
+}
+
+.tr-red {
+    background-color: #fdd;
+}
+
+.tr-blue {
+    background-color: #c8c8f5;
+}

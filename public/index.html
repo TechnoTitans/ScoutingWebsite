@@ -45,8 +45,8 @@
             <div class="center">Home</div>
         </ons-toolbar>
         <ons-tabbar swipeable id="appTabbar" position="auto">
-            <ons-tab label="Matches" icon="ion-edit" page="scout-matches.html" active></ons-tab>
-            <ons-tab label="Teams" icon="ion-home" page="home.html"></ons-tab>
+            <ons-tab label="Matches" icon="ion-home" page="scout-matches.html" active></ons-tab>
+            <ons-tab label="Teams" icon="ion-edit" page="home.html"></ons-tab>
             <ons-tab label="View Teams" icon="ion-edit" page="teams.html"></ons-tab>
             <ons-tab label="Settings" icon="ion-settings" page="settings.html"></ons-tab>
         </ons-tabbar>
@@ -114,6 +114,32 @@
         <div class="loading"><ons-icon id="loading-icon" size="22px" spin="true" icon="fa-spinner"></ons-icon></div>
         <ons-list id="matches-list">
         </ons-list>
+    </ons-page>
+</template>
+
+<template id="view-match-scout.html">
+    <ons-page id="view-match-scout">
+        <ons-toolbar>
+            <div class="left">
+                <ons-back-button>Matches</ons-back-button>
+            </div>
+            <div class="center">
+                Match <span id="match-number"></span>
+            </div>
+        </ons-toolbar>
+        <table>
+            <thead>
+                <tr><th>Alliance</th><th>Team</th></tr>
+            </thead>
+            <tbody>
+                <tr class="tr-red"><td>Red 1</td><td class="tdteam"></td></tr>
+                <tr class="tr-red"><td>Red 2</td><td class="tdteam"></td></tr>
+                <tr class="tr-red"><td>Red 3</td><td class="tdteam"></td></tr>
+                <tr class="tr-blue"><td>Blue 1</td><td class="tdteam"></td></tr>
+                <tr class="tr-blue"><td>Blue 2</td><td class="tdteam"></td></tr>
+                <tr class="tr-blue"><td>Blue 3</td><td class="tdteam"></td></tr>
+            </tbody>
+        </table>
     </ons-page>
 </template>
 
