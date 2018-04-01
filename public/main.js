@@ -388,7 +388,7 @@ var getElemByTeamNum = function (teamNum) {
 var getDisplayTableTeam = function(teamNum) {
     var displayTable = document.querySelectorAll(".tdteam");
     if (displayTable) {
-        return _.find(displayTable, td => td.dataset.teamNum === teamNum);
+        return _.find(displayTable, td => td.dataset.teamNum === teamNum.toString());
     }
 };
 
@@ -420,7 +420,7 @@ var releaseTeamBusy = function (teamNum) {
     var displayTable = document.querySelectorAll(".tdteam");
     if (displayTable) {
         displayTable.forEach(td => {
-            if (td.dataset.teamNum === teamNum) {
+            if (td.dataset.teamNum === teamNum.toString()) {
                 let toRemove = td.querySelector(".in-progress");
                 if (toRemove) td.removeChild(toRemove);
             }
@@ -469,6 +469,9 @@ document.addEventListener('destroy', function (event) {
         // releaseTeamBusy(team.teamNum);
         // releaseTeamBusy(num); // this will already be called when from remove session data
         removeSessionData(num);
+    } else if (page.matches('#match-scout') && _.find(document.getElementById("appNavigator").pages, d => d.matches("#view-match-scout"))) { // hack
+        console.log("Removing data for", page.data.team);
+        removeSessionData(page.data.team.team_number);
     }
 });
 
@@ -873,6 +876,7 @@ document.addEventListener('init', function (event) {
                 }
                 page.querySelectorAll("tbody tr")[i].onclick = function() {
                     console.log("Going to team scout team", team.team_number, "match #", mt.match_number);
+                    writeSessionData(team.team_number);
                     document.getElementById("appNavigator").pushPage("match-scout.html", {data: {team: team, matchNum: mt.match_number}});
                 };
             }
