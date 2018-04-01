@@ -168,7 +168,7 @@ ons-splitter-side[animation=overlay] {
     margin-top: 0.8em;
 }
 
-#in-progress {
+.in-progress {
     color: #4c6ef5;
     padding-right: 0.3em;
 }

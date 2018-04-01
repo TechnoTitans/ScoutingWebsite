@@ -24,6 +24,7 @@ var allBusyTeamsBuffer = [];
 var allTeamData = null;
 var teamDataDirty = true;
 var teamListDirty = true;
+var matchListDirty = true;
 var allScouters = {};
 
 var writeScoutingData = function (data, isPit) {
@@ -384,23 +385,27 @@ var getElemByTeamNum = function (teamNum) {
     return document.querySelector(`[data-team-num~="${teamNum}"]`); //https://stackoverflow.com/a/13449757/3807967
 };
 
-var setTeamBusy = function (teamNum, username) {
-    var team = getElemByTeamNum(teamNum);
-    if(!team) {
-        console.log("Will do", teamNum, "later");
-        allBusyTeamsBuffer.push({num: teamNum, user: username}); // will do later when page loads
-        return;
+var getDisplayTableTeam = function(teamNum) {
+    var displayTable = document.querySelectorAll(".tdteam");
+    if (displayTable) {
+        return _.find(displayTable, td => td.dataset.teamNum === teamNum);
     }
+};
+
+var setTeamBusy = function (teamNum, username) {
     if(allBusyTeams[teamNum]){
         console.log('already there');
     } else {
         allBusyTeams[teamNum] = username;
-        team.appendChild(makeBusyMarker(username));
+        let team = getElemByTeamNum(teamNum);
+        if (team) team.appendChild(makeBusyMarker(username));
+        let team2 = getDisplayTableTeam(teamNum);
+        if (team2) team2.appendChild(makeBusyMarker(username));
     }
 };
 
 var makeBusyMarker = function(username) {
-    return ons.createElement(`<div id="in-progress" class="right list-item__right">
+    return ons.createElement(`<div class="in-progress right list-item__right">
         <ons-icon icon="fa-circle"></ons-icon><span class="list-item__subtitle" style="margin-left: 5px;">${username}</span>
     </div>`);
 }
@@ -408,8 +413,19 @@ var makeBusyMarker = function(username) {
 var releaseTeamBusy = function (teamNum) {
     var team = getElemByTeamNum(teamNum);
     console.log('team to release', teamNum);
-    let toRemove = team.querySelector("#in-progress");
-    if (toRemove) team.removeChild(toRemove);
+    if (team) { // we may have moved to a different event
+        let toRemove = team.querySelector(".in-progress");
+        if (toRemove) team.removeChild(toRemove);
+    }
+    var displayTable = document.querySelectorAll(".tdteam");
+    if (displayTable) {
+        displayTable.forEach(td => {
+            if (td.dataset.teamNum === teamNum) {
+                let toRemove = td.querySelector(".in-progress");
+                if (toRemove) td.removeChild(toRemove);
+            }
+        });
+    }
     delete allBusyTeams[teamNum];
 };
 
@@ -534,21 +550,26 @@ document.addEventListener('init', function (event) {
         //page.querySelector("#team-title").innerHTML = team.nickname;
         //createSelectMenu(targetBtnsContainer, chosen => enableButtons(resultBtnsContainer, chosen != null));
         //createSelectMenu(resultBtnsContainer);
-        getMatches(team.team_number).then(matches => {
-            let minDist = Infinity, minMatch = -1;
-            for (let match of matches) {
-                if (match.comp_level !== "qm") continue;
-                let tm = match.actual_time || match.predicted_time || match.time;
-                if (!tm) continue;
-                let dist = Math.abs(Date.now()/1000 - tm);
-                if (dist < minDist) {
-                    minDist = dist;
-                    minMatch = match.match_number;
-                }
-            };
-            if (minMatch >= 0) page.querySelector("#match-num").value = minMatch;
-            else page.querySelector("#match-num").value = 0;
-        });
+        let mtNum = page.data.matchNum;
+        if (!mtNum) {
+            getMatches(team.team_number).then(matches => {
+                let minDist = Infinity, minMatch = -1;
+                for (let match of matches) {
+                    if (match.comp_level !== "qm") continue;
+                    let tm = match.actual_time || match.predicted_time || match.time;
+                    if (!tm) continue;
+                    let dist = Math.abs(Date.now()/1000 - tm);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        minMatch = match.match_number;
+                    }
+                };
+                if (minMatch >= 0) page.querySelector("#match-num").value = minMatch;
+                else page.querySelector("#match-num").value = 0;
+            });
+        } else {
+            page.querySelector("#match-num").value = mtNum;
+        }
         let autoMove = page.querySelector("#auto-move"), autoTarget = page.querySelector("#auto-target"), autoSucc = page.querySelector("#auto-target-result");
         createSelectMenu(autoMove, chosen => {
             if (chosen && chosen.dataset.select === "dline") {
@@ -651,9 +672,9 @@ document.addEventListener('init', function (event) {
         tournamentCode.onchange = function (event) {
             console.log(event.target.value);
             eventCode = eventCodes[event.target.value];
-            teamListDirty = teamDataDirty = true;
+            teamListDirty = teamDataDirty = matchListDirty = true;
             var homePage = document.querySelector("#home");
-            homePage.querySelectorAll(".loading").forEach(x => x.display = "block");
+            document.querySelectorAll(".loading").forEach(x => x.style.display = "block");
             fetchTeams(homePage).then(function () {
                 ons.notification.toast('Successfully loaded teams', {
                     timeout: 1620,
@@ -844,9 +865,15 @@ document.addEventListener('init', function (event) {
             console.log(allianceMembers)
             for (let i = 0; i < allianceMembers.length; ++i) {
                 let team = allianceMembers[i];
-                page.querySelectorAll(".tdteam")[i].innerHTML = `${team.team_number}<br/>${team.nickname}`;
+                let td = page.querySelectorAll(".tdteam")[i];
+                td.innerHTML = `${team.team_number}<br/>${team.nickname}`;
+                td.dataset.teamNum = team.team_number;
+                if (allBusyTeams[team.team_number]) {
+                    td.appendChild(makeBusyMarker(allBusyTeams[team.team_number]));
+                }
                 page.querySelectorAll("tbody tr")[i].onclick = function() {
                     console.log("Going to team scout team", team.team_number, "match #", mt.match_number);
+                    document.getElementById("appNavigator").pushPage("match-scout.html", {data: {team: team, matchNum: mt.match_number}});
                 };
             }
         });
@@ -1017,7 +1044,7 @@ document.addEventListener("show", function (event) {
                 ranks.appendChild(createTeamCard(team, i + 1, subScoreRanks[team.team_number]));
             }
         });
-    } else if (page.matches("#scout-matches")) {
+    } else if (page.matches("#scout-matches") && matchListDirty) {
         getMatches().then(function (result) {
             page.querySelector(".loading").style.display = "none";
             page.querySelector("#matches-list").innerHTML = "";
@@ -1027,6 +1054,7 @@ document.addEventListener("show", function (event) {
                 page.querySelector("#matches-list").innerHTML = "";
                 addMatches(matches, page);
             };
+            matchListDirty = false;
         });
     } 
 });
