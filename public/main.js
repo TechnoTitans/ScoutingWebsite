@@ -225,14 +225,19 @@ var createSelectMenu = function (div, onchange) {
     var chosen = null;
     var btns = div.querySelectorAll("ons-button");
     div.dataset.selected = "";
+    let requiredInp = div.querySelector(".select-required");
+    // if it is required and some are not disabled
+    if (requiredInp && _.some(btns, x => !x.disabled)) requiredInp.setCustomValidity("Please select one");
     for (let button of btns) {
         button.onclick = function () {
             this.classList.add("chosen");
             if (chosen) chosen.classList.remove("chosen");
             if (this !== chosen) {
                 chosen = this;
+                if (requiredInp) requiredInp.setCustomValidity("");
             } else {
                 chosen = null;
+                if (requiredInp) requiredInp.setCustomValidity("Please select one");
             }
             div.dataset.selected = chosen ? chosen.dataset.select : "";
             if (onchange) onchange(chosen);
@@ -265,6 +270,8 @@ var enableButtons = function (container, enabled) {
         button.disabled = !enabled;
         if (button.classList.contains("chosen")) button.classList.remove("chosen");
     }
+    let requiredInp = container.querySelector(".select-required");
+    if (requiredInp) requiredInp.setCustomValidity(enabled ? "Please select one" : "");
 };
 
 var makeSuccessFailureMenu = function (main, succ, isCheckbox) {
@@ -1062,3 +1069,4 @@ document.addEventListener("show", function (event) {
         });
     } 
 });
+setInterval(function() { matchListDirty = true; }, 60 * 1000 * 5); // refresh the match list once at least every 5 minutes

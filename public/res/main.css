@@ -247,3 +247,11 @@ table {
     margin: auto;
     max-width: 3.5in;
 }
+
+.select-required {
+    width: 1px;
+    overflow: hidden;
+    opacity: 0;
+    border: 0;
+    padding: 0;
+}
