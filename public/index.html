@@ -159,7 +159,7 @@
                 <div class="title">Match</div>
                 <div class="content">When scouting for a real match</div>
             </ons-card>
-            <ons-card id="pit" modifier="large">
+            <ons-card id="pit" modifier="large">    
                 <div class="title">Pit</div>
                 <div class="content">Simply asking questions</div>
             </ons-card>
@@ -176,8 +176,18 @@
         <ons-toolbar>
             <div class="left"><ons-back-button></ons-back-button></div>
             <div class="center" id="team-title">Team <span id="team-num"></span> Match Scouting</div>
-        </ons-toolbar>
-        <h2 id="team-name"></h2>
+        </ons-toolbar>  
+        
+
+        <h2 style = "margin-bottom: 10%" id = "team-name"></h2>
+        <div style = "width: 50%; margin-left: auto; margin-right: auto">
+            <h3 id="matchNum">Match Number:
+                
+                <ons-input type="number" value="0" min="0" style = "width: 25%" required></ons-input>
+                
+            </h3>
+        </div>
+
         <div id="match-btns" class="btns">
             <form style="padding: 5px;">
             <div>
@@ -224,6 +234,7 @@
                         <ons-input type="number" value="0" min="0" required></ons-input>
                         <ons-button class="plus"><ons-icon icon="md-plus"></ons-icon></ons-button>
                     </p>
+                    
                 </div>
             </div>
             <hr />
@@ -232,16 +243,13 @@
                 <p>Leave blank for none</p>
                 <div id="end-game-menu" class="btn-select-menu">
                     <ons-button modifier="large" data-select="climb">Climb (e.g. with rope/hook)</ons-button>
-                    <ons-button modifier="large" data-select="ramps">Ramps</ons-button>
-                    <ons-button modifier="large" data-select="other">Other (raised)</ons-button>
-                    <ons-button modifier="large" data-select="parked">Parked (not raised)</ons-button>
-                </div>
-                <div id="end-game-result" class="btn-select-menu">
-                    <ons-button disabled data-select="true">Success</ons-button>
-                    <ons-button disabled data-select="false">Failure</ons-button>
+                    <ons-button modifier="large" data-select="doubleClimb">Double Climb</ons-button>
+                    <ons-button modifier="large" data-select="tripleClimb">Triple Climb</ons-button>
+                    <ons-button modifier="large" data-select="park">Park</ons-button>
+                    <ons-button modifier="large" data-select="none">Nothing</ons-button>
                 </div>
             </div>
-            <hr />
+            <hr/>
             <textarea placeholder="Comments (optional)"></textarea>
             <button id="submit-match" class="button button--material"> <!-- Slight hack but this should get around form validation -->
                 <span id="submit-text">Submit</span>
@@ -259,44 +267,49 @@
                 <div class="left"><ons-back-button></ons-back-button></div>
                 <div class="center" id="team-title">Team <span id="team-num"></span> Pit Scouting</div>
             </ons-toolbar>
+
             <div class = "pitTitle">
-                <h2 style = "font-size: x-small"><span id="team-name"></span></h2>
-    	    </div>
-            <form class="btns">
-                <div>
-                    <h2 id = "driveTrainHeading" style = "margin-bottom: 0%; padding-bottom: 0%">Drive Train Type:</h2>
-                    <div class="select-one" id="drivetrain-select">
-                        <ons-button modifier="large" data-select="tank">Tank</ons-button>
-                        <ons-button modifier="large" data-select="swerve">Swerve</ons-button>
-                        <ons-button modifier="large" data-select="mecanum">Mecanum</ons-button>
-                        <ons-button modifier="large" data-select="slide">Slide</ons-button>
-                        <ons-button modifier="large" data-select="holonomic">Holonomic</ons-button>
-                    </div>
+                <h2 style = "font-size: x-large"><span id="team-name"></span></h2>
+            </div>
+
+            <div class = "pitScout">
+                    <h2>Are they changing any robot system:</h2>
+                    <div class = "CheckBoxPit select-one" id="workingOn">
+                            <ons-button modifier="large" data-select="0">Nothing</ons-button>
+                            <ons-button modifier="large" data-select="1">Minor System</ons-button>
+                            <ons-button modifier="large" data-select="2">Major System</ons-button>
+                        </div> 
                 </div>
-                <div class = "pitScout">
-                    <h2>Focus:</h2><br />
-                    <div class="select-many" id="focus">
-                        <ons-button modifier="large" data-select="0">Switch</ons-button>
-                        <ons-button modifier="large" data-select="1">Scale</ons-button>
-                        <ons-button modifier="large" data-select="2">Defense</ons-button>
-                    </div>
-                </div>
-                <div class = "pitScout">
-                    <h2>Capabilities:</h2><br />
-                    <div class = "CheckBoxPit select-many" id="capabilities">
-                        <ons-button modifier="large" data-select="0">Switch</ons-button>
-                        <ons-button modifier="large" data-select="1">Scale</ons-button>
-                    </div>
-                    
-                    <div id = "insertHeight">
-                        <h4>Robot's Max Lift Height:</h4>
-                        <ons-input type="number" id="heightInput" required min="0"></ons-input> 
-                        <h5>inches</h5>
-                    </div>
-                </div>
+
+            <div class = "pitScout">
+                <h2>Drive Train Type:</h2>
+                <form class = "btns"></form>
+                <textarea placeholder="Drive Train Type with Wheel Number" id="drivetrain-select"></textarea>
+            </div>
+
+            <div class = "pitScout">
+                <h2>Capabilities:</h2><br />
+                <div class = "CheckBoxPit select-many" id="capabilities">
+                    <ons-button modifier="large" data-select="0">Switch</ons-button>
+                    <ons-button modifier="large" data-select="1">Scale</ons-button>
+                    <ons-button modifier="large" data-select="2">Vault</ons-button>
+                    <ons-button modifier="large" data-select="3">Cubes on Ground</ons-button>
+                    <ons-button modifier="large" data-select="3">Cubes from Exchange</ons-button>
+                </div>  
+            </div>
                
+            <div class = "pitScout">
+                <h2>Autonomous Capabilites:</h2><br />
+                <div class = "CheckBoxPit select-many" id="autoCapabilities">
+                    <ons-button modifier="large" data-select="0">Pass line</ons-button>
+                    <ons-button modifier="large" data-select="1">Close Switch</ons-button>
+                    <ons-button modifier="large" data-select="2">Far Switch</ons-button>
+                    <ons-button modifier="large" data-select="3">Close Scale</ons-button>
+                    <ons-button modifier="large" data-select="3">Far Scale</ons-button>
+                </div>  
+            </div>
                 <div class="pitScout" style = "margin-top:10%">
-                    <h2 style="margin-top: 4%" >End Game Strategy:</h2>
+                    <h2 style="margin-top: 4%" >End Game Capabilities:</h2>
                     <div class="CheckBoxPit select-one" id="endgame-strategy">
                         <ons-button modifier="large" data-select="ramps">Ramps</ons-button>
                         <ons-button modifier="large" data-select="climb">Climb</ons-button>
