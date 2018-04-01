@@ -241,3 +241,9 @@ table {
 .tr-blue {
     background-color: #c8c8f5;
 }
+
+.chart-container {
+    position: relative;
+    margin: auto;
+    max-width: 3.5in;
+}
