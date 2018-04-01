@@ -25,12 +25,7 @@
     "express": "^4.16.2",
     "firebaseui": "^2.6.2",
     "font-awesome-animation": "^0.2.0",
-<<<<<<< HEAD
-    "lodash": "^4.17.5",
-    "moment": "^2.21.0",
-=======
     "npm": "^5.7.1",
->>>>>>> 686134f9cc9d28b344b312f4c63c10eb4cafd060
     "onsenui": "^2.9.2",
     "workbox-sw": "^2.1.2",
     "xlsx": "^0.12.5"
