@@ -331,19 +331,44 @@
             <div class="left"><ons-back-button></ons-back-button></div>
             <div class="center" id="team-title">Team <span id="team-num"></span></div>
         </ons-toolbar>
-        <forms height = "100%" width = "100%">
-            <video id="video" width="100%" height="45%" autoplay  style = "margin-top:6%; object-fit: fill; position: fixed"></video>
-
-            <div style = "margin: 0%; margin-top: 90%; margin-left: 10%; width: 20%; position: fixed; float: left;">
-                <ons-icon icon = "ion-ios-circle-filled" style = "font-size:300%; margin-left: auto; margin-right: auto; margin-top:70%; margin-bottom:90%;"></ons-icon>
-                <ons-icon icon  = "ion-ios-folder" style = "font-size:300%" onclick = "submitPicture.html"></ons-icon>
+        <forms>
+            <video id="video" style = "width:106%; margin-top: 7%; margin-left: -3%; border-width: 2px; border: black" autoplay></video>
+            <div id = "picMain">
+                <ons-button id="snap" style = "background: black">
+                    <i class = "fas fa-camera" style = "font-size: 300%; margin-bottom: 0%; margin-top:1.5%; margin-right: 24%; margin-left: 5%; float: left;"> </i> 
+                    <h4 class = "PicText">Take Picture</h4>
+                </ons-button>
+                
+                <ons-input type = "image" id="file" style = "background:black">
+                    <i class = "fas fa-image" style = "font-size: 300%; margin-bottom: 0%; margin-top:1.5%; margin-right: 8%; margin-left: 4.5%; float: left; color: white"> </i> 
+                    <h4 class = "PicText" style = "color: white; margin-top: 5.5%;">GET PICTURE OFF PHONE</h4>
+                </ons-input>
             </div>
-            
-            <div style = "margin: 0%; margin-top: 36.5%; margin-left: 10%; width: 100%; position: fixed; float: left; margin-top: 102%;">
-                <h2 style = "font-size: 140%; margin-left: auto; margin-right: auto; margin-bottom: 20%;">Take Picture</h2>
-                <h2 style = "font-size: 140%; margin-left: auto; margin-right: auto;">Get Picture <br> off Phone</h2>
-            </div> 
-
+            <script>
+                document.getElementById("picMain").style.height= 1 - document.getElementById("video").style.height;
+            </script>
+            <style>
+                .PicText{
+                    margin: 0%;
+                    margin-left: 4%;
+                    padding: 0%;
+                    border: 0%;
+                    float: left;
+                }
+                #snap{
+                    padding: 0px;
+                    padding-bottom: 0px; 
+                    width: 100%; margin: 0%; 
+                    margin-top: 12%; 
+                    margin-bottom: 12%;
+                } 
+                #file{
+                    padding: 0px; 
+                    padding-bottom: 0px;
+                    width:100%;
+                    margin-left: 0%;
+                }
+            </style>
         </forms>
 
         <script>
