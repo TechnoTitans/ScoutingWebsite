@@ -48,16 +48,16 @@ var writeImage = function (blob, team) {
     var metadata = {
         contentType: blob.type,
         team: team.teamNum
-    }
+    };
     console.log('team is', team);
     if(!blob) {
-        console.log('No image! WTF r u doin boi')
-
+        console.log('No image! WTF r u doin boi');
     }
     var upload = storage.child('images/' + team.team_number + '_' + moment().format("YYYY_MM_DD-HH-mm-ss-" + Math.random().toString().slice(2))
     ).put(blob, metadata);
     console.log(upload);
-    upload.on(firebase.storage.TaskEvent.STATE_CHANGED, // or 'state_changed'
+    return new Promise((resolve, reject) => {
+        upload.on(firebase.storage.TaskEvent.STATE_CHANGED, // or 'state_changed'
         function(snapshot) {
             // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
             imageProgress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
@@ -75,10 +75,12 @@ var writeImage = function (blob, team) {
             // A full list of error codes is available at
             // https://firebase.google.com/docs/storage/web/handle-errors
             console.log("Error uploading: ", error)
+            reject(error);
         }, function() {
             // Upload completed successfully, now we can get the download URL
-            return upload.snapshot.downloadURL;
+            resolve(upload.snapshot.downloadURL);
         });
+    });
 };
 
 
@@ -1000,20 +1002,22 @@ document.addEventListener('init', function (event) {
             });
             let canvas = document.getElementById("canvasMain");
 
-
-            document.getElementById("snap").onclick = function (){
+            document.getElementById("snap").onclick = function () {
+                canvas.style.display = "block";
                 var context = canvas.getContext("2d");
                 context.drawImage(video, 0, 0);
-            }
+            };
         }
 
-        document.querySelector("#pic-form").onsubmit = function(e) {
-            e.preventDefault()
+        document.querySelector("#submit-pic").onclick = function(e) {
+            e.preventDefault();
             canvas.toBlob((blobby) => {
 
                 // untested
-                allTeamPicURLs[team.team_num].push(writeImage(blobby, team));
-            })
+                writeImage(blobby, team).then(downloadURL => {
+                    console.log("URL", downloadURL);
+                });
+            });
 
         }
     }
