@@ -255,13 +255,16 @@ table {
     border: 0;
     padding: 0;
 }
-
+    
+                    
 .PicText{
     margin: 0%;
-    margin-left: 4%;
+    margin-left: 3%;
+    margin-top: 20%;    
     padding: 0%;
     border: 0%;
     float: left;
+    font-size: 150%;    
 }
 #snap{
     padding: 0px;
@@ -270,9 +273,19 @@ table {
     margin-top: 12%; 
     margin-bottom: 12%;
 } 
-#file{
-    padding: 0px; 
-    padding-bottom: 0px;
-    width:100%;
-    margin-left: 0%;
+#label{
+    color: white;
+    padding: 0%;
+    font-size: 320%;
 }
+
+#label h4{
+    font-size: 45%;
+    margin-right: 40%;
+    margin: 0%;
+    padding: 0%;  
+}
+#file{
+    opacity: 0;
+}
+                                   
