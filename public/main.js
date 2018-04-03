@@ -989,7 +989,15 @@ document.addEventListener('init', function (event) {
         
         if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             // Not adding `{ audio: true }` since we only want video now
+            
             navigator.getUserMedia({video: { facingMode: "environment" } }, successCallback, errorCallback);
+            function successCallback(){
+
+            }
+            function errorCallback () {
+                navigator.getUserMedia({video: {facingMode: "user"}});
+            }
+            
             video.addEventListener('loadedmetadata', function() {
                 console.log(video.videoWidth);
                 console.log(video.videoHeight);
