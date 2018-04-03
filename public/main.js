@@ -7,12 +7,13 @@ var config = {
     apiKey: "AIzaSyAyrHz96bV4nR3SoyMsyPQ__MdOrYHdaEk",
     authDomain: "scouting-data.firebaseapp.com",
     databaseURL: "https://scouting-data.firebaseio.com/",
-    storageBucket: "bucket.appspot.com"
+    storageBucket: "gs://scouting-data.appspot.com"
 };
 
 firebase.initializeApp(config);
 console.log('fb conslog', firebase);
 var db = firebase.database();
+var storage = firebase.storage().ref();
 
 var state = 'ga', eventCode = 'col', year = 2018; // todo determine eventcode by date
 var currentEventKey = () => year + state + eventCode;
@@ -26,6 +27,11 @@ var teamDataDirty = true;
 var teamListDirty = true;
 var matchListDirty = true;
 var allScouters = {};
+var allTeamPicURLs = {};
+
+// team pic structure {
+    // <team_num>: ['<link1>', '<link2>'], ...
+// }
 
 var writeScoutingData = function (data, isPit) {
     if(!data) {
@@ -34,6 +40,45 @@ var writeScoutingData = function (data, isPit) {
     }
     console.log('sent data for team' + data.teamName, data);
     return db.ref("data").child(data.teamNum.toString()).child(currentEventKey()).child(isPit ? 'pit' : 'match').push().set(data);
+};
+
+var imageProgress = -1;
+
+var writeImage = function (blob, team) {
+    var metadata = {
+        contentType: blob.type,
+        team: team.teamNum
+    }
+    console.log('team is', team);
+    if(!blob) {
+        console.log('No image! WTF r u doin boi')
+
+    }
+    var upload = storage.child('images/' + team.team_number + '_' + moment().format("YYYY_MM_DD-HH-mm-ss-" + Math.random().toString().slice(2))
+    ).put(blob, metadata);
+    console.log(upload);
+    upload.on(firebase.storage.TaskEvent.STATE_CHANGED, // or 'state_changed'
+        function(snapshot) {
+            // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+            imageProgress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            console.log('Upload is ' + imageProgress + '% done');
+            switch (snapshot.state) {
+                case firebase.storage.TaskState.PAUSED: // or 'paused'
+                    console.log('Upload is paused');
+                    break;
+                case firebase.storage.TaskState.RUNNING: // or 'running'
+                    console.log('Upload is running');
+                    break;
+            }
+        }, function(error) {
+
+            // A full list of error codes is available at
+            // https://firebase.google.com/docs/storage/web/handle-errors
+            console.log("Error uploading: ", error)
+        }, function() {
+            // Upload completed successfully, now we can get the download URL
+            return upload.snapshot.downloadURL;
+        });
 };
 
 
@@ -939,17 +984,28 @@ document.addEventListener('init', function (event) {
         var canvas = document.getElementById("canvasMain");
         var dim = document.getElementById("dimensions");
         var w, h, ratio;
+        var team = page.data.team;
         ratio = 480/640;
         w = screen.width;
         h = w * ratio;
         canvas.style.width = w.toString() + "px";
         canvas.style.height = h.toString() + "px";
-        
+
 
 
         document.getElementById("snap").onclick = function (){
             var context = canvas.getContext("2d");
             context.drawImage(video, 0, 0, 300, 150);
+        }
+
+        document.querySelector("#pic-form").onsubmit = function(e) {
+            e.preventDefault()
+            canvas.toBlob((blobby) => {
+
+                // untested
+                allTeamPicURLs[team.team_num].push(writeImage(blobby, team));
+            })
+
         }
     }
 });
