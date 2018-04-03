@@ -16,7 +16,7 @@ var db = firebase.database();
 
 var state = 'ga', eventCode = 'alb', year = 2018; // todo determine eventcode by date
 var currentEventKey = () => year + state + eventCode;
-var eventCodes = {'Gainesville': 'gai', 'Houston': 'cmptx', 'Peachtree': 'cmp', 'Albany': 'alb'};
+var eventCodes = {'Gainesville': 'gai', 'Houston': 'cmptx', 'Peachtree': 'cmp', 'Albany': 'alb', 'Columbus': 'col'};
 var allTeams = [];
 // var allTeamElems = [];
 var allBusyTeams = {};
@@ -161,7 +161,7 @@ var createMatchArr = function(match) {
                 ];
 };
 var matchesExport = function() { // TODO: use settings, maybe make configurable?
-    return Promise.all([getTeams(), getAllTeamData(), getMatches()]).then(function (values) {
+    return Promise.all([getTeams(), getAllTeamData()]).then(function (values) {
         let allTeams = values[0], allTeamData = values[1];
         let wb = {SheetNames: [], Sheets: {}};
         var header = "Team,Match Number,Movement in Autonomous,Autonomous Target,Autonomous Success,Teleop Switch,Teleop Scale,Teleop Vault,End Game,End Game Success,Comments".split(",");
@@ -171,12 +171,10 @@ var matchesExport = function() { // TODO: use settings, maybe make configurable?
         for (let i = 0; i < teamsWithData.length; ++i) {
             let team = allTeams[i];
             let teamData = allTeamData[team.team_number][currentEventKey()].match;
-            let isFirst = true;
             for (let matchKey in teamData) {
                 let match = teamData[matchKey];
-                let matchArr = (isFirst ? [team.nickname + " -- " + team.team_number] : [""]).concat(createMatchArr(match));
+                let matchArr = ([team.nickname + " -- " + team.team_number]).concat(createMatchArr(match));
                 finalMatchWs.push(matchArr);
-                isFirst = false;
             }
         }
         wb.SheetNames.push("Teams");
