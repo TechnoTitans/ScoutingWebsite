@@ -984,25 +984,31 @@ document.addEventListener('init', function (event) {
             }
         });    
     } else if (page.matches ("#pic-scout")){
-        var video = document.getElementById("video");
-        var canvas = document.getElementById("canvasMain");
-        var dim = document.getElementById("dimensions");
-        var w, h, ratio;
-        var team = page.data.team;
-        ratio = 480/640;
-        w = screen.width;
-        h = w * ratio;
-        canvas.style.width = w.toString() + "px";
-        canvas.style.height = h.toString() + "px";
+        
+        let video = document.getElementById("video");
+    
+        if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            // Not adding `{ audio: true }` since we only want video now
+            video.addEventListener('loadedmetadata', function() {
+                console.log(video.videoWidth);
+                console.log(video.videoHeight);
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight ;
+            });
+            navigator.mediaDevices.getUserMedia({ video: true }).then(function(stream) {
+                video.src = window.URL.createObjectURL(stream);
+                video.play();
+            });
+            let canvas = document.getElementById("canvasMain");
 
-
-
-        document.getElementById("snap").onclick = function (){
-            var context = canvas.getContext("2d");
-            context.drawImage(video, 0, 0, 300, 150);
+            document.getElementById("snap").onclick = function () {
+                canvas.style.display = "block";
+                var context = canvas.getContext("2d");
+                context.drawImage(video, 0, 0);
+            };
         }
 
-        document.querySelector("#pic-form").onsubmit = function(e) {
+        document.querySelector("#submit-pic").onclick = function(e) {
             e.preventDefault();
             canvas.toBlob((blobby) => {
 
