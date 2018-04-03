@@ -45,8 +45,9 @@
             <div class="center">Home</div>
         </ons-toolbar>
         <ons-tabbar swipeable id="appTabbar" position="auto">
-            <ons-tab label="Home" icon="ion-home" page="home.html" active></ons-tab>
-            <ons-tab label="View Teams" icon="ion-edit" page="teams.html"></ons-tab>
+            <ons-tab label="Matches" icon="ion-home" page="scout-matches.html" active></ons-tab>
+            <ons-tab label="Scout" icon="ion-edit" page="home.html"></ons-tab>
+            <ons-tab label="Rank Teams" icon="ion-stats-bars" page="teams.html"></ons-tab>
             <ons-tab label="Settings" icon="ion-settings" page="settings.html"></ons-tab>
         </ons-tabbar>
 
@@ -70,19 +71,27 @@
             <h1 id="team-name"></h1>
             <div id="autostats">
                 <h2>Autonomous</h2>
-                <canvas id="autoMove"></canvas>
+                <div class="chart-container">
+                    <canvas id="autoMove"></canvas>
+                </div>
                 <hr style="margin: 10px 0px;" />
-                <canvas id="autochart"></canvas>
+                <div class="chart-container">
+                    <canvas id="autochart"></canvas>
+                </div>
             </div>
             <hr />
             <div id="teleopstats">
                 <h2>Teleop</h2>
-                <canvas id="teleopchart"></canvas>
+                <div class="chart-container">
+                    <canvas id="teleopchart"></canvas>
+                </div>
             </div>
             <hr />
             <div id="endgamestats">
                 <h2>End Game</h2>
-                <canvas id="endgamechart"></canvas>
+                <div class="chart-container">
+                    <canvas id="endgamechart"></canvas>
+                </div>
             </div>
             <hr />
             <div>
@@ -102,14 +111,53 @@
     </ons-page>
 </template>
 
-<!-- this just gets all the info from bluealliance-->
+<template id="scout-matches.html">
+    <ons-page id="scout-matches">
+        <ons-toolbar>
+            <ons-list-item class="center">
+                <div>View Past Matches</div>
+                <div style="margin-left: 20px;"><ons-switch></ons-switch></div>
+            </ons-list-item>
+        </ons-toolbar>
+        <div class="loading"><ons-icon id="loading-icon" size="22px" spin="true" icon="fa-spinner"></ons-icon></div>
+        <ons-list id="matches-list" class="loaded-list">
+        </ons-list>
+    </ons-page>
+</template>
+
+<template id="view-match-scout.html">
+    <ons-page id="view-match-scout">
+        <ons-toolbar>
+            <div class="left">
+                <ons-back-button>Matches</ons-back-button>
+            </div>
+            <div class="center">
+                Match <span id="match-number"></span>
+            </div>
+        </ons-toolbar>
+        <table>
+            <thead>
+                <tr><th>Alliance</th><th>Team</th></tr>
+            </thead>
+            <tbody>
+                <tr class="tr-red"><td>Red 1</td><td class="tdteam"></td></tr>
+                <tr class="tr-red"><td>Red 2</td><td class="tdteam"></td></tr>
+                <tr class="tr-red"><td>Red 3</td><td class="tdteam"></td></tr>
+                <tr class="tr-blue"><td>Blue 1</td><td class="tdteam"></td></tr>
+                <tr class="tr-blue"><td>Blue 2</td><td class="tdteam"></td></tr>
+                <tr class="tr-blue"><td>Blue 3</td><td class="tdteam"></td></tr>
+            </tbody>
+        </table>
+    </ons-page>
+</template>
+
 <template id="home.html">
     <ons-page id="home">
         <ons-toolbar>
             <div class="center" style="margin-top: 5px"><ons-search-input class="center"></ons-search-input></div>
         </ons-toolbar>
-        <div id="loading" style="text-align: center; margin: 10px 0px;"><ons-icon id="loading-icon" size="22px" spin="true" icon="fa-spinner"></ons-icon></div>
-        <ons-list id="teams-list">
+        <div class="loading"><ons-icon id="loading-icon" size="22px" spin="true" icon="fa-spinner"></ons-icon></div>
+        <ons-list id="teams-list" class="loaded-list">
         </ons-list>
     </ons-page>
 </template>
@@ -132,6 +180,7 @@
                 <ons-select id="tournament" style = "float: left">
                     <option value="Albany">Albany</option>
                     <option value="Gainesville">Gainesville</option>
+                    <option value="Columbus">Columbus</option>
                     <option value="Peachtree">Peachtree</option>
                             <!--<option value="Houston">Houston</option>-->
                 </ons-select>
@@ -159,7 +208,7 @@
                 <div class="title">Match</div>
                 <div class="content">When scouting for a real match</div>
             </ons-card>
-            <ons-card id="pit" modifier="large">    
+            <ons-card id="pit" modifier="large">
                 <div class="title">Pit</div>
                 <div class="content">Simply asking questions</div>
             </ons-card>
@@ -176,18 +225,8 @@
         <ons-toolbar>
             <div class="left"><ons-back-button></ons-back-button></div>
             <div class="center" id="team-title">Team <span id="team-num"></span> Match Scouting</div>
-        </ons-toolbar>  
-        
-
-        <h2 style = "margin-bottom: 10%" id = "team-name"></h2>
-        <div style = "width: 50%; margin-left: auto; margin-right: auto">
-            <h3 id="matchNum">Match Number:
-                
-                <ons-input type="number" value="0" min="0" style = "width: 25%" required></ons-input>
-                
-            </h3>
-        </div>
-
+        </ons-toolbar>
+        <h2 style="margin-bottom: 10%;" id="team-name"></h2>
         <div id="match-btns" class="btns">
             <form style="padding: 5px;">
             <div>
@@ -208,10 +247,11 @@
                     <ons-button modifier="large" data-select="cswitch" disabled>Switch (Cross side)</ons-button>
                     <ons-button modifier="large" data-select="sscale" disabled>Scale (Same side)</ons-button>
                     <ons-button modifier="large" data-select="cscale" disabled>Scale (Cross side)</ons-button>
-                    <ons-button modifier = "large" data-select = "twoBlocks" disabled>Two Block Auto</ons-button>
+                    <ons-button modifier = "large" data-select="twoBlocks" disabled>Two+ Cube Auto</ons-button>
                 </div>
                 <div id="auto-target-result" class="btn-select-menu">
                     <ons-button disabled data-select="true">Success</ons-button>
+                    <input class="select-required" />
                     <ons-button disabled data-select="false">Failure</ons-button>
                 </div>
             </div>
@@ -234,7 +274,6 @@
                         <ons-input type="number" value="0" min="0" required></ons-input>
                         <ons-button class="plus"><ons-icon icon="md-plus"></ons-icon></ons-button>
                     </p>
-                    
                 </div>
             </div>
             <hr />
@@ -246,10 +285,14 @@
                     <ons-button modifier="large" data-select="doubleClimb">Double Climb</ons-button>
                     <ons-button modifier="large" data-select="tripleClimb">Triple Climb</ons-button>
                     <ons-button modifier="large" data-select="park">Park</ons-button>
-                    <ons-button modifier="large" data-select="none">Nothing</ons-button>
+                </div>
+                <div id="end-game-result" class="btn-select-menu">
+                    <ons-button disabled data-select="true">Success</ons-button>
+                    <input class="select-required" />
+                    <ons-button disabled data-select="false">Failure</ons-button>
                 </div>
             </div>
-            <hr/>
+            <hr />
             <textarea placeholder="Comments (optional)"></textarea>
             <button id="submit-match" class="button button--material"> <!-- Slight hack but this should get around form validation -->
                 <span id="submit-text">Submit</span>
@@ -270,42 +313,42 @@
 
             <div class = "pitTitle">
                 <h2 style = "font-size: x-large"><span id="team-name"></span></h2>
-            </div>
-
-            <div class = "pitScout">
+    	    </div>
+            <form class="btns">
+                <div class="pitScout">
                     <h2>Are they changing any robot system:</h2>
                     <div class = "CheckBoxPit select-one" id="workingOn">
                             <ons-button modifier="large" data-select="0">Nothing</ons-button>
                             <ons-button modifier="large" data-select="1">Minor System</ons-button>
                             <ons-button modifier="large" data-select="2">Major System</ons-button>
-                        </div> 
+                    </div> 
                 </div>
 
-            <div class = "pitScout">
+            <div class="pitScout">
                 <h2>Drive Train Type:</h2>
-                <form class = "btns"></form>
                 <textarea placeholder="Drive Train Type with Wheel Number" id="drivetrain-select"></textarea>
             </div>
 
-            <div class = "pitScout">
+            <div class="pitScout">
                 <h2>Capabilities:</h2><br />
-                <div class = "CheckBoxPit select-many" id="capabilities">
-                    <ons-button modifier="large" data-select="0">Switch</ons-button>
-                    <ons-button modifier="large" data-select="1">Scale</ons-button>
-                    <ons-button modifier="large" data-select="2">Vault</ons-button>
-                    <ons-button modifier="large" data-select="3">Cubes on Ground</ons-button>
-                    <ons-button modifier="large" data-select="3">Cubes from Exchange</ons-button>
+                <div class="CheckBoxPit select-many" id="capabilities">
+                    <ons-button modifier="large" data-select="switch">Switch</ons-button>
+                    <ons-button modifier="large" data-select="scale">Scale</ons-button>
+                    <ons-button modifier="large" data-select="vault">Vault</ons-button>
+                    <ons-button modifier="large" data-select="groundCubes">Cubes on Ground</ons-button>
+                    <ons-button modifier="large" data-select="exchangeCubes">Cubes from Exchange</ons-button>
                 </div>  
             </div>
                
             <div class = "pitScout">
                 <h2>Autonomous Capabilites:</h2><br />
                 <div class = "CheckBoxPit select-many" id="autoCapabilities">
-                    <ons-button modifier="large" data-select="0">Pass line</ons-button>
-                    <ons-button modifier="large" data-select="1">Close Switch</ons-button>
-                    <ons-button modifier="large" data-select="2">Far Switch</ons-button>
-                    <ons-button modifier="large" data-select="3">Close Scale</ons-button>
-                    <ons-button modifier="large" data-select="3">Far Scale</ons-button>
+                    <ons-button modifier="large" data-select="dline">Pass line</ons-button>
+                    <ons-button modifier="large" data-select="middle">Middle Switch</ons-button>
+                    <ons-button modifier="large" data-select="sswitch">Close Switch</ons-button>
+                    <ons-button modifier="large" data-select="cswitch">Far Switch</ons-button>
+                    <ons-button modifier="large" data-select="sscale">Close Scale</ons-button>
+                    <ons-button modifier="large" data-select="cscale">Far Scale</ons-button>
                 </div>  
             </div>
                 <div class="pitScout" style = "margin-top:10%">

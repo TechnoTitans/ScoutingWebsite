@@ -16,14 +16,15 @@ var db = firebase.database();
 
 var state = 'ga', eventCode = 'alb', year = 2018; // todo determine eventcode by date
 var currentEventKey = () => year + state + eventCode;
-var eventCodes = {'Gainesville': 'gai', 'Houston': 'cmptx', 'Peachtree': 'cmp', 'Albany': 'alb'};
+var eventCodes = {'Gainesville': 'gai', 'Houston': 'cmptx', 'Peachtree': 'cmp', 'Albany': 'alb', 'Columbus': 'col'};
 var allTeams = [];
 // var allTeamElems = [];
-var allBusyTeams = [];
+var allBusyTeams = {};
 var allBusyTeamsBuffer = [];
 var allTeamData = null;
 var teamDataDirty = true;
 var teamListDirty = true;
+var matchListDirty = true;
 var allScouters = {};
 
 var writeScoutingData = function (data, isPit) {
@@ -160,7 +161,7 @@ var createMatchArr = function(match) {
                 ];
 };
 var matchesExport = function() { // TODO: use settings, maybe make configurable?
-    return Promise.all([getTeams(), getAllTeamData(), getMatches()]).then(function (values) {
+    return Promise.all([getTeams(), getAllTeamData()]).then(function (values) {
         let allTeams = values[0], allTeamData = values[1];
         let wb = {SheetNames: [], Sheets: {}};
         var header = "Team,Match Number,Movement in Autonomous,Autonomous Target,Autonomous Success,Teleop Switch,Teleop Scale,Teleop Vault,End Game,End Game Success,Comments".split(",");
@@ -170,12 +171,10 @@ var matchesExport = function() { // TODO: use settings, maybe make configurable?
         for (let i = 0; i < teamsWithData.length; ++i) {
             let team = allTeams[i];
             let teamData = allTeamData[team.team_number][currentEventKey()].match;
-            let isFirst = true;
             for (let matchKey in teamData) {
                 let match = teamData[matchKey];
-                let matchArr = (isFirst ? [team.nickname + " -- " + team.team_number] : [""]).concat(createMatchArr(match));
+                let matchArr = ([team.nickname + " -- " + team.team_number]).concat(createMatchArr(match));
                 finalMatchWs.push(matchArr);
-                isFirst = false;
             }
         }
         wb.SheetNames.push("Teams");
@@ -224,14 +223,19 @@ var createSelectMenu = function (div, onchange) {
     var chosen = null;
     var btns = div.querySelectorAll("ons-button");
     div.dataset.selected = "";
+    let requiredInp = div.querySelector(".select-required");
+    // if it is required and some are not disabled
+    if (requiredInp && _.some(btns, x => !x.disabled)) requiredInp.setCustomValidity("Please select one");
     for (let button of btns) {
         button.onclick = function () {
             this.classList.add("chosen");
             if (chosen) chosen.classList.remove("chosen");
             if (this !== chosen) {
                 chosen = this;
+                if (requiredInp) requiredInp.setCustomValidity("");
             } else {
                 chosen = null;
+                if (requiredInp) requiredInp.setCustomValidity("Please select one");
             }
             div.dataset.selected = chosen ? chosen.dataset.select : "";
             if (onchange) onchange(chosen);
@@ -264,6 +268,8 @@ var enableButtons = function (container, enabled) {
         button.disabled = !enabled;
         if (button.classList.contains("chosen")) button.classList.remove("chosen");
     }
+    let requiredInp = container.querySelector(".select-required");
+    if (requiredInp) requiredInp.setCustomValidity(enabled ? "Please select one" : "");
 };
 
 var makeSuccessFailureMenu = function (main, succ, isCheckbox) {
@@ -298,14 +304,17 @@ var addTeams = function (teams, query, page) {
     // we need to remove the teams that are not present at the event
     var teamList = page.querySelector("#teams-list");
     // allTeamElems = [];
-    allBusyTeams = [];
     teamList.innerHTML = ''; // hacky way to delete previous teams
     for (let team of teams) {
         if (query.every(term => team.nickname.toLowerCase().indexOf(term) !== -1
                 || team.team_number.toString().indexOf(term) !== -1)
             || (query.join(" ") === "the best team" && team.team_number === 1683)) { // lol easter egg
             // page.querySelector("#teams-list").appendChild(createTeam(team));
-            teamList.appendChild(createTeam(team));
+            let created = createTeam(team);
+            if (allBusyTeams[team.team_number]) {
+                created.appendChild(makeBusyMarker(allBusyTeams[team.team_number]));
+            }
+            teamList.appendChild(created);
         }
         //allTeamElems.forEach(teamEl => {
         //    teamList.appendChild(teamEl);
@@ -315,6 +324,18 @@ var addTeams = function (teams, query, page) {
         teamList.innerHTML = '<div>No results</div>'; // todo fix styling
     }
 
+};
+
+var addMatches = function (mts, page) {
+    if (mts.length === 0) {
+        page.querySelector("#matches-list").innerHTML = 'No match data found';
+    }
+    let showPassed = page.querySelector("ons-switch").checked;
+    for (let mt of mts) {
+        if (!mt.actual_time || showPassed) { // hasn't happened yet
+            page.querySelector("#matches-list").appendChild(createMatch(mt));
+        }
+    };
 };
 
 var createTeam = function (team) {
@@ -331,18 +352,37 @@ var createTeam = function (team) {
     // allTeamElems.push(elem);
 };
 
+var createMatch = function (mt) {
+    let mom = moment.unix(mt.actual_time || mt.predicted_time || mt.time);
+    var elem = ons.createElement(`
+            <ons-list-item data-match-num="${mt.match_number}">
+                <div>
+                    Match ${mt.match_number} <em>(${mom.fromNow()} at ${mom.format('ddd h:s A')})</em>
+                </div>
+            </ons-list-item>
+    `);
+    elem.onclick = matchClick(mt);
+    return elem;
+}
+
 var teamClick = function () {
     var teamNumber = this.dataset.teamNum;
     document.getElementById("appNavigator").pushPage("team-scout.html", {data: {num: teamNumber}});
     writeSessionData(teamNumber);
 };
 
+var matchClick = function (match) {
+    return function() {
+        document.getElementById("appNavigator").pushPage("view-match-scout.html", {data: {mt: match}});
+    };
+};
+
 var fetchTeams = function (page) {
     return getTeams().then(function (teams) {
         addTeams(teams, [], page);
-        page.querySelector("#loading").style.display = "none";
+        page.querySelector(".loading").style.display = "none";
     }).catch(function (error) {
-        page.querySelector("#loading").innerHTML = `<p style="color: red;">Could not load data<br />${error}<br />Check internet connection</p>`;
+        page.querySelector(".loading").innerHTML = `<p style="color: red;">Could not load data<br />${error}<br />Check internet connection</p>`;
     });
 };
 
@@ -350,30 +390,48 @@ var getElemByTeamNum = function (teamNum) {
     return document.querySelector(`[data-team-num~="${teamNum}"]`); //https://stackoverflow.com/a/13449757/3807967
 };
 
-var setTeamBusy = function (teamNum, username) {
-    var team = getElemByTeamNum(teamNum);
-    if(!team) {
-        console.log("Will do", teamNum, "later");
-        allBusyTeamsBuffer.push({num: teamNum, user: username}); // will do later when page loads
-        return;
-    }
-    if(_.includes(allBusyTeams, teamNum.toString())){
-        console.log('already there');
-    } else {
-        allBusyTeams.push(teamNum);
-        // allBusyTeams = _.uniq(allBusyTeams); // very dirty hack
-        team.appendChild(ons.createElement(`<div id="in-progress" class="right list-item__right">
-            <ons-icon icon="fa-circle"></ons-icon><span class="list-item__subtitle" style="margin-left: 5px;">${username}</span>
-        </div>`));
+var getDisplayTableTeam = function(teamNum) {
+    var displayTable = document.querySelectorAll(".tdteam");
+    if (displayTable) {
+        return _.find(displayTable, td => td.dataset.teamNum === teamNum.toString());
     }
 };
+
+var setTeamBusy = function (teamNum, username) {
+    if(allBusyTeams[teamNum]){
+        console.log('already there');
+    } else {
+        allBusyTeams[teamNum] = username;
+        let team = getElemByTeamNum(teamNum);
+        if (team) team.appendChild(makeBusyMarker(username));
+        let team2 = getDisplayTableTeam(teamNum);
+        if (team2) team2.appendChild(makeBusyMarker(username));
+    }
+};
+
+var makeBusyMarker = function(username) {
+    return ons.createElement(`<div class="in-progress right list-item__right">
+        <ons-icon icon="fa-circle"></ons-icon><span class="list-item__subtitle" style="margin-left: 5px;">${username}</span>
+    </div>`);
+}
 
 var releaseTeamBusy = function (teamNum) {
     var team = getElemByTeamNum(teamNum);
     console.log('team to release', teamNum);
-    let toRemove = team.querySelector("#in-progress");
-    if (toRemove) team.removeChild(toRemove);
-    _.remove(allBusyTeams, x => x === teamNum);
+    if (team) { // we may have moved to a different event
+        let toRemove = team.querySelector(".in-progress");
+        if (toRemove) team.removeChild(toRemove);
+    }
+    var displayTable = document.querySelectorAll(".tdteam");
+    if (displayTable) {
+        displayTable.forEach(td => {
+            if (td.dataset.teamNum === teamNum.toString()) {
+                let toRemove = td.querySelector(".in-progress");
+                if (toRemove) td.removeChild(toRemove);
+            }
+        });
+    }
+    delete allBusyTeams[teamNum];
 };
 
 var createMatchViewElem = function(teamNum, blueMatch, ourMatch) {
@@ -416,6 +474,9 @@ document.addEventListener('destroy', function (event) {
         // releaseTeamBusy(team.teamNum);
         // releaseTeamBusy(num); // this will already be called when from remove session data
         removeSessionData(num);
+    } else if (page.matches('#match-scout') && _.find(document.getElementById("appNavigator").pages, d => d.matches("#view-match-scout"))) { // hack
+        console.log("Removing data for", page.data.team);
+        removeSessionData(page.data.team.team_number);
     }
 });
 
@@ -497,21 +558,26 @@ document.addEventListener('init', function (event) {
         //page.querySelector("#team-title").innerHTML = team.nickname;
         //createSelectMenu(targetBtnsContainer, chosen => enableButtons(resultBtnsContainer, chosen != null));
         //createSelectMenu(resultBtnsContainer);
-        getMatches(team.team_number).then(matches => {
-            let minDist = Infinity, minMatch = -1;
-            for (let match of matches) {
-                if (match.comp_level !== "qm") continue;
-                let tm = match.actual_time || match.predicted_time || match.time;
-                if (!tm) continue;
-                let dist = Math.abs(Date.now()/1000 - tm);
-                if (dist < minDist) {
-                    minDist = dist;
-                    minMatch = match.match_number;
-                }
-            };
-            if (minMatch >= 0) page.querySelector("#match-num").value = minMatch;
-            else page.querySelector("#match-num").value = 0;
-        });
+        let mtNum = page.data.matchNum;
+        if (!mtNum) {
+            getMatches(team.team_number).then(matches => {
+                let minDist = Infinity, minMatch = -1;
+                for (let match of matches) {
+                    if (match.comp_level !== "qm") continue;
+                    let tm = match.actual_time || match.predicted_time || match.time;
+                    if (!tm) continue;
+                    let dist = Math.abs(Date.now()/1000 - tm);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        minMatch = match.match_number;
+                    }
+                };
+                if (minMatch >= 0) page.querySelector("#match-num").value = minMatch;
+                else page.querySelector("#match-num").value = 0;
+            });
+        } else {
+            page.querySelector("#match-num").value = mtNum;
+        }
         let autoMove = page.querySelector("#auto-move"), autoTarget = page.querySelector("#auto-target"), autoSucc = page.querySelector("#auto-target-result");
         createSelectMenu(autoMove, chosen => {
             if (chosen && chosen.dataset.select === "dline") {
@@ -614,9 +680,9 @@ document.addEventListener('init', function (event) {
         tournamentCode.onchange = function (event) {
             console.log(event.target.value);
             eventCode = eventCodes[event.target.value];
-            teamListDirty = teamDataDirty = true;
+            teamListDirty = teamDataDirty = matchListDirty = true;
             var homePage = document.querySelector("#home");
-            homePage.querySelector("#loading").display = "block";
+            document.querySelectorAll(".loading").forEach(x => x.style.display = "block");
             fetchTeams(homePage).then(function () {
                 ons.notification.toast('Successfully loaded teams', {
                     timeout: 1620,
@@ -798,17 +864,38 @@ document.addEventListener('init', function (event) {
                 if (scoutMatch.length > 0) page.querySelector("#match-view").appendChild(createMatchViewElem(team.team_number, match, scoutMatch[0]));
             });
         });
+    } else if (page.matches("#view-match-scout")) {
+        getTeams().then(function(teams) {
+            let mt = page.data.mt;
+            console.log(mt);
+            page.querySelector("#match-number").innerHTML = mt.match_number;
+            let allianceMembers = mt.alliances.red.team_keys.concat(mt.alliances.blue.team_keys).map(key => _.find(teams, team => team.key === key));
+            console.log(allianceMembers)
+            for (let i = 0; i < allianceMembers.length; ++i) {
+                let team = allianceMembers[i];
+                let td = page.querySelectorAll(".tdteam")[i];
+                td.innerHTML = `${team.team_number}<br/>${team.nickname}`;
+                td.dataset.teamNum = team.team_number;
+                if (allBusyTeams[team.team_number]) {
+                    td.appendChild(makeBusyMarker(allBusyTeams[team.team_number]));
+                }
+                page.querySelectorAll("tbody tr")[i].onclick = function() {
+                    console.log("Going to team scout team", team.team_number, "match #", mt.match_number);
+                    writeSessionData(team.team_number);
+                    document.getElementById("appNavigator").pushPage("match-scout.html", {data: {team: team, matchNum: mt.match_number}});
+                };
+            }
+        });
     }
 });
 
 document.addEventListener("show", function (event) {
     var page = event.target;
-    var settings = document.querySelector("#settingsPage");
     if (page.matches("#rank-teams") && teamDataDirty) {
-        var settings = document.querySelector("#settingsPage");
-        var teamSubScores = {};
-        var teamScores = {};
-        var averageStats = {
+        let settings = document.querySelector("#settingsPage");
+        let teamSubScores = {};
+        let teamScores = {};
+        let averageStats = {
             autoSwitch: 0,
             autoScale: 0,
             teleopSwitch: 0,
@@ -816,8 +903,8 @@ document.addEventListener("show", function (event) {
             vault: 0,
             endGame: 0
         };
-        var totalMatches = 0;
-        var calculateScore = function (team, number) {
+        let totalMatches = 0;
+        let calculateScore = function (team, number) {
             var matches = Object.values(team[currentEventKey()].match);
             matches.sort((x, y) => y.timestamp - x.timestamp);
             var autoMap = {
@@ -856,11 +943,11 @@ document.addEventListener("show", function (event) {
             teamScores[number] = totalScore / totalWeight;
             teamSubScores[number] = subScores;
         };
-        var getAverage = function (s) {
+        let getAverage = function (s) {
             // hack to prevent NaNs
             return averageStats[s] === 0 ? 1e-50 : (averageStats[s] / totalMatches);
         };
-        var addToAverages = function (team) {
+        let addToAverages = function (team) {
             var matches = Object.values(team[currentEventKey()].match);
             for (let mt of matches) {
                 averageStats.autoSwitch += mt.autoTarget.indexOf("switch") !== -1;
@@ -966,5 +1053,18 @@ document.addEventListener("show", function (event) {
                 ranks.appendChild(createTeamCard(team, i + 1, subScoreRanks[team.team_number]));
             }
         });
-    }
+    } else if (page.matches("#scout-matches") && matchListDirty) {
+        getMatches().then(function (result) {
+            page.querySelector(".loading").style.display = "none";
+            page.querySelector("#matches-list").innerHTML = "";
+            let matches = result.filter(x => x.comp_level === 'qm').sort((a, b) => a.match_number - b.match_number);
+            addMatches(matches, page);
+            page.querySelector("ons-switch").onchange = function() {
+                page.querySelector("#matches-list").innerHTML = "";
+                addMatches(matches, page);
+            };
+            matchListDirty = false;
+        });
+    } 
 });
+setInterval(function() { matchListDirty = true; }, 60 * 1000 * 5); // refresh the match list once at least every 5 minutes
