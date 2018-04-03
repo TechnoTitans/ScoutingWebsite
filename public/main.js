@@ -990,21 +990,20 @@ document.addEventListener('init', function (event) {
         
         if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             // Not adding `{ audio: true }` since we only want video now
+            
             video.addEventListener('loadedmetadata', function() {
                 console.log(video.videoWidth);
                 console.log(video.videoHeight);
                 canvas.width = video.videoWidth;
                 canvas.height = video.videoHeight ;
             });
-            navigator.mediaDevices.getUserMedia({ video: true }).then(function(stream) {
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: "environment" } } }).then(function(stream) {
                 video.src = window.URL.createObjectURL(stream);
                 video.play();
             });
 
             document.getElementById("snap").onclick = function () {
                 canvas.style.display = "block";
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
                 var context = canvas.getContext("2d");
                 context.drawImage(video, 0, 0);
             };
