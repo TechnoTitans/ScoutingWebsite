@@ -886,7 +886,24 @@ document.addEventListener('init', function (event) {
                     document.getElementById("appNavigator").pushPage("match-scout.html", {data: {team: team, matchNum: mt.match_number}});
                 };
             }
-        });
+        });    
+    } else if (page.matches ("#pic-scout")){
+        var video = document.getElementById("video");
+        var canvas = document.getElementById("canvasMain");
+        var dim = document.getElementById("dimensions");
+        var w, h, ratio;
+        ratio = 480/640;
+        w = screen.width;
+        h = w * ratio;
+        canvas.style.width = w.toString() + "px";
+        canvas.style.height = h.toString() + "px";
+        
+
+
+        document.getElementById("snap").onclick = function (){
+            var context = canvas.getContext("2d");
+            context.drawImage(video, 0, 0, 300, 150);
+        }
     }
 });
 
