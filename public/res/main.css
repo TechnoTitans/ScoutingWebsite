@@ -255,3 +255,24 @@ table {
     border: 0;
     padding: 0;
 }
+
+.PicText{
+    margin: 0%;
+    margin-left: 4%;
+    padding: 0%;
+    border: 0%;
+    float: left;
+}
+#snap{
+    padding: 0px;
+    padding-bottom: 0px; 
+    width: 100%; margin: 0%; 
+    margin-top: 12%; 
+    margin-bottom: 12%;
+} 
+#file{
+    padding: 0px; 
+    padding-bottom: 0px;
+    width:100%;
+    margin-left: 0%;
+}

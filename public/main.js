@@ -545,6 +545,7 @@ document.addEventListener('init', function (event) {
         //    console.log('team has data');
         //    page.querySelector("#prev-data-icon").style.visibility = "visible";
         //}
+
         for (let button of buttons) {
             button.onclick = function () {
                 document.getElementById("appNavigator").pushPage(`${this.id}-scout.html`, {data: {team: teamObj}});
