@@ -178,9 +178,9 @@
 	        <div>
 		        <h4 style = "padding-right: 8%; font-size: 99%">Tournament:</h4>
                 <ons-select id="tournament" style = "float: left">
+                    <option value="Columbus">Columbus</option>
                     <option value="Albany">Albany</option>
                     <option value="Gainesville">Gainesville</option>
-                    <option value="Columbus">Columbus</option>
                     <option value="Peachtree">Peachtree</option>
                             <!--<option value="Houston">Houston</option>-->
                 </ons-select>
@@ -243,17 +243,19 @@
                 </div>
                 Choose target (If none, leave blank):<br />
                 <div id="auto-target" class="btn-select-menu">
+                    <ons-button modifier="large" data-select="middle" disabled>Switch (Started in middle)</ons-button>
                     <ons-button modifier="large" data-select="sswitch" disabled>Switch (Same side)</ons-button>
                     <ons-button modifier="large" data-select="cswitch" disabled>Switch (Cross side)</ons-button>
                     <ons-button modifier="large" data-select="sscale" disabled>Scale (Same side)</ons-button>
                     <ons-button modifier="large" data-select="cscale" disabled>Scale (Cross side)</ons-button>
-                    <ons-button modifier = "large" data-select="twoBlocks" disabled>Two+ Cube Auto</ons-button>
+                    <ons-button modifier = "large" data-select="twoBlocks" disabled>Two+ Cube Auto (Describe in comments)</ons-button>
                 </div>
                 <div id="auto-target-result" class="btn-select-menu">
                     <ons-button disabled data-select="true">Success</ons-button>
                     <input class="select-required" />
                     <ons-button disabled data-select="false">Failure</ons-button>
                 </div>
+                <textarea placeholder="Auto comments (Optional)" id="auto-textarea"></textarea>
             </div>
             <hr />
             <div id="teleop">
@@ -275,25 +277,28 @@
                         <ons-button class="plus"><ons-icon icon="md-plus"></ons-icon></ons-button>
                     </p>
                 </div>
+                <h3>Efficiency Comments</h3>
+                <textarea placeholder="Efficiency comments (Optional)" id="efficiency-textarea"></textarea>
+                <h3>Defense Comments</h3>
+                <textarea placeholder="Defense comments (Optional)" id="defense-textarea"></textarea>
             </div>
             <hr />
             <div id="end-game">
                 <h3>End Game</h3>
                 <p>Leave blank for none</p>
                 <div id="end-game-menu" class="btn-select-menu">
-                    <ons-button modifier="large" data-select="climb">Climb (e.g. with rope/hook)</ons-button>
-                    <ons-button modifier="large" data-select="doubleClimb">Double Climb</ons-button>
-                    <ons-button modifier="large" data-select="tripleClimb">Triple Climb</ons-button>
-                    <ons-button modifier="large" data-select="park">Park</ons-button>
+                    <ons-button modifier="large" data-select="parked">Park</ons-button>
+                    <ons-button modifier="large" data-select="climb">Climb</ons-button>
+                    <ons-button modifier="large" data-select="climb2">Double Climb</ons-button>
+                    <ons-button modifier="large" data-select="climb3">Triple Climb</ons-button>
+                    <ons-button modifier="large" data-select="otherClimb">Participated in Teammate's Climb</ons-button>
                 </div>
-                <div id="end-game-result" class="btn-select-menu">
-                    <ons-button disabled data-select="true">Success</ons-button>
-                    <input class="select-required" />
-                    <ons-button disabled data-select="false">Failure</ons-button>
-                </div>
+                <h3>End Game Comments</h3>
+                <textarea placeholder="End Game comments (Optional)" id="endgame-textarea"></textarea>
             </div>
-            <hr />
-            <textarea placeholder="Comments (optional)"></textarea>
+            <hr/>
+            <h3>General Comments</h3>
+            <textarea placeholder="General comments (Optional)" id="general-textarea"></textarea>
             <button id="submit-match" class="button button--material"> <!-- Slight hack but this should get around form validation -->
                 <span id="submit-text">Submit</span>
                 <span id="submit-load" style="display: none;"><ons-icon icon="ion-load-c" spin size="26px"></ons-icon></span>

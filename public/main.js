@@ -14,7 +14,7 @@ firebase.initializeApp(config);
 console.log('fb conslog', firebase);
 var db = firebase.database();
 
-var state = 'ga', eventCode = 'alb', year = 2018; // todo determine eventcode by date
+var state = 'ga', eventCode = 'col', year = 2018; // todo determine eventcode by date
 var currentEventKey = () => year + state + eventCode;
 var eventCodes = {'Gainesville': 'gai', 'Houston': 'cmptx', 'Peachtree': 'cmp', 'Albany': 'alb', 'Columbus': 'col'};
 var allTeams = [];
@@ -143,6 +143,9 @@ var createMatchArr = function(match) {
             "cscale": "Cross-side scale",
             "": "None",
             "climb": "Climbed",
+            "climb2": "Double climb",
+            "climb3": "Triple climb",
+            "otherClimb": "Used teammate to climb",
             "ramps": "Deployed ramps",
             "other": "Other lifting mechanism",
             "parked": "Parked on platforms"
@@ -156,7 +159,10 @@ var createMatchArr = function(match) {
                     match.teleopScale,
                     match.teleopVault,
                     strMap[match.endGame],
-                    match.endGameSuccess,
+                    match.autoComments,
+                    match.efficiencyComments,
+                    match.defenseComments,
+                    match.endGameComments,
                     match.comments
                 ];
 };
@@ -164,7 +170,7 @@ var matchesExport = function() { // TODO: use settings, maybe make configurable?
     return Promise.all([getTeams(), getAllTeamData()]).then(function (values) {
         let allTeams = values[0], allTeamData = values[1];
         let wb = {SheetNames: [], Sheets: {}};
-        var header = "Team,Match Number,Movement in Autonomous,Autonomous Target,Autonomous Success,Teleop Switch,Teleop Scale,Teleop Vault,End Game,End Game Success,Comments".split(",");
+        var header = "Team,Match Number,Movement in Autonomous,Autonomous Target,Autonomous Success,Teleop Switch,Teleop Scale,Teleop Vault,End Game,Auto Comments,Efficiency Comments,Defense Comments,End Game Comments,General Comments".split(",");
 
         let teamsWithData = getTeamsWithData(allTeams, allTeamData);
         let finalMatchWs = [header];
@@ -265,8 +271,8 @@ var createSelectCheckboxMenu = function (div, onchange) {
 var enableButtons = function (container, enabled) {
     var btns = container.querySelectorAll("ons-button");
     for (let button of btns) {
+        if (button.classList.contains("chosen")) button.onclick();
         button.disabled = !enabled;
-        if (button.classList.contains("chosen")) button.classList.remove("chosen");
     }
     let requiredInp = container.querySelector(".select-required");
     if (requiredInp) requiredInp.setCustomValidity(enabled ? "Please select one" : "");
@@ -436,6 +442,19 @@ var releaseTeamBusy = function (teamNum) {
 
 var createMatchViewElem = function(teamNum, blueMatch, ourMatch) {
     console.log(ourMatch);
+    /*                    match.matchNum || 0,
+                    strMap[match.autoMove],
+                    strMap[match.autoTarget],
+                    match.autoSuccess,
+                    match.teleopSwitch,
+                    match.teleopScale,
+                    match.teleopVault,
+                    strMap[match.endGame],
+                    match.autoComments,
+                    match.efficiencyComments,
+                    match.defenseComments,
+                    match.endGameComments,
+                    match.comments*/
     let matchArr = createMatchArr(ourMatch);
     console.log(matchArr);
     var div = ons.createElement(`<div>
@@ -447,7 +466,11 @@ var createMatchViewElem = function(teamNum, blueMatch, ourMatch) {
                 </thead>
                 <tbody>
                     <tr><td>Scouter</td><td>${ourMatch.user}</td></tr>
-                    <tr><td>Comments</td><td>${matchArr[9]}</td></tr>
+                    <tr><td>Auto Comments</td><td>${matchArr[8]}</td></tr>
+                    <tr><td>Efficiency Comments</td><td>${matchArr[9]}</td></tr>
+                    <tr><td>Defense Comments</td><td>${matchArr[10]}</td></tr>
+                    <tr><td>End Game Comments</td><td>${matchArr[11]}</td></tr>
+                    <tr><td>General Comments</td><td>${matchArr[12]}</td></tr>
                     <tr><td>Auto Move</td><td>${matchArr[1]}</td></tr>
                     <tr><td>Auto Target</td><td>${matchArr[2]}</td></tr>
                     <tr><td>Auto Success</td><td>${matchArr[3]}</td></tr>
@@ -455,7 +478,6 @@ var createMatchViewElem = function(teamNum, blueMatch, ourMatch) {
                     <tr><td>Teleop Scale</td><td>${matchArr[5]}</td></tr>
                     <tr><td>Teleop Vault</td><td>${matchArr[6]}</td></tr>
                     <tr><td>End Game</td><td>${matchArr[7]}</td></tr>
-                    <tr><td>End Game Success</td><td>${matchArr[8]}</td></tr>
                 </tbody>
             </table>
             <a href="https://www.thebluealliance.com/match/${currentEventKey()}_qm${ourMatch.matchNum}" target="_blank">Blue Alliance View</a>
@@ -593,13 +615,17 @@ document.addEventListener('init', function (event) {
         createSelectMenu(autoTarget, chosen => {
             if (chosen != null) {
                 enableButtons(autoSucc, true);
+                if (chosen.dataset.select === "twoBlocks") {
+                    autoSucc.querySelector('ons-button[data-select=true]').onclick();
+                    autoSucc.querySelector('ons-button[data-select=false]').disabled = true;
+                }
             } else {
                 enableButtons(autoSucc, false);
                 autoSucc.dataset.selected = "";
             }
         });
         createSelectMenu(autoSucc);
-        makeSuccessFailureMenu(page.querySelector("#end-game-menu"), page.querySelector("#end-game-result"), false);
+        createSelectMenu(page.querySelector("#end-game-menu"));
         page.querySelectorAll("#teleop-run p").forEach(p => createNumInput(p));
         let submitted = false;
         page.querySelector("form").onsubmit = function (e) {
@@ -616,8 +642,11 @@ document.addEventListener('init', function (event) {
             data.teleopScale = parseInt(page.querySelector("#teleop-scale ons-input").value, 10);
             data.teleopVault = parseInt(page.querySelector("#teleop-vault ons-input").value, 10);
             data.endGame = page.querySelector("#end-game-menu").dataset.selected;
-            data.endGameSuccess = page.querySelector("#end-game-result").dataset.selected;
-            data.comments = page.querySelector("textarea").value;
+            data.autoComments = page.querySelector("#auto-textarea").value;
+            data.efficiencyComments = page.querySelector("#efficiency-textarea").value;
+            data.defenseComments = page.querySelector("#defense-textarea").value;
+            data.endGameComments = page.querySelector("#endgame-textarea").value;
+            data.comments = page.querySelector("#general-textarea").value;
             data.prettydate = getPrettyTimestamp();
             data.timestamp = Date.now();
             data.teamNum = team.team_number;
@@ -699,7 +728,7 @@ document.addEventListener('init', function (event) {
         page.querySelectorAll("canvas").forEach(canvas => {
             canvas.height = canvas.width = Math.min(300, window.innerWidth - 20);
         });
-        let autoData = {sswitch: [0, 0], sscale: [0, 0], cswitch: [0, 0], cscale: [0, 0]};
+        let autoData = {sswitch: [0, 0], sscale: [0, 0], cswitch: [0, 0], cscale: [0, 0], middle: [0, 0], twoBlocks: [0, 0]};
         let autoMoveData = {dline: 0, move: 0, none: 0};
         var matches = Object.values(data.teamData[team.team_number][currentEventKey()].match); // should always exist
         matches.sort((x, y) => y.timestamp - x.timestamp);
@@ -715,22 +744,24 @@ document.addEventListener('init', function (event) {
             data: {
                 datasets: [{
                     data: [
-                        autoData.sswitch[0], autoData.cswitch[0], autoData.sscale[0], autoData.cscale[0]
+                        autoData.middle[0], autoData.sswitch[0], autoData.cswitch[0], autoData.sscale[0], autoData.cscale[0], autoData.twoBlocks[0]
                     ],
                     backgroundColor: "green",
                     label: 'Successful autos'
                 }, {
                     data: [
-                        autoData.sswitch[1], autoData.cswitch[1], autoData.sscale[1], autoData.cscale[1]
+                        autoData.middle[1], autoData.sswitch[1], autoData.cswitch[1], autoData.sscale[1], autoData.cscale[1]
                     ],
                     backgroundColor: "rgba(0, 255, 0, 0.5)",
                     label: 'Failed autos'
                 }],
                 labels: [
+                    "Switch from middle",
                     "Same-side switch",
                     "Cross-side switch",
                     "Same-side scale",
-                    "Cross-side scale"
+                    "Cross-side scale",
+                    "Two+ cubes"
                 ]
             },
             options: {
@@ -746,12 +777,14 @@ document.addEventListener('init', function (event) {
                 scales: {
                     xAxes: [{
                         stacked: true,
-                        ticks: {autoSkip: false}
+                        ticks: {
+                            autoSkip: false
+                        }
                     }],
                     yAxes: [{
                         stacked: true,
-                        ticks: {min: 0, max: matches.length, stepSize: 1},
-                        scaleLabel: {display: true, labelString: "Number of Matches"}
+                        ticks: {min: 0, max: matches.length},
+                        scaleLabel: {display: true, labelString: "Number of Matches"},
                     }]
                 }
             }
@@ -824,19 +857,33 @@ document.addEventListener('init', function (event) {
 	            }
             }
         });
-        let endGameData = {parked: [0, 0], ramps: [0, 0], none: 0, climb: [0, 0], other: [0, 0]};
+        let endGameData = {parked: [0, 0], climb2: [0, 0], none: 0, climb: [0, 0], climb3: [0, 0], otherClimb: [0, 0], ramps: [0, 0], other: [0, 0]};
         for (let mt of matches) {
-            let ind = mt.endGameSuccess === "true" ? 0 : 1;
+            let ind = (mt.endGameSuccess === "true" || mt.endGameSuccess === undefined) ? 0 : 1;
             if (mt.endGame) endGameData[mt.endGame][ind]++;
             else endGameData.none++;
         }
-        let endGameDataArray = [endGameData.none, endGameData.parked[0], endGameData.parked[1], endGameData.ramps[0], endGameData.ramps[1],
+
+        let endGameDataArray, endGameLabels, endGameColors;
+
+        if (matches[0] && matches[0].endGameSuccess !== undefined) {
+            endGameDataArray = [endGameData.none, endGameData.parked[0], endGameData.parked[1], endGameData.ramps[0], endGameData.ramps[1],
                             endGameData.climb[0], endGameData.climb[1], endGameData.other[0], endGameData.other[1]];
-        let endGameLabels = ['None', 'Parked', 'Attempted park', 'Ramps', 'Attempted ramps', 'Climbed', 'Attempted climb', 'Other', 'Attempted other'];
-        let endGameColors = ['red', 'rgb(255, 173, 51)', 'rgba(255, 173, 51, 0.5)',
+            endGameLabels = ['None', 'Parked', 'Attempted park', 'Ramps', 'Attempted ramps', 'Climbed', 'Attempted climb', 'Other', 'Attempted other'];
+            endGameColors = ['red', 'rgb(255, 173, 51)', 'rgba(255, 173, 51, 0.5)',
                                         'rgb(6, 198, 6)', 'rgba(6, 198, 6, 0.5)',
                                         'rgb(51, 153, 255)', 'rgba(51, 153, 255, 0.5)',
                                         'rgb(204, 102, 153)', 'rgba(204, 102, 153, 0.5)'];
+        } else {
+            endGameDataArray = [endGameData.none, endGameData.parked[0], endGameData.climb[0], endGameData.climb2[0], 
+                                endGameData.climb3[0], endGameData.otherClimb[0]];
+            endGameLabels = ['None', 'Parked', 'Climb', 'Double climb', 'Triple Climb', 'Participated in teammate\'s climb'];
+            endGameColors = ['red', 'rgb(255, 173, 51)',
+                                    'rgb(6, 198, 6)',
+                                    'rgb(51, 153, 255)',
+                                    'rgb(204, 102, 153)',
+                                    'yellow'];
+        }
         let inds = [];
         for (let i = 0; i < endGameDataArray.length; ++i)
             if (endGameDataArray[i] !== 0)
@@ -929,7 +976,9 @@ document.addEventListener("show", function (event) {
                 "sscale": "auto-scale-crit",
                 "cscale": "auto-scale-crit",
                 "sswitch": "auto-switch-crit",
-                "cswitch": "auto-switch-crit"
+                "cswitch": "auto-switch-crit",
+                "middle": "auto-switch-crit",
+                "twoBlocks": "auto-switch-crit"
             };
             var expWeight = -parseInt(settings.querySelector("#bias-crit ons-range").value) / 250;
             var totalScore = 0, totalWeight = 0;
@@ -940,8 +989,9 @@ document.addEventListener("show", function (event) {
                 let score = 0;
                 if (mt.autoTarget && mt.autoSuccess === "true") {
                     // so sketchy, relies on the fact that "scale" and "switch" both start with "s"
-                    score += +settings.querySelector(`#auto-${mt.autoTarget.slice(1)}-crit ons-range`).value / getAverage("autoS" + mt.autoTarget.slice(2));
-                    subScores.autoSwitch += mt.autoTarget.indexOf("switch") !== -1;
+                    score += (+settings.querySelector(`#${autoMap[mt.autoTarget]} ons-range`).value / getAverage("auto" + (mt.autoTarget.slice(1) === "scale" ? "Scale" : "Switch")))
+                        * (mt.autoTarget === "twoBlocks" ? 2 : 1);
+                    subScores.autoSwitch += (mt.autoTarget.indexOf("switch") !== -1) + (mt.autoTarget === "middle") + (mt.autoTarget === "twoBlocks") * 2;
                     subScores.autoScale += mt.autoTarget.indexOf("scale") !== -1;
                 } else if (mt.autoMove === "dline") {
                     score += ((+settings.querySelector("#auto-switch-crit ons-range").value) + (+settings.querySelector("#auto-scale-crit ons-range").value)) / 8;
@@ -952,7 +1002,7 @@ document.addEventListener("show", function (event) {
                 subScores.teleopScale += mt.teleopScale / matches.length;
                 score += mt.teleopVault * (+settings.querySelector("#vault-crit ons-range").value) / getAverage("vault");
                 subScores.vault += mt.teleopVault / matches.length;
-                let climbed = mt.endGameSuccess === "true" && mt.endGame !== "parked";
+                let climbed = mt.endGame && mt.endGame !== "parked";
                 subScores.endGame += +climbed / matches.length;
                 score += (climbed ? +settings.querySelector("#endgame-crit ons-range").value : 0) / getAverage("endGame");
                 totalScore += score * weight;
@@ -968,12 +1018,12 @@ document.addEventListener("show", function (event) {
         let addToAverages = function (team) {
             var matches = Object.values(team[currentEventKey()].match);
             for (let mt of matches) {
-                averageStats.autoSwitch += mt.autoTarget.indexOf("switch") !== -1;
-                averageStats.autoScale += mt.autoTarget.indexOf("scale") !== -1;
+                averageStats.autoSwitch += (mt.autoTarget.indexOf("switch") !== -1) + 2*(mt.autoTarget === "twoBlocks") + (mt.autoTarget === "middle");
+                averageStats.autoScale += (mt.autoTarget.indexOf("scale") !== -1);
                 averageStats.teleopSwitch += mt.teleopSwitch;
                 averageStats.teleopScale += mt.teleopScale;
                 averageStats.vault += mt.teleopVault;
-                averageStats.endGame += mt.endGameSuccess === "true" && mt.endGame !== "parked";
+                averageStats.endGame += (mt.endGame && mt.endGame !== "parked") ? 1 : 0;
             }
             totalMatches += matches.length;
         };

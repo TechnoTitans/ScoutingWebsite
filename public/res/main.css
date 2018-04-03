@@ -101,7 +101,7 @@ ons-splitter-side[animation=overlay] {
     width: -webkit-fill-available;
     width: -moz-fill-available;
     border-radius: 4px;
-    height: 5em;
+    height: 3em;
 }
 
 .scout-page textarea:focus {
