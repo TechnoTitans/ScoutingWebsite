@@ -186,6 +186,8 @@ var createMatchArr = function(match) {
             "sscale": "Same-side scale",
             "cswitch": "Cross-side switch",
             "cscale": "Cross-side scale",
+            "middle": "Switch from middle",
+            "twoBlocks": "Two-cube auto (see comments)",
             "": "None",
             "climb": "Climbed",
             "climb2": "Double climb",
