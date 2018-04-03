@@ -392,16 +392,16 @@
                     <i class="fas fa-camera" style="font-size: 350%; margin-bottom: 4%; margin-top:5%; margin-right: 21%; margin-left: 5%; float: left;"> </i> 
                     <h4 class ="PicText" style="margin-top: 7%;">Take Picture</h4>
                 </ons-button>
-                <form style="background-color: black" id="pic-form">
+                <div style="background-color: black" id="pic-form">
                     <input type="file" name="file" id="file" class="inputfile" accept="image/*" capture="camera" style="display: none;"/>
                     <label id = "label" for="file" style = "background: black; ">
                         <i class="fas fa-image" style="float: left; background-color: black; margin-top: 4%; margin-left: 4.5%; margin-bottom: 3%;" ></i> 
                         <h4 style="font-size: 45%; padding: 6%; text-align: center;" >CHOOSE PICTURE</h4>
                     </label>
-                </form>
+                </div>
             </div>
             <div style="text-align: center;">
-                <ons-button id="submit-pic" class="button--material">
+                <ons-button id="submit-pic">
                     <span id="submit-text">Submit</span>
                     <span id="submit-load" style="display: none;"><ons-icon icon="ion-load-c" spin size="26px"></ons-icon></span>
                     <span id="submit-done" style="display: none;"><ons-icon icon="ion-checkmark-circled" size="26px"></ons-icon></span>

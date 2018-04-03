@@ -986,7 +986,8 @@ document.addEventListener('init', function (event) {
     } else if (page.matches ("#pic-scout")){
         
         let video = document.getElementById("video");
-    
+        let canvas = document.getElementById("canvasMain");
+        
         if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             // Not adding `{ audio: true }` since we only want video now
             video.addEventListener('loadedmetadata', function() {
@@ -999,26 +1000,48 @@ document.addEventListener('init', function (event) {
                 video.src = window.URL.createObjectURL(stream);
                 video.play();
             });
-            let canvas = document.getElementById("canvasMain");
 
             document.getElementById("snap").onclick = function () {
                 canvas.style.display = "block";
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
                 var context = canvas.getContext("2d");
                 context.drawImage(video, 0, 0);
             };
         }
-
-        document.querySelector("#submit-pic").onclick = function(e) {
+        let btn = document.querySelector("#submit-pic");
+        btn.onclick = function(e) {
             e.preventDefault();
             canvas.toBlob((blobby) => {
 
                 // untested
-                writeImage(blobby, team).then(downloadURL => {
+                writeImage(blobby, page.data.team).then(downloadURL => {
                     console.log("URL", downloadURL);
+                });
+
+                btn.querySelector("#submit-load").style.display = "initial";
+                btn.querySelector("#submit-text").style.display = "none";
+                writeImage(blobby, page.data.team).then(downloadURL => {
+                    db.ref("pitimgs").child(page.data.team.team_number).child(currentEventKey()).set(downloadURL).then(function() {
+                        btn.querySelector("#submit-load").style.display = "none";
+                        btn.querySelector("#submit-done").style.display = "initial";
+                        btn.style.backgroundColor = "green";
+                    });
                 });
             });
 
         }
+
+        document.querySelector("#file").onchange = function(e) {
+            var img = new Image();
+            img.onload = function() {
+                canvas.width = img.width;
+                canvas.height = img.height;
+                canvas.style.display = "block";
+                canvas.getContext("2d").drawImage(img, 0, 0);
+            }
+            img.src = URL.createObjectURL(e.target.files[0]);
+        };
     }
 });
 
