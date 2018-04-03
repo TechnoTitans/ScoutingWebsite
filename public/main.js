@@ -997,9 +997,11 @@ document.addEventListener('init', function (event) {
                 canvas.width = video.videoWidth;
                 canvas.height = video.videoHeight ;
             });
-            navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: "environment" } } }).then(function(stream) {
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(function(stream) {
                 video.src = window.URL.createObjectURL(stream);
                 video.play();
+            }).catch(function(err) {
+                console.error(err);
             });
 
             document.getElementById("snap").onclick = function () {
@@ -1012,11 +1014,6 @@ document.addEventListener('init', function (event) {
         btn.onclick = function(e) {
             e.preventDefault();
             canvas.toBlob((blobby) => {
-
-                // untested
-                writeImage(blobby, page.data.team).then(downloadURL => {
-                    console.log("URL", downloadURL);
-                });
 
                 btn.querySelector("#submit-load").style.display = "initial";
                 btn.querySelector("#submit-text").style.display = "none";
