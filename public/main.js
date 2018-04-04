@@ -215,16 +215,37 @@ var createMatchArr = function(match) {
                     match.comments
                 ];
 };
-var matchesExport = function() { // TODO: use settings, maybe make configurable?
-    return Promise.all([getTeams(), getAllTeamData()]).then(function (values) {
-        let allTeams = values[0], allTeamData = values[1];
-        let wb = {SheetNames: [], Sheets: {}};
-        var header = "Team,Match Number,Movement in Autonomous,Autonomous Target,Autonomous Success,Teleop Switch,Teleop Scale,Teleop Vault,End Game,Auto Comments,Efficiency Comments,Defense Comments,End Game Comments,General Comments".split(",");
 
-        let teamsWithData = getTeamsWithData(allTeams, allTeamData);
+var getPictureData = function() {
+    return Promise.resolve([]);
+};
+
+var matchesExport = function() { // TODO: use settings, maybe make configurable?
+    return Promise.all([getTeams(), getAllTeamData(), getPictureData()]).then(function (values) {
+        if (!window.ExcelJS) return alert('Excel exporting library not loaded. Check internet connection or wait until it loads.');
+        let allTeams = values[0], allTeamData = values[1];
+        let wb = new ExcelJS.Workbook();
+        let header = [
+            "Team",
+            "Match Number",
+            "Movement in Autonomous",
+            "Autonomous Target",
+            "Autonomous Success",
+            "Teleop Switch",
+            "Teleop Scale",
+            "Teleop Vault",
+            "End Game",
+            "Auto Comments",
+            "Efficiency Comments",
+            "Defense Comments",
+            "End Game Comments",
+            "General Comments"
+        ];
+        let allScores = calculateAllScores(allTeams, allTeamData);
+        let teamsWithData = allScores.teamsWithData;
         let finalMatchWs = [header];
         for (let i = 0; i < teamsWithData.length; ++i) {
-            let team = allTeams[i];
+            let team = teamsWithData[i];
             let teamData = allTeamData[team.team_number][currentEventKey()].match;
             for (let matchKey in teamData) {
                 let match = teamData[matchKey];
@@ -232,9 +253,48 @@ var matchesExport = function() { // TODO: use settings, maybe make configurable?
                 finalMatchWs.push(matchArr);
             }
         }
-        wb.SheetNames.push("Teams");
-        wb.Sheets.Teams = XLSX.utils.aoa_to_sheet(finalMatchWs);
+        let sheet = wb.addWorksheet('Teams');
+        for (let row = 0; row < finalMatchWs.length; ++row) {
+            for (let col = 0; col < finalMatchWs[row].length; ++col) {
+                sheet.getCell(row + 1, col + 1).value = finalMatchWs[row][col];
+            }
+        }
+        let calcSheet = wb.addWorksheet('Calculated values');
+        let teamSubScores = allScores.teamSubScores;
+        let scoresHeaders = ['Team', '% Auto Switch', '% Auto Scale', 'Auto Consistency (%)', 'Teleop Switch (Mean)', 'Teleop Scale (Mean)',
+            'Teleop Vault (Mean)', 'Robots lifted during end game (Mean)', 'General Score'];
+        // available data: {averageStats, teamSubScores, teamScores, subScoreRanks, teamsWithData};
+        let pcntStyle = { numFmt: '0.00%' };
+        for (let col of [1, 2, 3]) calcSheet.getColumn(col + 1).numFmt = '0.00%';
+        for (let i = 0; i < scoresHeaders.length; ++i) {
+            calcSheet.getCell(1, i + 1).value = scoresHeaders[i];
+        }
+        for (let i = 0; i < teamsWithData.length; ++i) {
+            let team = teamsWithData[i], row = calcSheet.getRow(i + 2);
+            let teamSubScore = teamSubScores[team.team_number];
+            row.getCell(1).value = team.nickname + " -- " + team.team_number;
+            row.getCell(2).value = teamSubScore.autoSwitch;
+            row.getCell(3).value = teamSubScore.autoScale;
+            let total = teamSubScore.autoConsistency[0] + teamSubScore.autoConsistency[1];
+            row.getCell(4).value = total === 0 ? 0 : (teamSubScore.autoConsistency[1] / total);
+            row.getCell(5).value = teamSubScore.teleopSwitch;
+            row.getCell(6).value = teamSubScore.teleopScale;
+            row.getCell(7).value = teamSubScore.vault;
+            row.getCell(8).value = teamSubScore.endGame;
+            row.getCell(9).value = allScores.teamScores[team.team_number];
+        }
         return wb;
+    });
+};
+
+var downloadWb = function(wb) {
+    return wb.xlsx.writeBuffer().then(function(buffer) {
+        var blob=new Blob([buffer], {type: "application/xlsx"});
+
+        var link=document.createElement('a');
+        link.href=window.URL.createObjectURL(blob);
+        link.download = Math.random() < 0.2 ? "we-should-get-paid-more.xlsx" : "scouting.xlsx";
+        link.click();
     });
 };
 
@@ -926,7 +986,7 @@ document.addEventListener('init', function (event) {
         } else {
             endGameDataArray = [endGameData.none, endGameData.parked[0], endGameData.climb[0], endGameData.climb2[0], 
                                 endGameData.climb3[0], endGameData.otherClimb[0]];
-            endGameLabels = ['None', 'Parked', 'Climb', 'Double climb', 'Triple Climb', 'Participated in teammate\'s climb'];
+            endGameLabels = ['None', 'Parked', 'Climb', 'Double Climb', 'Triple Climb', 'Participated in teammate\'s climb'];
             endGameColors = ['red', 'rgb(255, 173, 51)',
                                     'rgb(6, 198, 6)',
                                     'rgb(51, 153, 255)',
@@ -1041,113 +1101,123 @@ document.addEventListener('init', function (event) {
     }
 });
 
+var calculateAllScores = function (teams, teamData) {
+    let settings = document.querySelector("#settingsPage");
+    let teamSubScores = {};
+    let teamScores = {};
+    let averageStats = {
+        autoSwitch: 0,
+        autoScale: 0,
+        teleopSwitch: 0,
+        teleopScale: 0,
+        vault: 0,
+        endGame: 0
+    };
+    let totalMatches = 0;
+    let calculateScore = function (team, number) {
+        var matches = Object.values(team[currentEventKey()].match);
+        matches.sort((x, y) => y.timestamp - x.timestamp);
+        var autoMap = {
+            "sscale": "auto-scale-crit",
+            "cscale": "auto-scale-crit",
+            "sswitch": "auto-switch-crit",
+            "cswitch": "auto-switch-crit",
+            "middle": "auto-switch-crit",
+            "twoBlocks": "auto-switch-crit"
+        };
+        var expWeight = -parseInt(settings.querySelector("#bias-crit ons-range").value) / 250;
+        var totalScore = 0, totalWeight = 0;
+        var subScores = {autoSwitch: 0, autoScale: 0, teleopSwitch: 0, teleopScale: 0, endGame: 0, vault: 0, autoConsistency: [0, 0]};
+        for (let i = 0; i < matches.length; ++i) {
+            let weight = Math.exp(expWeight * i);
+            let mt = matches[i];
+            let score = 0;
+            if (mt.autoTarget && mt.autoSuccess === "true") {
+                // so sketchy, relies on the fact that "scale" and "switch" both start with "s"
+                score += (+settings.querySelector(`#${autoMap[mt.autoTarget]} ons-range`).value / getAverage("auto" + (mt.autoTarget.slice(1) === "scale" ? "Scale" : "Switch")))
+                    * (mt.autoTarget === "twoBlocks" ? 2 : 1);
+                subScores.autoSwitch += ((mt.autoTarget.indexOf("switch") !== -1) + (mt.autoTarget === "middle") + (mt.autoTarget === "twoBlocks") * 2) / matches.length;
+                subScores.autoScale += (mt.autoTarget.indexOf("scale") !== -1) / matches.length;
+            } else if (mt.autoMove === "dline") {
+                score += ((+settings.querySelector("#auto-switch-crit ons-range").value) + (+settings.querySelector("#auto-scale-crit ons-range").value)) / 8;
+            }
+            if (mt.autoTarget) subScores.autoConsistency[+(mt.autoSuccess === "true")]++;
+            score += mt.teleopSwitch * (+settings.querySelector("#teleop-switch-crit ons-range").value) / getAverage("teleopSwitch");
+            subScores.teleopSwitch += mt.teleopSwitch / matches.length;
+            score += mt.teleopScale * (+settings.querySelector("#teleop-scale-crit ons-range").value) / getAverage("teleopScale");
+            subScores.teleopScale += mt.teleopScale / matches.length;
+            score += mt.teleopVault * (+settings.querySelector("#vault-crit ons-range").value) / getAverage("vault");
+            subScores.vault += mt.teleopVault / matches.length;
+            let climbed = (mt.endGame !== "" && mt.endGame !== "parked" && mt.endGame !== "otherClimb") ? 1 : 0;
+            if (climbed && mt.endGame.startsWith("climb") && mt.endGame !== "climb") climbed = parseInt(mt.endGame.replace("climb", ""), 10);
+            subScores.endGame += climbed / matches.length;
+            score += (+settings.querySelector("#endgame-crit ons-range").value) * climbed / getAverage("endGame");
+            totalScore += score * weight;
+            totalWeight += weight;
+        }
+        teamScores[number] = totalScore / totalWeight;
+        teamSubScores[number] = subScores;
+    };
+    let getAverage = function (s) {
+        // hack to prevent NaNs
+        return averageStats[s] === 0 ? 1e-50 : (averageStats[s] / totalMatches);
+    };
+    let addToAverages = function (team) {
+        var matches = Object.values(team[currentEventKey()].match);
+        for (let mt of matches) {
+            averageStats.autoSwitch += (mt.autoTarget.indexOf("switch") !== -1) + 2*(mt.autoTarget === "twoBlocks") + (mt.autoTarget === "middle");
+            averageStats.autoScale += (mt.autoTarget.indexOf("scale") !== -1);
+            averageStats.teleopSwitch += mt.teleopSwitch;
+            averageStats.teleopScale += mt.teleopScale;
+            averageStats.vault += mt.teleopVault;
+            averageStats.endGame += (mt.endGame && mt.endGame !== "parked" && mt.endGame !== "otherClimb") ? (+mt.endGame["climb".length] || 1) : 0;
+        }
+        totalMatches += matches.length;
+    };
+    var teamsWithData = getTeamsWithData(teams, teamData);
+
+    for (let team of teamsWithData) {
+        addToAverages(teamData[team.team_number]);
+    }
+    // all averages must be calculated before scores
+    for (let team of teamsWithData) {
+        calculateScore(teamData[team.team_number], team.team_number);
+    }
+    teamsWithData.sort((team1, team2) => teamScores[team2.team_number] - teamScores[team1.team_number]);
+    var subScoreRanks = {};
+    for (let team of teamsWithData) subScoreRanks[team.team_number] = {};
+    for (let key in averageStats) {
+        let subScoreSorted = teamsWithData.slice().sort((team1, team2) => {
+            var subScore1 = teamSubScores[team1.team_number][key],
+                subScore2 = teamSubScores[team2.team_number][key];
+            return subScore2 - subScore1;
+        });
+        let prevRank = teamsWithData.length, prevScore = -Infinity;
+        for (let i = teamsWithData.length - 1; i >= 0; --i) {
+            let team = subScoreSorted[i];
+            let newScore = teamSubScores[team.team_number][key];
+            if (newScore - prevScore < 0.0001) {
+                subScoreRanks[team.team_number][key] = prevRank;
+            } else {
+                subScoreRanks[team.team_number][key] = i + 1;
+                prevScore = newScore;
+                prevRank = i + 1;
+            }
+        }
+    }
+    return {averageStats, teamSubScores, teamScores, subScoreRanks, teamsWithData};
+};
+
 document.addEventListener("show", function (event) {
     var page = event.target;
     if (page.matches("#rank-teams") && teamDataDirty) {
-        let settings = document.querySelector("#settingsPage");
-        let teamSubScores = {};
-        let teamScores = {};
-        let averageStats = {
-            autoSwitch: 0,
-            autoScale: 0,
-            teleopSwitch: 0,
-            teleopScale: 0,
-            vault: 0,
-            endGame: 0
-        };
-        let totalMatches = 0;
-        let calculateScore = function (team, number) {
-            var matches = Object.values(team[currentEventKey()].match);
-            matches.sort((x, y) => y.timestamp - x.timestamp);
-            var autoMap = {
-                "sscale": "auto-scale-crit",
-                "cscale": "auto-scale-crit",
-                "sswitch": "auto-switch-crit",
-                "cswitch": "auto-switch-crit",
-                "middle": "auto-switch-crit",
-                "twoBlocks": "auto-switch-crit"
-            };
-            var expWeight = -parseInt(settings.querySelector("#bias-crit ons-range").value) / 250;
-            var totalScore = 0, totalWeight = 0;
-            var subScores = {autoSwitch: 0, autoScale: 0, teleopSwitch: 0, teleopScale: 0, endGame: 0, vault: 0};
-            for (let i = 0; i < matches.length; ++i) {
-                let weight = Math.exp(expWeight * i);
-                let mt = matches[i];
-                let score = 0;
-                if (mt.autoTarget && mt.autoSuccess === "true") {
-                    // so sketchy, relies on the fact that "scale" and "switch" both start with "s"
-                    score += (+settings.querySelector(`#${autoMap[mt.autoTarget]} ons-range`).value / getAverage("auto" + (mt.autoTarget.slice(1) === "scale" ? "Scale" : "Switch")))
-                        * (mt.autoTarget === "twoBlocks" ? 2 : 1);
-                    subScores.autoSwitch += (mt.autoTarget.indexOf("switch") !== -1) + (mt.autoTarget === "middle") + (mt.autoTarget === "twoBlocks") * 2;
-                    subScores.autoScale += mt.autoTarget.indexOf("scale") !== -1;
-                } else if (mt.autoMove === "dline") {
-                    score += ((+settings.querySelector("#auto-switch-crit ons-range").value) + (+settings.querySelector("#auto-scale-crit ons-range").value)) / 8;
-                }
-                score += mt.teleopSwitch * (+settings.querySelector("#teleop-switch-crit ons-range").value) / getAverage("teleopSwitch");
-                subScores.teleopSwitch += mt.teleopSwitch / matches.length;
-                score += mt.teleopScale * (+settings.querySelector("#teleop-scale-crit ons-range").value) / getAverage("teleopScale");
-                subScores.teleopScale += mt.teleopScale / matches.length;
-                score += mt.teleopVault * (+settings.querySelector("#vault-crit ons-range").value) / getAverage("vault");
-                subScores.vault += mt.teleopVault / matches.length;
-                let climbed = mt.endGame && mt.endGame !== "parked";
-                subScores.endGame += +climbed / matches.length;
-                score += (climbed ? +settings.querySelector("#endgame-crit ons-range").value : 0) / getAverage("endGame");
-                totalScore += score * weight;
-                totalWeight += weight;
-            }
-            teamScores[number] = totalScore / totalWeight;
-            teamSubScores[number] = subScores;
-        };
-        let getAverage = function (s) {
-            // hack to prevent NaNs
-            return averageStats[s] === 0 ? 1e-50 : (averageStats[s] / totalMatches);
-        };
-        let addToAverages = function (team) {
-            var matches = Object.values(team[currentEventKey()].match);
-            for (let mt of matches) {
-                averageStats.autoSwitch += (mt.autoTarget.indexOf("switch") !== -1) + 2*(mt.autoTarget === "twoBlocks") + (mt.autoTarget === "middle");
-                averageStats.autoScale += (mt.autoTarget.indexOf("scale") !== -1);
-                averageStats.teleopSwitch += mt.teleopSwitch;
-                averageStats.teleopScale += mt.teleopScale;
-                averageStats.vault += mt.teleopVault;
-                averageStats.endGame += (mt.endGame && mt.endGame !== "parked") ? 1 : 0;
-            }
-            totalMatches += matches.length;
-        };
         Promise.all([getTeams(), getAllTeamData()]).then(function (values) {
             teamDataDirty = false;
             var teams = values[0].slice(), teamData = values[1];
-            var teamsWithData = getTeamsWithData(teams, teamData);
-
-            for (let team of teamsWithData) {
-                addToAverages(teamData[team.team_number]);
-            }
-            // all averages must be calculated before scores
-            for (let team of teamsWithData) {
-                calculateScore(teamData[team.team_number], team.team_number);
-            }
-            teamsWithData.sort((team1, team2) => teamScores[team2.team_number] - teamScores[team1.team_number]);
-            var subScoreRanks = {};
-            for (let team of teamsWithData) subScoreRanks[team.team_number] = {};
-            for (let key in averageStats) {
-                let subScoreSorted = teamsWithData.slice().sort((team1, team2) => {
-                    var subScore1 = teamSubScores[team1.team_number][key],
-                        subScore2 = teamSubScores[team2.team_number][key];
-                    return subScore2 - subScore1;
-                });
-                let prevRank = teamsWithData.length, prevScore = -Infinity;
-                for (let i = teamsWithData.length - 1; i >= 0; --i) {
-                    let team = subScoreSorted[i];
-                    let newScore = teamSubScores[team.team_number][key];
-                    if (newScore - prevScore < 0.0001) {
-                        subScoreRanks[team.team_number][key] = prevRank;
-                    } else {
-                        subScoreRanks[team.team_number][key] = i + 1;
-                        prevScore = newScore;
-                        prevRank = i + 1;
-                    }
-                }
-            }
+            var allScores = calculateAllScores(teams, teamData);
+            var averageStats = allScores.averageStats, teamSubScores = allScores.teamSubScores,
+                teamScores = allScores.teamScores, subScoreRanks = allScores.subScoreRanks,
+                teamsWithData = allScores.teamsWithData;
             console.log(averageStats, teamSubScores, teamScores, subScoreRanks);
             var createTeamCard = function (team, rank, subScoreRanks) {
                 var DEAD_ZONE = 0.8; // if you are in bottom 80%, you are red, so the top 80% has more resolution
