@@ -15,7 +15,7 @@ console.log('fb conslog', firebase);
 var db = firebase.database();
 var storage = firebase.storage().ref();
 
-var state = 'ga', eventCode = 'col', year = 2018; // todo determine eventcode by date
+var state = 'ga', eventCode = 'cmp', year = 2018; // todo determine eventcode by date
 var currentEventKey = () => year + state + eventCode;
 var eventCodes = {'Gainesville': 'gai', 'Houston': 'cmptx', 'Peachtree': 'cmp', 'Albany': 'alb', 'Columbus': 'col'};
 var allTeams = [];
