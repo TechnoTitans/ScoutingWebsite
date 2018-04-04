@@ -339,7 +339,7 @@ var matchesExport = function() { // TODO: use settings, maybe make configurable?
             if (forEvent && forEvent.pit) {
                 for (let pitKey in forEvent.pit) {
                     let d = forEvent.pit[pitKey];
-                    pitSheet.getRow(pitRowNum * 10 + 1).values = [team.nickname + " -- " + team.team_number, d.user,
+                    pitSheet.getRow(pitRowNum * 10 + 2).values = [team.nickname + " -- " + team.team_number, d.user,
                         d.autoCapabilities.split(",").map(mapPitStrs).join("; "),
                         d.capabilities.split(",").map(mapPitStrs).join("; "),
                         d.driveTrain,
@@ -347,7 +347,7 @@ var matchesExport = function() { // TODO: use settings, maybe make configurable?
                         d.workingOn,
                         d.comment];
                     if (imgKeys[team.team_number] != null) {
-                        pitSheet.addImage(imgKeys[team.team_number], `O${pitRowNum*10+1}:Q${pitRowNum*10+10}`);
+                        pitSheet.addImage(imgKeys[team.team_number], `O${pitRowNum*10+2}:Q${pitRowNum*10+11}`);
                     }
                     pitRowNum++;
                 }
@@ -900,7 +900,15 @@ document.addEventListener('init', function (event) {
                     animation: 'fall'
                 });
             });
-        }
+        };
+        page.querySelector("#excel-export").onclick = function() {
+            this.querySelector("#submit-load").style.display = "initial";
+            this.querySelector("#submit-text").style.display = "none";
+            matchesExport().then(downloadWb).then(() => {
+                this.querySelector("#submit-load").style.display = "none";
+                this.querySelector("#submit-text").style.display = "initial";
+            });
+        };
     } else if (page.matches("#inspect-team-data")) {
         var data = page.data, team = data.team;
         page.querySelector("#team-num").innerHTML = team.team_number;

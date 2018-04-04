@@ -187,7 +187,7 @@
                 </ons-select>
 	        </div><br />
             <p id="settings-btns"><ons-button onclick="firebase.auth().signOut().then(() => location.reload())">Logout</ons-button>
-            <ons-button onclick="matchesExport().then(downloadWb);" id="excel-export">
+            <ons-button id="excel-export">
                 <span id="submit-text">Export Scouting Data</span>
                 <span id="submit-load" style="display: none;"><ons-icon icon="ion-load-c" spin size="26px"></ons-icon></span>
             </ons-button>
