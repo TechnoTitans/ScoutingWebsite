@@ -180,40 +180,57 @@ function HSVtoRGB(h, s, v) {
 };
 
 var createMatchArr = function(match) {
-        var strMap = {
-            "dline": "Drove across line",
-            "move": "Moved but did not cross",
-            "none": "Did not move",
-            "sswitch": "Same-side switch",
-            "sscale": "Same-side scale",
-            "cswitch": "Cross-side switch",
-            "cscale": "Cross-side scale",
-            "middle": "Switch from middle",
-            "twoBlocks": "Two-cube auto (see comments)",
-            "": "None",
-            "climb": "Climbed",
-            "climb2": "Double climb",
-            "climb3": "Triple climb",
-            "otherClimb": "Used teammate to climb",
-            "ramps": "Deployed ramps",
-            "other": "Other lifting mechanism",
-            "parked": "Parked on platforms"
-        };
+    var strMap = {
+        "dline": "Drove across line",
+        "move": "Moved but did not cross",
+        "none": "Did not move",
+        "sswitch": "Same-side switch",
+        "sscale": "Same-side scale",
+        "cswitch": "Cross-side switch",
+        "cscale": "Cross-side scale",
+        "middle": "Switch from middle",
+        "twoBlocks": "Two-cube auto (see comments)",
+        "": "None",
+        "climb": "Climbed",
+        "climb2": "Double climb",
+        "climb3": "Triple climb",
+        "otherClimb": "Used teammate to climb",
+        "ramps": "Deployed ramps",
+        "other": "Other lifting mechanism",
+        "parked": "Parked on platforms"
+    };
     return [
-                    match.matchNum || 0,
-                    strMap[match.autoMove],
-                    strMap[match.autoTarget],
-                    match.autoSuccess,
-                    match.teleopSwitch,
-                    match.teleopScale,
-                    match.teleopVault,
-                    strMap[match.endGame],
-                    match.autoComments,
-                    match.efficiencyComments,
-                    match.defenseComments,
-                    match.endGameComments,
-                    match.comments
-                ];
+        match.matchNum || 0,
+        strMap[match.autoMove],
+        strMap[match.autoTarget],
+        match.autoSuccess,
+        match.teleopSwitch,
+        match.teleopScale,
+        match.teleopVault,
+        strMap[match.endGame],
+        match.autoComments,
+        match.efficiencyComments,
+        match.defenseComments,
+        match.endGameComments,
+        match.comments
+    ];
+};
+
+var mapPitStrs = function(str) {
+    var strMap = {
+        'dline': "Drive across line",
+        "middle": "Switch from middle",
+        "sswitch": "Switch from same side",
+        "cswitch": "Switch from opposite side",
+        "sscale": "Scale from same side",
+        "cscale": "Scale from opposite side",
+        "switch": "Switch",
+        "scale": "Scale",
+        "vault": "Vault",
+        "groundCubes": "Pick up cubes on the ground",
+        "exchangeCubes": "Get cubes from exchange zone",
+    };
+    return strMap[str];
 };
 
 var getPictureData = function() {
@@ -227,6 +244,7 @@ var matchesExport = function() { // TODO: use settings, maybe make configurable?
         let wb = new ExcelJS.Workbook();
         let header = [
             "Team",
+            "Scouter",
             "Match Number",
             "Movement in Autonomous",
             "Autonomous Target",
@@ -243,20 +261,14 @@ var matchesExport = function() { // TODO: use settings, maybe make configurable?
         ];
         let allScores = calculateAllScores(allTeams, allTeamData);
         let teamsWithData = allScores.teamsWithData;
-        let finalMatchWs = [header];
+        let sheet = wb.addWorksheet('Teams');
+        sheet.addRow(header);
         for (let i = 0; i < teamsWithData.length; ++i) {
             let team = teamsWithData[i];
             let teamData = allTeamData[team.team_number][currentEventKey()].match;
             for (let matchKey in teamData) {
                 let match = teamData[matchKey];
-                let matchArr = ([team.nickname + " -- " + team.team_number]).concat(createMatchArr(match));
-                finalMatchWs.push(matchArr);
-            }
-        }
-        let sheet = wb.addWorksheet('Teams');
-        for (let row = 0; row < finalMatchWs.length; ++row) {
-            for (let col = 0; col < finalMatchWs[row].length; ++col) {
-                sheet.getCell(row + 1, col + 1).value = finalMatchWs[row][col];
+                sheet.addRow(([team.nickname + " -- " + team.team_number, match.user]).concat(createMatchArr(match)));
             }
         }
         let calcSheet = wb.addWorksheet('Calculated values');
@@ -264,11 +276,8 @@ var matchesExport = function() { // TODO: use settings, maybe make configurable?
         let scoresHeaders = ['Team', '% Auto Switch', '% Auto Scale', 'Auto Consistency (%)', 'Teleop Switch (Mean)', 'Teleop Scale (Mean)',
             'Teleop Vault (Mean)', 'Robots lifted during end game (Mean)', 'General Score'];
         // available data: {averageStats, teamSubScores, teamScores, subScoreRanks, teamsWithData};
-        let pcntStyle = { numFmt: '0.00%' };
         for (let col of [1, 2, 3]) calcSheet.getColumn(col + 1).numFmt = '0.00%';
-        for (let i = 0; i < scoresHeaders.length; ++i) {
-            calcSheet.getCell(1, i + 1).value = scoresHeaders[i];
-        }
+        calcSheet.addRow(scoresHeaders);
         for (let i = 0; i < teamsWithData.length; ++i) {
             let team = teamsWithData[i], row = calcSheet.getRow(i + 2);
             let teamSubScore = teamSubScores[team.team_number];
@@ -282,6 +291,26 @@ var matchesExport = function() { // TODO: use settings, maybe make configurable?
             row.getCell(7).value = teamSubScore.vault;
             row.getCell(8).value = teamSubScore.endGame;
             row.getCell(9).value = allScores.teamScores[team.team_number];
+        }
+
+        let pitSheet = wb.addWorksheet('Pit Data');
+        pitSheet.addRow(['Team', 'Scouter', 'Autonomous', 'Teleop', 'Drive Train', 'End Game', 'Systems that were being changed', 'Comments and Other Systems'])
+        for (let team of allTeams) {
+            let ourData = allTeamData[team.team_number];
+            if (!ourData) continue;
+            let forEvent = ourData[currentEventKey()];
+            if (forEvent && forEvent.pit) {
+                for (let pitKey in forEvent.pit) {
+                    let d = forEvent.pit[pitKey];
+                    pitSheet.addRow([team.nickname + " -- " + team.team_number, d.user,
+                        d.autoCapabilities.split(",").map(mapPitStrs).join("; "),
+                        d.capabilities.split(",").map(mapPitStrs).join("; "),
+                        d.driveTrain,
+                        d.endGameCapabilities,
+                        d.workingOn,
+                        d.comment]);
+                }
+            }
         }
         return wb;
     });
@@ -784,14 +813,15 @@ document.addEventListener('init', function (event) {
             var data = {};
             data.user = firebase.auth().currentUser.displayName;
             data.teamNum = team.team_number;
-            data.driveTrain = page.querySelector("#drivetrain-select").dataset.selected;
-            data.focus = page.querySelector("#focus").dataset.selected;
+            data.workingOn = page.querySelector("#workingOn").dataset.selected;
+            data.driveTrain = page.querySelector("#drivetrain-select").value;
             data.capabilities = page.querySelector("#capabilities").dataset.selected;
-            data.maxLiftHeight = parseInt(page.querySelector("#heightInput").value);
+            data.autoCapabilities = page.querySelector("#autoCapabilities").dataset.selected;
+            data.endGameCapabilities = page.querySelector("#endgame-strategy").dataset.selected;
             data.comment = page.querySelector("#more-comments").value;
-            data.endGameStrategy = page.querySelector("#endgame-strategy").dataset.selected;
             var btn = this.querySelector("#submit-pit");
-
+            btn.querySelector("#submit-load").style.display = "initial";
+            btn.querySelector("#submit-text").style.display = "none";
             writeScoutingData(data, true).then(() => {
                 btn.querySelector("#submit-load").style.display = "none";
                 btn.querySelector("#submit-done").style.display = "initial";
