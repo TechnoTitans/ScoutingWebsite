@@ -234,7 +234,34 @@ var mapPitStrs = function(str) {
 };
 
 var getPictureData = function() {
-    return Promise.resolve([]);
+    return db.ref("pitimgs").once('value').then(function(snapshot) {
+        var teams = snapshot.val();
+        var teamNums = [], urls = [];
+        for (let teamKey in teams) {
+            if (teams[teamKey][currentEventKey()]) {
+                teamNums.push(teamKey);
+                urls.push(teams[teamKey][currentEventKey()]);
+            }
+        }
+        return urls.map(function(url, ind) {
+            return new Promise((resolve, reject) => {
+                var oReq = new XMLHttpRequest();
+                oReq.open("GET", url);
+                oReq.responseType = "arraybuffer";
+
+                oReq.onload = function(oEvent) {
+                  var imgBlob = new Blob([oReq.response], {type: "image/png"});
+                  resolve({blob: imgBlob, teamNum: teamNums[ind]});
+                };
+
+                oReq.onerror = reject;
+                console.log("Loaded", ind);
+                oReq.send();
+            });
+        });
+    }).then(function(promises) {
+        return Promise.all(promises);
+    });
 };
 
 var matchesExport = function() { // TODO: use settings, maybe make configurable?
@@ -295,6 +322,16 @@ var matchesExport = function() { // TODO: use settings, maybe make configurable?
 
         let pitSheet = wb.addWorksheet('Pit Data');
         pitSheet.addRow(['Team', 'Scouter', 'Autonomous', 'Teleop', 'Drive Train', 'End Game', 'Systems that were being changed', 'Comments and Other Systems'])
+        let pitRowNum = 0;
+        let imgs = values[2], imgKeys = {};
+        console.log("Imgs", imgs);
+        for (let img of imgs) {
+            let imgKey = wb.addImage({
+              buffer: img.blob,
+              extension: 'png',
+            });
+            imgKeys[img.teamNum] = imgKey;
+        }
         for (let team of allTeams) {
             let ourData = allTeamData[team.team_number];
             if (!ourData) continue;
@@ -302,13 +339,17 @@ var matchesExport = function() { // TODO: use settings, maybe make configurable?
             if (forEvent && forEvent.pit) {
                 for (let pitKey in forEvent.pit) {
                     let d = forEvent.pit[pitKey];
-                    pitSheet.addRow([team.nickname + " -- " + team.team_number, d.user,
+                    pitSheet.getRow(pitRowNum * 10 + 1).values = [team.nickname + " -- " + team.team_number, d.user,
                         d.autoCapabilities.split(",").map(mapPitStrs).join("; "),
                         d.capabilities.split(",").map(mapPitStrs).join("; "),
                         d.driveTrain,
                         d.endGameCapabilities,
                         d.workingOn,
-                        d.comment]);
+                        d.comment];
+                    if (imgKeys[team.team_number] != null) {
+                        pitSheet.addImage(imgKeys[team.team_number], `O${pitRowNum*10+1}:Q${pitRowNum*10+10}`);
+                    }
+                    pitRowNum++;
                 }
             }
         }
