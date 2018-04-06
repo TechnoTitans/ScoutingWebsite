@@ -542,7 +542,7 @@ var createMatch = function (mt) {
     var elem = ons.createElement(`
             <ons-list-item data-match-num="${mt.match_number}">
                 <div>
-                    Match ${mt.match_number} <em>(${mom.fromNow()} at ${mom.format('ddd h:s A')})</em>
+                    Match ${mt.match_number} <em>(${mom.fromNow()} at ${mom.format('ddd h:mm A')})</em>
                 </div>
             </ons-list-item>
     `);
