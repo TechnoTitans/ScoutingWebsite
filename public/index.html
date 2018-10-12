@@ -183,7 +183,8 @@
                     <option value="Columbus">Columbus</option>
                     <option value="Albany">Albany</option>
                     <option value="Gainesville">Gainesville</option>
-                            <!--<option value="Houston">Houston</option>-->
+			<option value="GRITS">GRITS</option>
+                            <!--<option value="Houston">Houston</option>--> <!-- RIP -->
                 </ons-select>
 	        </div><br />
             <p id="settings-btns"><ons-button onclick="firebase.auth().signOut().then(() => location.reload())">Logout</ons-button>
@@ -447,7 +448,7 @@
     };
 
     window.fn.checkForPrevAuth = function () {
-
+	
         if (localStorage.auth === "1") {
             document.getElementById('appNavigator').pushPage('tabbar.html');
         }
