@@ -15,7 +15,7 @@ console.log('fb conslog', firebase);
 var db = firebase.database();
 var storage = firebase.storage().ref();
 
-var state = 'ga', eventCode = 'cmp', year = 2018; // todo determine eventcode by date
+var state = 'ga', eventCode = 'gr', year = 2018; // todo determine eventcode by date
 var currentEventKey = () => year + state + eventCode;
 var eventCodes = {'Gainesville': 'gai', 'Houston': 'cmptx', 'Peachtree': 'cmp', 'Albany': 'alb', 'Columbus': 'col', 'GRITS': 'gr'};
 var allTeams = [];
@@ -117,6 +117,16 @@ var getTeams = function () {
     }).then(function (response) {
         teamListDirty = false;
         allTeams = response.data;
+        if (eventCode == 'gr' && !_.find(allTeams, key => key.team_number === 1311)) {
+            // kell joined
+            allTeams.push({city: "idk",
+            country: "USA",
+            key: "frc1311",
+            name: "lol Kell idk",
+            nickname: "Kell",
+            state_prov: "Georgia",
+            team_number: 1311});
+        }
         return response.data;
     });
 };
