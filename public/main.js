@@ -214,7 +214,7 @@ var createMatchArr = function(match) {
  strMap[match.autoMove],
  strMap[match.autoTarget],
  match.autoSuccess,
- match.teleopCargoL1,
+ match.teleopCargo,
  match.teleopScale,
  match.teleopVault,
  strMap[match.endGame],
@@ -323,7 +323,7 @@ var matchesExport = function() { // TODO: use settings, maybe make configurable?
  row.getCell(3).value = teamSubScore.autoScale;
  let total = teamSubScore.autoConsistency[0] + teamSubScore.autoConsistency[1];
  row.getCell(4).value = total === 0 ? 0 : (teamSubScore.autoConsistency[1] / total);
- row.getCell(5).value = teamSubScore.teleopCargoL1;
+ row.getCell(5).value = teamSubScore.teleopSwitch;
  row.getCell(6).value = teamSubScore.teleopScale;
  row.getCell(7).value = teamSubScore.vault;
  row.getCell(8).value = teamSubScore.endGame;
@@ -635,7 +635,7 @@ var createMatchViewElem = function(teamNum, blueMatch, ourMatch) {
  strMap[match.autoMove],
  strMap[match.autoTarget],
  match.autoSuccess,
- match.teleopCargoL1,
+ match.teleopSwitch,
  match.teleopScale,
  match.teleopVault,
  strMap[match.endGame],
@@ -827,9 +827,13 @@ document.addEventListener('init', function (event) {
  data.autoMove = page.querySelector("#auto-move").dataset.selected;
  data.autoTarget = page.querySelector("#auto-target").dataset.selected;
  data.autoSuccess = page.querySelector("#auto-target-result").dataset.selected;
- data.teleopCargoL1 = parseInt(page.querySelector("#teleop-cargoL1 ons-input").value, 10);
- data.teleopScale = parseInt(page.querySelector("#teleop-scale ons-input").value, 10);
- data.teleopVault = parseInt(page.querySelector("#teleop-vault ons-input").value, 10);
+ data.teleopCargoL1 = parseInt(page.querySelector("#teleop-cargo1 ons-input").value, 10);
+ data.teleopCargoL2 = parseInt(page.querySelector("#teleop-cargo2 ons-input").value, 10);
+ data.teleopCargoL3 = parseInt(page.querySelector("#teleop-cargo3 ons-input").value, 10);
+ data.teleopPanels1 = parseInt(page.querySelector("#teleop-panel1 ons-input").value, 10);
+ data.teleopPanels2 = parseInt(page.querySelector("#teleop-panel2 ons-input").value, 10);
+ data.teleopPanels3 = parseInt(page.querySelector("#teleop-panel3 ons-input").value, 10);
+ // data.teleopVault = parseInt(page.querySelector("#teleop-vault ons-input").value, 10);
  data.endGame = page.querySelector("#end-game-menu").dataset.selected;
  data.autoComments = page.querySelector("#auto-textarea").value;
  data.efficiencyComments = page.querySelector("#efficiency-textarea").value;
@@ -1001,7 +1005,7 @@ document.addEventListener('init', function (event) {
  let autoChart = new Chart(page.querySelector("#autochart").getContext("2d"), autoConfig);
  let teleopData = {switch: [], scale: [], vault: []};
  for (let match of matches) {
- teleopData.switch.push(match.teleopCargoL1);
+ teleopData.switch.push(match.teleopSwitch);
  teleopData.scale.push(match.teleopScale);
  teleopData.vault.push(match.teleopVault);
  }
@@ -1198,7 +1202,7 @@ var calculateAllScores = function (teams, teamData) {
  let averageStats = {
  autoSwitch: 0,
  autoScale: 0,
- teleopCargoL1: 0,
+ teleopCargo: 0,  
  teleopScale: 0,
  vault: 0,
  endGame: 0
@@ -1217,7 +1221,7 @@ var calculateAllScores = function (teams, teamData) {
  };
  var expWeight = -parseInt(settings.querySelector("#bias-crit ons-range").value) / 250;
  var totalScore = 0, totalWeight = 0;
- var subScores = {autoSwitch: 0, autoScale: 0, teleopCargoL1: 0, teleopScale: 0, endGame: 0, vault: 0, autoConsistency: [0, 0]};
+ var subScores = {autoSwitch: 0, autoScale: 0, teleopCargo: 0, teleopScale: 0, endGame: 0, vault: 0, autoConsistency: [0, 0]};
  for (let i = 0; i < matches.length; ++i) {
  let weight = Math.exp(expWeight * i);
  let mt = matches[i];
@@ -1232,8 +1236,8 @@ var calculateAllScores = function (teams, teamData) {
  score += ((+settings.querySelector("#auto-switch-crit ons-range").value) + (+settings.querySelector("#auto-scale-crit ons-range").value)) / 8;
  }
  if (mt.autoTarget) subScores.autoConsistency[+(mt.autoSuccess === "true")]++;
- score += mt.teleopCargoL1 * (+settings.querySelector("#teleop-switch-crit ons-range").value) / getAverage("teleopCargoL1");
- subScores.teleopCargoL1 += mt.teleopCargoL1 / matches.length;
+ score += mt.teleopSwitch * (+settings.querySelector("#teleop-switch-crit ons-range").value) / getAverage("teleopSwitch");
+ subScores.teleopSwitch += mt.teleopSwitch / matches.length;
  score += mt.teleopScale * (+settings.querySelector("#teleop-scale-crit ons-range").value) / getAverage("teleopScale");
  subScores.teleopScale += mt.teleopScale / matches.length;
  score += mt.teleopVault * (+settings.querySelector("#vault-crit ons-range").value) / getAverage("vault");
@@ -1257,7 +1261,7 @@ var calculateAllScores = function (teams, teamData) {
  for (let mt of matches) {
  averageStats.autoSwitch += (mt.autoTarget.indexOf("switch") !== -1) + 2*(mt.autoTarget === "twoBlocks") + (mt.autoTarget === "middle");
  averageStats.autoScale += (mt.autoTarget.indexOf("scale") !== -1);
- averageStats.teleopCargoL1 += mt.teleopCargoL1;
+ averageStats.teleopSwitch += mt.teleopSwitch;
  averageStats.teleopScale += mt.teleopScale;
  averageStats.vault += mt.teleopVault;
  averageStats.endGame += (mt.endGame && mt.endGame !== "parked" && mt.endGame !== "otherClimb") ? (+mt.endGame["climb".length] || 1) : 0;
@@ -1347,7 +1351,7 @@ document.addEventListener("show", function (event) {
  <ons-col>Auto Panels <div class="indicator" style="${subScoreColors.autoScale}"></div></ons-col>
  </ons-row>
  <ons-row> 
- <ons-col>Teleop Cargo <div class="indicator" style="${subScoreColors.teleopCargoL1}"></div></ons-col>
+ <ons-col>Teleop Cargo <div class="indicator" style="${subScoreColors.teleopSwitch}"></div></ons-col>
  <ons-col>Teleop Panels <div class="indicator" style="${subScoreColors.teleopScale}"></div></ons-col>
  </ons-row>
  <ons-row>

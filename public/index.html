@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en" xmlns="">
 <head>
@@ -254,9 +253,9 @@ Match <span id="match-number"></span>
 
 Did they move:<br />
 <div id="auto-move" class="btn-select-menu">
-<ons-button modifier="large" data-select="dline">Drive across line</ons-button>
-<ons-button modifier="large" data-select="move">Moved but did not cross line</ons-button>
-<ons-button modifier="large" data-select="none">Did not move</ons-button>
+<ons-button modifier="large" data-select="dline">Cross HAB</ons-button>
+<ons-button modifier="large" data-select="move">Moved but did not cross HAB</ons-button>
+<ons-button modifier="large" data-select="none">No movement</ons-button>
 </div>
 Choose target (If none, leave blank):<br />
 <div id="auto-target" class="btn-select-menu">
@@ -279,32 +278,32 @@ Choose target (If none, leave blank):<br />
 <div id="teleop">
 <h3>Teleoperated</h3>
 <div id="teleop-run">
-<p id="teleop-switch">Cargo Level 1:<br/>
+<p id="teleop-cargo1">Cargo Level 1:<br/>
 <ons-button class="minus"><ons-icon icon="md-minus"></ons-icon></ons-button>
 <ons-input type="number" value="0" min="0" required></ons-input>
 <ons-button class="plus"><ons-icon icon="md-plus"></ons-icon></ons-button>
 </p>
-<p id="teleop-scale">Cargo Level 2:<br/>
+<p id="teleop-cargo2">Cargo Level 2:<br/>
 <ons-button class="minus"><ons-icon icon="md-minus"></ons-icon></ons-button>
 <ons-input type="number" value="0" min="0" required></ons-input>
 <ons-button class="plus"><ons-icon icon="md-plus"></ons-icon></ons-button>
 </p>
-<p id="teleop-vault">Cargo Level 3:<br />
+<p id="teleop-cargo3">Cargo Level 3:<br />
 <ons-button class="minus"><ons-icon icon="md-minus"></ons-icon></ons-button>
 <ons-input type="number" value="0" min="0" required></ons-input>
 <ons-button class="plus"><ons-icon icon="md-plus"></ons-icon></ons-button>
 </p>
-<p id="teleop-switch">Panels Level 1:<br/>
+<p id="teleop-panel1">Panels Level 1:<br/>
 <ons-button class="minus"><ons-icon icon="md-minus"></ons-icon></ons-button>
 <ons-input type="number" value="0" min="0" required></ons-input>
 <ons-button class="plus"><ons-icon icon="md-plus"></ons-icon></ons-button>
 </p>
-<p id="teleop-scale">Panels Level 2:<br/>
+<p id="teleop-panel2">Panels Level 2:<br/>
 <ons-button class="minus"><ons-icon icon="md-minus"></ons-icon></ons-button>
 <ons-input type="number" value="0" min="0" required></ons-input>
 <ons-button class="plus"><ons-icon icon="md-plus"></ons-icon></ons-button>
 </p>
-<p id="teleop-vault">Panels Level 3:<br />
+<p id="teleop-panel3">Panels Level 3:<br />
 <ons-button class="minus"><ons-icon icon="md-minus"></ons-icon></ons-button>
 <ons-input type="number" value="0" min="0" required></ons-input>
 <ons-button class="plus"><ons-icon icon="md-plus"></ons-icon></ons-button>
