@@ -19,7 +19,7 @@
   "dependencies": {
     "auth0-js": "^9.3.0",
     "axios": "^0.17.1",
-    "chart.js": "^2.7.1",
+    "chart.js": "^2.7.3",
     "chartjs": "^0.3.24",
     "chartjs-chart-box-and-violin-plot": "^1.0.0",
     "exceljs": "^1.1.0",
