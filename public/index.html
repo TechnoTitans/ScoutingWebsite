@@ -1,480 +1,487 @@
 <!DOCTYPE html>
 <html lang="en" xmlns="">
 <head>
-<meta charset="UTF-8">
-<title>Scouting App</title>
-<link rel="stylesheet" href="node_modules/onsenui/css/onsenui.css">
-<link rel="stylesheet" href="node_modules/onsenui/css/onsen-css-components.css">
-<script src="node_modules/onsenui/js/onsenui.js"></script>
-<link rel="stylesheet" href="node_modules/font-awesome-animation/dist/font-awesome-animation.min.css">
-<script src="node_modules/axios/dist/axios.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/4.9.1/firebase.js"></script>
-<script src="node_modules/chart.js/dist/Chart.min.js"></script>
-<script src="node_modules/chartjs-chart-box-and-violin-plot/build/Chart.BoxPlot.js"></script>
- <!-- <script src="https://cdn.auth0.com/js/auth0/9.2.2/auth0.min.js"></script> -->
-<!-- <script src="node_modules/firebaseui/dist/firebaseui.js"></script> -->
-<!-- <link type="text/css" rel="stylesheet" href="node_modules/firebaseui/dist/firebaseui.css" /> -->
-<script src="https://www.gstatic.com/firebasejs/5.8.2/firebase.js"></script>
-<script src="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.js"></script>
-<link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.css" />
- <!-- <script src="node_modules/xlsx/dist/xlsx.full.min.js" async></script> -->
-<script src="node_modules/exceljs/dist/exceljs.min.js" async></script>
-<script src="node_modules/moment/min/moment.min.js"></script>
-<script src="node_modules/lodash/lodash.min.js"></script>
-<script src="main.js"></script>
-<script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
-<link rel="stylesheet" href="res/main.css"/>
- <!--<link rel="manifest" href="manifest.json">-->
+    <meta charset="UTF-8">
+    <title>Scouting App</title>
+    <link rel="stylesheet" href="node_modules/onsenui/css/onsenui.css">
+    <link rel="stylesheet" href="node_modules/onsenui/css/onsen-css-components.css">
+    <script src="node_modules/onsenui/js/onsenui.js"></script>
+    <link rel="stylesheet" href="node_modules/font-awesome-animation/dist/font-awesome-animation.min.css">
+    <script src="node_modules/axios/dist/axios.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.9.1/firebase.js"></script>
+    <script src="node_modules/chart.js/dist/Chart.min.js"></script>
+    <script src="node_modules/chartjs-chart-box-and-violin-plot/build/Chart.BoxPlot.js"></script>
+    <!-- <script src="https://cdn.auth0.com/js/auth0/9.2.2/auth0.min.js"></script> -->
+    <!-- <script src="node_modules/firebaseui/dist/firebaseui.js"></script> -->
+    <!-- <link type="text/css" rel="stylesheet" href="node_modules/firebaseui/dist/firebaseui.css" /> -->
+    <script src="https://www.gstatic.com/firebasejs/5.8.2/firebase.js"></script>
+    <script src="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.js"></script>
+    <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.css" />
+    <!-- <script src="node_modules/xlsx/dist/xlsx.full.min.js" async></script> -->
+    <script src="node_modules/exceljs/dist/exceljs.min.js" async></script>
+    <script src="node_modules/moment/min/moment.min.js"></script>
+    <script src="node_modules/lodash/lodash.min.js"></script>
+    <script src="main.js"></script>
+    <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
+    <link rel="stylesheet" href="res/main.css"/>
+    <!--<link rel="manifest" href="manifest.json">-->
 </head>
 
 <body>
-<ons-navigator id="appNavigator" swipeable swipe-target-width="80px">
-<ons-page id="tabbarPage">
-<ons-splitter id="appSplitter">
-<ons-splitter-content page="login.html"></ons-splitter-content>
-</ons-splitter>
-</ons-page>
-</ons-navigator>
+    <ons-navigator id="appNavigator" swipeable swipe-target-width="80px">
+        <ons-page id="tabbarPage">
+            <ons-splitter id="appSplitter">
+                <ons-splitter-content page="login.html"></ons-splitter-content>
+            </ons-splitter>
+        </ons-page>
+    </ons-navigator>
 
-<template id="login.html">
-<ons-page id="login">
-<div style="text-align: center; margin-top: 30px;" id="firebaseui-auth-container">
-</div>
-</ons-page>
-</template>
+    <template id="login.html">
+        <ons-page id="login">
+            <div style="text-align: center; margin-top: 30px;" id="firebaseui-auth-container">
+            </div>
+        </ons-page>
+    </template>
 
-<template id="tabbar.html">
-<ons-page id="tabbar-page">
-<ons-toolbar>
-<div class="center">Home</div>
-</ons-toolbar>
-<ons-tabbar swipeable id="appTabbar" position="auto">
-<ons-tab label="Matches" icon="ion-home" page="scout-matches.html" active></ons-tab>
-<ons-tab label="Scout" icon="ion-edit" page="home.html"></ons-tab>
-<ons-tab label="Rank Teams" icon="ion-stats-bars" page="teams.html"></ons-tab>
-<ons-tab label="Settings" icon="ion-settings" page="settings.html"></ons-tab>
-</ons-tabbar>
+    <template id="tabbar.html">
+        <ons-page id="tabbar-page">
+            <ons-toolbar>
+                <div class="center">Home</div>
+            </ons-toolbar>
+            <ons-tabbar swipeable id="appTabbar" position="auto">
+                <ons-tab label="Matches" icon="ion-home" page="scout-matches.html" active></ons-tab>
+                <ons-tab label="Scout" icon="ion-edit" page="home.html"></ons-tab>
+                <ons-tab label="Rank Teams" icon="ion-stats-bars" page="teams.html"></ons-tab>
+                <ons-tab label="Settings" icon="ion-settings" page="settings.html"></ons-tab>
+            </ons-tabbar>
 
-<script>
- ons.getScriptPage().addEventListener('prechange', function (event) {
- if (event.target.matches('#appTabbar')) {
- event.currentTarget.querySelector('ons-toolbar .center').innerHTML = event.tabItem.getAttribute('label');
- }
- });
- </script>
-</ons-page>
-</template>
+            <script>
+               ons.getScriptPage().addEventListener('prechange', function (event) {
+                   if (event.target.matches('#appTabbar')) {
+                       event.currentTarget.querySelector('ons-toolbar .center').innerHTML = event.tabItem.getAttribute('label');
+                   }
+               });
+           </script>
+       </ons-page>
+   </template>
 
-<template id="inspect-team-data.html">
-<ons-page id="inspect-team-data">
-<ons-toolbar>
-<div class="left"><ons-back-button>All Teams</ons-back-button></div>
-<div class="center">Team <span id="team-num"></span></div>
-</ons-toolbar>
-<div style="text-align:center; padding: 5px;">
-<h1 id="team-name"></h1>
-<div id="autostats">
-<h2>Autonomous</h2>
-<div class="chart-container">
-<canvas id="autoMove"></canvas>
-</div>
-<hr style="margin: 10px 0px;" />
-<div class="chart-container">
-<canvas id="autochart"></canvas>
-</div>
-</div>
-<hr />
-<div id="teleopstats">
-<h2>Teleop</h2>
-<div class="chart-container">
-<canvas id="teleopchart"></canvas>
-</div>
-</div>
-<hr />
-<div id="endgamestats">
-<h2>End Game</h2>
-<div class="chart-container">
-<canvas id="endgamechart"></canvas>
-</div>
-</div>
-<hr />
-<div>
-<h2>Win/Loss Record: <span id="record-win"></span>-<span id="record-loss"></span></h2>
-<h2>Rank: <span id="qual-rank"></span></h2>
-<div id="match-view">
-</div>
-</div>
-</div>
-</ons-page>
+   <template id="inspect-team-data.html">
+    <ons-page id="inspect-team-data">
+        <ons-toolbar>
+            <div class="left"><ons-back-button>All Teams</ons-back-button></div>
+            <div class="center">Team <span id="team-num"></span></div>
+        </ons-toolbar>
+        <div style="text-align:center; padding: 5px;">
+            <h1 id="team-name"></h1>
+            <div id="autostats">
+                <h2>Autonomous</h2>
+                <div class="chart-container">
+                    <canvas id="autoMove"></canvas>
+                </div>
+                <hr style="margin: 10px 0px;" />
+                <div class="chart-container">
+                    <canvas id="autochart"></canvas>
+                </div>
+            </div>
+            <hr />
+            <div id="teleopstats">
+                <h2>Teleop</h2>
+                <div class="chart-container">
+                    <canvas id="teleopchart"></canvas>
+                </div>
+            </div>
+            <hr />
+            <div id="endgamestats">
+                <h2>End Game</h2>
+                <div class="chart-container">
+                    <canvas id="endgamechart"></canvas>
+                </div>
+            </div>
+            <hr />
+            <div>
+                <h2>Win/Loss Record: <span id="record-win"></span>-<span id="record-loss"></span></h2>
+                <h2>Rank: <span id="qual-rank"></span></h2>
+                <div id="match-view">
+                </div>
+            </div>
+        </div>
+    </ons-page>
 </template>
 
 <template id="teams.html">
-<ons-page id="rank-teams">
-<div id="teams-ranked">
+    <ons-page id="rank-teams">
+        <div id="teams-ranked">
 
-</div>
-</ons-page>
+        </div>
+    </ons-page>
 </template>
 
 <template id="scout-matches.html">
-<ons-page id="scout-matches">
-<ons-toolbar>
-<ons-list-item class="center">
-<div>View Past Matches</div>
-<div style="margin-left: 20px;"><ons-switch></ons-switch></div>
-</ons-list-item>
-</ons-toolbar>
-<div class="loading"><ons-icon id="loading-icon" size="22px" spin="true" icon="fa-spinner"></ons-icon></div>
-<ons-list id="matches-list" class="loaded-list">
-</ons-list>
-</ons-page>
+    <ons-page id="scout-matches">
+        <ons-toolbar>
+            <ons-list-item class="center">
+                <div>View Past Matches</div>
+                <div style="margin-left: 20px;"><ons-switch></ons-switch></div>
+            </ons-list-item>
+        </ons-toolbar>
+        <div class="loading"><ons-icon id="loading-icon" size="22px" spin="true" icon="fa-spinner"></ons-icon></div>
+        <ons-list id="matches-list" class="loaded-list">
+        </ons-list>
+    </ons-page>
 </template>
 
 <template id="view-match-scout.html">
-<ons-page id="view-match-scout">
-<ons-toolbar>
-<div class="left">
-<ons-back-button>Matches</ons-back-button>
-</div>
-<div class="center">
-Match <span id="match-number"></span>
-</div>
-</ons-toolbar>
-<table>
-<thead>
-<tr><th>Alliance</th><th>Team</th></tr>
-</thead>
-<tbody>
-<tr class="tr-red"><td>Red 1</td><td class="tdteam"></td></tr>
-<tr class="tr-red"><td>Red 2</td><td class="tdteam"></td></tr>
-<tr class="tr-red"><td>Red 3</td><td class="tdteam"></td></tr>
-<tr class="tr-blue"><td>Blue 1</td><td class="tdteam"></td></tr>
-<tr class="tr-blue"><td>Blue 2</td><td class="tdteam"></td></tr>
-<tr class="tr-blue"><td>Blue 3</td><td class="tdteam"></td></tr>
-</tbody>
-</table>
-</ons-page>
+    <ons-page id="view-match-scout">
+        <ons-toolbar>
+            <div class="left">
+                <ons-back-button>Matches</ons-back-button>
+            </div>
+            <div class="center">
+                Match <span id="match-number"></span>
+            </div>
+        </ons-toolbar>
+        <table>
+            <thead>
+                <tr><th>Alliance</th><th>Team</th></tr>
+            </thead>
+            <tbody>
+                <tr class="tr-red"><td>Red 1</td><td class="tdteam"></td></tr>
+                <tr class="tr-red"><td>Red 2</td><td class="tdteam"></td></tr>
+                <tr class="tr-red"><td>Red 3</td><td class="tdteam"></td></tr>
+                <tr class="tr-blue"><td>Blue 1</td><td class="tdteam"></td></tr>
+                <tr class="tr-blue"><td>Blue 2</td><td class="tdteam"></td></tr>
+                <tr class="tr-blue"><td>Blue 3</td><td class="tdteam"></td></tr>
+            </tbody>
+        </table>
+    </ons-page>
 </template>
 
 <template id="home.html">
-<ons-page id="home">
-<ons-toolbar>
-<div class="center" style="margin-top: 5px"><ons-search-input class="center"></ons-search-input></div>
-</ons-toolbar>
-<div class="loading"><ons-icon id="loading-icon" size="22px" spin="true" icon="fa-spinner"></ons-icon></div>
-<ons-list id="teams-list" class="loaded-list">
-</ons-list>
-</ons-page>
+    <ons-page id="home">
+        <ons-toolbar>
+            <div class="center" style="margin-top: 5px"><ons-search-input class="center"></ons-search-input></div>
+        </ons-toolbar>
+        <div class="loading"><ons-icon id="loading-icon" size="22px" spin="true" icon="fa-spinner"></ons-icon></div>
+        <ons-list id="teams-list" class="loaded-list">
+        </ons-list>
+    </ons-page>
 </template>
 
 <template id = "settings.html">
-<ons-page id = "settingsPage" data-dirty="y">
-<div style="padding: 15px;">
-<div style="text-align: center"><h2>Rank Criteria</h2></div>
-<div id="rank-criteria">
-<p id="auto-switch-crit">Autonomous Cargo: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
-<p id="auto-scale-crit">Autonomous Panels: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
-<p id="teleop-switch-crit">Teleop Cargo: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
-<p id="teleop-scale-crit">Teleop Panels: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
-<p id="vault-crit">-- <span></span>%<ons-button disabled >Max</ons-button><ons-range></ons-range></p>
-<p id="endgame-crit">Endgame: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
-<p id="bias-crit">Bias toward recent games: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
-</div>
-    <div>
-    <h4 style = "padding-right: 8%; font-size: 99%">Tournament:</h4>
-<ons-select id="tournament" style = "float: left">
-    <option value="GRITS">GRITS</option>
-<option value="Peachtree">Peachtree</option>
-<option value="Columbus">Columbus</option>
-<option value="Albany">Albany</option>
-<option value="Gainesville">Gainesville</option>
- <!--<option value="Houston">Houston</option>--> <!-- RIP -->
-</ons-select>
-    </div><br />
-<p id="settings-btns"><ons-button onclick="firebase.auth().signOut().then(() => location.reload())">Logout</ons-button>
-<ons-button id="excel-export">
-<span id="submit-text">Export Scouting Data</span>
-<span id="submit-load" style="display: none;"><ons-icon icon="ion-load-c" spin size="26px"></ons-icon></span>
-</ons-button>
-</div>
-</ons-page>
-</template>
+    <ons-page id = "settingsPage" data-dirty="y">
+        <div style="padding: 15px;">
+            <div style="text-align: center"><h2>Rank Criteria</h2></div>
+            <div id="rank-criteria">
+                <p id="auto-switch-crit">Autonomous Cargo: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
+                <p id="auto-scale-crit">Autonomous Panels: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
+                <p id="teleop-cargo1-crit">Teleop Cargo L1: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
+                <p id="teleop-panel1-crit">Teleop Panels L1: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
+                <p id="teleop-cargo2-crit">Teleop Cargo L2: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
+                <p id="teleop-panel2-crit">Teleop Panels L2: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
+                <p id="teleop-cargo3-crit">Teleop Cargo L3: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
+                <p id="teleop-panel3-crit">Teleop Panels L3: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
+                <p id="teleop-cargo4-crit">Teleop Cargo Ship: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
+                <p id="teleop-panel4-crit">Teleop Hatch Panels Ship: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
+                <p id="endgame-crit">Endgame: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
+                <p id="bias-crit">Bias toward recent games: <span></span>%<ons-button>Max</ons-button><ons-range></ons-range></p>
+            </div>
+            <div>
+                <h4 style = "padding-right: 8%; font-size: 99%">Tournament:</h4>
+                <ons-select id="tournament" style = "float: left">
+                    <option value="Gainesville">Gainesville</option>
+                    <option value="Albany">Albany</option>
+                    <option value="Peachtree">Peachtree</option>
+                    <option value="Columbus">Columbus</option>
+                    <option value="GRITS">GRITS</option>
+                    <!--<option value="Houston">Houston</option>--> <!-- RIP -->
+                </ons-select>
+            </div><br />
+            <p id="settings-btns"><ons-button onclick="firebase.auth().signOut().then(() => location.reload())">Logout</ons-button>
+                <ons-button id="excel-export">
+                    <span id="submit-text">Export Scouting Data</span>
+                    <span id="submit-load" style="display: none;"><ons-icon icon="ion-load-c" spin size="26px"></ons-icon></span>
+                </ons-button>
+            </div>
+        </ons-page>
+    </template>
 
-<template id="team-scout.html">
-<ons-page id="team-scout" class="scout-page">
-<ons-toolbar>
-<div class="left">
-<ons-back-button>Home</ons-back-button>
-</div>
-<div class="center" id="team-title">
-</div>
-</ons-toolbar>
-<h2 style="text-align: center;">Team Scouting</h2>
-<div id="intro-btns" class="btns">
- <!-- What to do if preexisting data is found-->
-<ons-card id="match" modifier="large">
-<div class="title">Match</div>
-<div class="content">When scouting for a real match</div>
-</ons-card>
-<ons-card id="pit" modifier="large">
-<div class="title">Pit</div>
-<div class="content">Simply asking questions</div>
-</ons-card>
-<ons-card id="pic" modifier="large">
-<div class="title">Picture</div>
-<div class="content">Take a picture of the robot</div>
-</ons-card>
-</div>
-</ons-page>
+    <template id="team-scout.html">
+        <ons-page id="team-scout" class="scout-page">
+            <ons-toolbar>
+                <div class="left">
+                    <ons-back-button>Home</ons-back-button>
+                </div>
+                <div class="center" id="team-title">
+                </div>
+            </ons-toolbar>
+            <h2 style="text-align: center;">Team Scouting</h2>
+            <div id="intro-btns" class="btns">
+               <!-- What to do if preexisting data is found-->
+               <ons-card id="match" modifier="large">
+                <div class="title">Match</div>
+                <div class="content">When scouting for a real match</div>
+            </ons-card>
+            <ons-card id="pit" modifier="large">
+                <div class="title">Pit</div>
+                <div class="content">Simply asking questions</div>
+            </ons-card>
+            <ons-card id="pic" modifier="large">
+                <div class="title">Picture</div>
+                <div class="content">Take a picture of the robot</div>
+            </ons-card>
+        </div>
+    </ons-page>
 </template>
 
 <template id="match-scout.html">
-<ons-page id="match-scout" class="scout-page">
-<ons-toolbar>
-<div class="left"><ons-back-button></ons-back-button></div>
-<div class="center" id="team-title">Team <span id="team-num"></span> Match Scouting</div>
-</ons-toolbar>
-<h2 id="team-name"></h2>
-<div id="match-btns" class="btns">
-<form style="padding: 5px;">
-<div>
-<em>Match Number:</em>
-<ons-input type="number" value="0" min="0" required style="width: 10%;" id="match-num"></ons-input>
-</div>
-<div id="autonomous">
-<h3>Sandstorm</h3>
+    <ons-page id="match-scout" class="scout-page">
+        <ons-toolbar>
+            <div class="left"><ons-back-button></ons-back-button></div>
+            <div class="center" id="team-title">Team <span id="team-num"></span> Match Scouting</div>
+        </ons-toolbar>
+        <h2 id="team-name"></h2>
+        <div id="match-btns" class="btns">
+            <form style="padding: 5px;">
+                <div>
+                    <em>Match Number:</em>
+                    <ons-input type="number" value="0" min="0" required style="width: 10%;" id="match-num"></ons-input>
+                </div>
+                <div id="autonomous">
+                    <h3>Sandstorm</h3>
 
-<div id="auto-target-result" class="btn-select-menu">
-<ons-button  data-select="true">Level 1</ons-button>
-<input class="select-required" />
-<ons-button  data-select="false">Level 2</ons-button>
-<ons-button  data-select="false">Level 3</ons-button>
-</div>
 
-Did they move:<br />
-<div id="auto-move" class="btn-select-menu">
-<ons-button modifier="large" data-select="dline">Cross HAB</ons-button>
-<ons-button modifier="large" data-select="move">Moved but did not cross HAB</ons-button>
-<ons-button modifier="large" data-select="none">No movement</ons-button>
-</div>
-Choose target (If none, leave blank):<br />
-<div id="auto-target" class="btn-select-menu">
-<ons-button modifier="large" data-select="middle" disabled>Cargo Rocket L1/Station</ons-button>
-<ons-button modifier="large" data-select="sswitch" disabled>Cargo Rocket L2</ons-button>
-<ons-button modifier="large" data-select="cswitch" disabled>Cargo Rocket Level 3</ons-button>
-<ons-button modifier="large" data-select="middle" disabled>Panel Rocket L1/Station</ons-button>
-<ons-button modifier="large" data-select="sswitch" disabled>Panel Rocket L2</ons-button>
-<ons-button modifier="large" data-select="cswitch" disabled>Panel Rocket Level 3</ons-button>
-<ons-button modifier = "large" data-select="twoBlocks" disabled>Two+ Objects Auto (Describe in comments)</ons-button>
-</div>
-<div id="auto-target-result" class="btn-select-menu">
-<ons-button disabled data-select="true">Success</ons-button>
-<input class="select-required" />
-<ons-button disabled data-select="false">Failure</ons-button>
-</div>
-<textarea placeholder="Auto comments (Optional)" id="auto-textarea"></textarea>
-</div>
-<hr />
-<div id="teleop">
-<h3>Teleoperated</h3>
-<div id="teleop-run">
-<p id="teleop-cargo1">Cargo Level 1:<br/>
-<ons-button class="minus"><ons-icon icon="md-minus"></ons-icon></ons-button>
-<ons-input type="number" value="0" min="0" required></ons-input>
-<ons-button class="plus"><ons-icon icon="md-plus"></ons-icon></ons-button>
-</p>
-<p id="teleop-cargo2">Cargo Level 2:<br/>
-<ons-button class="minus"><ons-icon icon="md-minus"></ons-icon></ons-button>
-<ons-input type="number" value="0" min="0" required></ons-input>
-<ons-button class="plus"><ons-icon icon="md-plus"></ons-icon></ons-button>
-</p>
-<p id="teleop-cargo3">Cargo Level 3:<br />
-<ons-button class="minus"><ons-icon icon="md-minus"></ons-icon></ons-button>
-<ons-input type="number" value="0" min="0" required></ons-input>
-<ons-button class="plus"><ons-icon icon="md-plus"></ons-icon></ons-button>
-</p>
-<p id="teleop-panel1">Panels Level 1:<br/>
-<ons-button class="minus"><ons-icon icon="md-minus"></ons-icon></ons-button>
-<ons-input type="number" value="0" min="0" required></ons-input>
-<ons-button class="plus"><ons-icon icon="md-plus"></ons-icon></ons-button>
-</p>
-<p id="teleop-panel2">Panels Level 2:<br/>
-<ons-button class="minus"><ons-icon icon="md-minus"></ons-icon></ons-button>
-<ons-input type="number" value="0" min="0" required></ons-input>
-<ons-button class="plus"><ons-icon icon="md-plus"></ons-icon></ons-button>
-</p>
-<p id="teleop-panel3">Panels Level 3:<br />
-<ons-button class="minus"><ons-icon icon="md-minus"></ons-icon></ons-button>
-<ons-input type="number" value="0" min="0" required></ons-input>
-<ons-button class="plus"><ons-icon icon="md-plus"></ons-icon></ons-button>
-</p>
-</div>
-<h3>Efficiency Comments</h3>
-<textarea placeholder="Efficiency comments (Optional)" id="efficiency-textarea"></textarea>
-<h3>Defense Comments</h3>
-<textarea placeholder="Defense comments (Optional)" id="defense-textarea"></textarea>
-</div>
-<hr />
-<div id="end-game">
-<h3>End Game</h3>
-<p>Leave blank for none</p>
-<div id="end-game-menu" class="btn-select-menu">
-<ons-button modifier="large" data-select="climb">Climb L1(3 pts)</ons-button>
-<ons-button modifier="large" data-select="climb2">Climb L2(3 pts)</ons-button>
-<ons-button modifier="large" data-select="climb3">Climb L3(3 pts)</ons-button>
-<ons-button modifier="large" data-select="otherClimb">Participated in Teammate's Climb</ons-button>
-</div>
-<h3>End Game Comments</h3>
-<textarea placeholder="End Game comments (Optional)" id="endgame-textarea"></textarea>
-</div>
-<hr/>
-<h3>General Comments</h3>
-<textarea placeholder="General comments (Optional)" id="general-textarea"></textarea>
-<button id="submit-match" class="button button--material"> <!-- Slight hack but this should get around form validation -->
-<span id="submit-text">Submit</span>
-<span id="submit-load" style="display: none;"><ons-icon icon="ion-load-c" spin size="26px"></ons-icon></span>
-<span id="submit-done" style="display: none;"><ons-icon icon="ion-checkmark-circled" size="26px"></ons-icon></span>
-</button>
-</form>
-</div>
-</ons-page>
+
+                    Did they move:<br />
+                    <div id="auto-move" class="btn-select-menu">
+                        <ons-button modifier="large" data-select="CrossHAB1">Cross HAB L1 (3pts)</ons-button>
+                        <ons-button modifier="large" data-select="CrossHAB2">Cross HAB L2 (6pts)</ons-button>
+                        <ons-button modifier="large" data-select="move">Moved but did not cross HAB</ons-button>
+                        <ons-button modifier="large" data-select="none">No movement</ons-button>
+                    </div>
+                    Choose target (If none, leave blank):<br />
+                    <div id="auto-target" class="btn-select-menu">
+                        <ons-button modifier="large" data-select="middle" disabled>Cargo Station</ons-button>
+                        <ons-button modifier="large" data-select="middle" disabled>Panel Station</ons-button>
+                        <ons-button modifier = "large" data-select="twoBlocks" disabled>Two+ Objects Auto (Describe in comments)</ons-button>
+                    </div>
+                    <div id="auto-target-result" class="btn-select-menu">
+                        <ons-button disabled data-select="true">Success</ons-button>
+                        <input class="select-required"/>
+                        <ons-button disabled data-select="false">Failure</ons-button>
+                    </div>
+                    <textarea placeholder="Auto comments (Optional)" id="auto-textarea"></textarea>
+                </div>
+                <hr />
+                <div id="teleop">
+                    <h3>Teleoperated (Rocket)</h3>
+                    <div id="teleop-run">
+                        <p id="teleop-cargo1">Cargo Level 1:<br/>
+                            <ons-button class="minus"><ons-icon icon="md-minus"></ons-icon></ons-button>
+                            <ons-input type="number" value="0" min="0" max="2" required></ons-input>
+                            <ons-button class="plus"><ons-icon icon="md-plus"></ons-icon></ons-button>
+                        </p>
+                        <p id="teleop-cargo2">Cargo Level 2:<br/>
+                            <ons-button class="minus"><ons-icon icon="md-minus"></ons-icon></ons-button>
+                            <ons-input type="number" value="0" min="0" max="2" required></ons-input>
+                            <ons-button class="plus"><ons-icon icon="md-plus"></ons-icon></ons-button>
+                        </p>
+                        <p id="teleop-cargo3">Cargo Level 3:<br />
+                            <ons-button class="minus"><ons-icon icon="md-minus"></ons-icon></ons-button>
+                            <ons-input type="number" value="0" min="0" max="2" required></ons-input>
+                            <ons-button class="plus"><ons-icon icon="md-plus"></ons-icon></ons-button>
+                        </p>
+                        <p id="teleop-panel1">Panels Level 1:<br/>
+                            <ons-button class="minus"><ons-icon icon="md-minus"></ons-icon></ons-button>
+                            <ons-input type="number" value="0" min="0" max="2"required></ons-input>
+                            <ons-button class="plus"><ons-icon icon="md-plus"></ons-icon></ons-button>
+                        </p>
+                        <p id="teleop-panel2">Panels Level 2:<br/>
+                            <ons-button class="minus"><ons-icon icon="md-minus"></ons-icon></ons-button>
+                            <ons-input type="number" value="0" min="0" max="2" required></ons-input>
+                            <ons-button class="plus"><ons-icon icon="md-plus"></ons-icon></ons-button>
+                        </p>
+                        <p id="teleop-panel3">Panels Level 3:<br />
+                            <ons-button class="minus"><ons-icon icon="md-minus"></ons-icon></ons-button>
+                            <ons-input type="number" value="0" min="0" max="2" required></ons-input>
+                            <ons-button class="plus"><ons-icon icon="md-plus"></ons-icon></ons-button>
+                        </p>
+                    <h3>Teleoperated (Ship)</h3>
+                        <p id="cargoship">Cargo Ship:<br />
+                            <ons-button class="minus"><ons-icon icon="md-minus"></ons-icon></ons-button>
+                            <ons-input type="number" value="0" min="0" max="6" required></ons-input>
+                            <ons-button class="plus"><ons-icon icon="md-plus"></ons-icon></ons-button>
+                        </p>
+                        <p id="hatchship">Hatch Panels on Ship:<br />
+                            <ons-button class="minus"><ons-icon icon="md-minus"></ons-icon></ons-button>
+                            <ons-input type="number" value="0" min="0" max="6" required></ons-input>
+                            <ons-button class="plus"><ons-icon icon="md-plus"></ons-icon></ons-button>
+                        </p>
+                    </div>
+                    <h3>Efficiency Comments</h3>
+                    <textarea placeholder="Efficiency comments (Optional)" id="efficiency-textarea"></textarea>
+                    <h3>Defense Comments</h3>
+                    <textarea placeholder="Defense comments (Optional)" id="defense-textarea"></textarea>
+                </div>
+                <hr />
+                <div id="end-game">
+                    <h3>End Game</h3>
+                    <p>Leave blank for none</p>
+                    <div id="end-game-menu" class="btn-select-menu">
+                        <ons-button modifier="large" data-select="climb">Climb L1(3 pts)</ons-button>
+                        <ons-button modifier="large" data-select="climb2">Climb L2(6 pts)</ons-button>
+                        <ons-button modifier="large" data-select="climb3">Climb L3(12 pts)</ons-button>
+                        <ons-button modifier="large" data-select="otherClimb">Participated in Teammate's Climb</ons-button>
+                    </div>
+                    <h3>End Game Comments</h3>
+                    <textarea placeholder="End Game comments (Optional)" id="endgame-textarea"></textarea>
+                </div>
+                <hr/>
+                <h3>General Comments</h3>
+                <textarea placeholder="General comments (Optional)" id="general-textarea"></textarea>
+                <button id="submit-match" class="button button--material"> <!-- Slight hack but this should get around form validation -->
+                    <span id="submit-text">Submit</span>
+                    <span id="submit-load" style="display: none;"><ons-icon icon="ion-load-c" spin size="26px"></ons-icon></span>
+                    <span id="submit-done" style="display: none;"><ons-icon icon="ion-checkmark-circled" size="26px"></ons-icon></span>
+                </button>
+            </form>
+        </div>
+    </ons-page>
 </template>
 
 <template id="pit-scout.html">
-<ons-page id="pit-scout" class="scout-page">
-<ons-toolbar>
-<div class="left"><ons-back-button></ons-back-button></div>
-<div class="center" id="team-title">Team <span id="team-num"></span> Pit Scouting</div>
-</ons-toolbar>
+    <ons-page id="pit-scout" class="scout-page">
+        <ons-toolbar>
+            <div class="left"><ons-back-button></ons-back-button></div>
+            <div class="center" id="team-title">Team <span id="team-num"></span> Pit Scouting</div>
+        </ons-toolbar>
 
-<div class = "pitTitle">
-<h2 style = "font-size: x-large"><span id="team-name"></span></h2>
-    </div>
-<form class="btns">
-<div class="pitScout">
-<h2>Are they changing any robot system:</h2>
-<div class = "CheckBoxPit select-one" id="workingOn">
-<ons-button modifier="large" data-select="nothing">Nothing</ons-button>
-<ons-button modifier="large" data-select="minor">Minor System</ons-button>
-<ons-button modifier="large" data-select="major">Major System</ons-button>
-</div>
-</div>
+        <div class = "pitTitle">
+            <h2 style = "font-size: x-large"><span id="team-name"></span></h2>
+        </div>
+        <form class="btns">
+            <div class="pitScout">
+                <h2>Are they changing any robot system:</h2>
+                <div class = "CheckBoxPit select-one" id="workingOn">
+                    <ons-button modifier="large" data-select="nothing">Nothing</ons-button>
+                    <ons-button modifier="large" data-select="minor">Minor System</ons-button>
+                    <ons-button modifier="large" data-select="major">Major System</ons-button>
+                </div>
+            </div>
 
-<div class="pitScout">
-<h2>Drive Train Type:</h2>
-<textarea placeholder="Drive Train Type with Wheel Number" id="drivetrain-select"></textarea>
-</div>
+            <div class="pitScout">
+                <h2>Drive Train Type:</h2>
+                <textarea placeholder="Drive Train Type with Wheel Number" id="drivetrain-select"></textarea>
+            </div>
 
-<div class="pitScout">
-<h2>Capabilities:</h2><br />
-<div class="CheckBoxPit select-many" id="capabilities">
-<ons-button modifier="large" data-select="switch">Switch</ons-button>
-<ons-button modifier="large" data-select="scale">Scale</ons-button>
-<ons-button modifier="large" data-select="vault">Vault</ons-button>
-<ons-button modifier="large" data-select="groundCubes">Cubes on Ground</ons-button>
-<ons-button modifier="large" data-select="exchangeCubes">Cubes from Exchange</ons-button>
-</div>
-</div>
- 
-<div class = "pitScout">
-<h2>Autonomous Capabilites:</h2><br />
-<div class = "CheckBoxPit select-many" id="autoCapabilities">
-<ons-button modifier="large" data-select="dline">Pass line</ons-button>
-<ons-button modifier="large" data-select="middle">Middle Switch</ons-button>
-<ons-button modifier="large" data-select="sswitch">Close Switch</ons-button>
-<ons-button modifier="large" data-select="cswitch">Far Switch</ons-button>
-<ons-button modifier="large" data-select="sscale">Close Scale</ons-button>
-<ons-button modifier="large" data-select="cscale">Far Scale</ons-button>
-</div>
-</div>
-<div class="pitScout">
-<h2 style="margin-top: 4%" >End Game Capabilities:</h2>
-<div class="CheckBoxPit select-one" id="endgame-strategy">
-<ons-button modifier="large" data-select="ramps">Ramps</ons-button>
-<ons-button modifier="large" data-select="climb">Climb</ons-button>
-</div><br/>
-<textarea placeholder="Additional Systems" id="more-comments"></textarea>
-<button id="submit-pit" class="button button--material" style="margin-left: auto; margin-right: auto;"> <!-- Slight hack but this should get around form validation -->
-<span id="submit-text">Submit</span>
-<span id="submit-load" style="display: none;"><ons-icon icon="ion-load-c" spin size="26px"></ons-icon></span>
-<span id="submit-done" style="display: none;"><ons-icon icon="ion-checkmark-circled" size="26px"></ons-icon></span>
-</button>
-</div>
-</form>
-</ons-page>
+            <div class="pitScout">
+                <h2>Capabilities:</h2><br />
+                <div class="CheckBoxPit select-many" id="capabilities">
+                    <ons-button modifier="large" data-select="scale">Cargo Ship</ons-button>
+                    <ons-button modifier="large" data-select="vault">Rocket</ons-button>
+                    <ons-button modifier="large" data-select="groundCubes">Cubes on Ground</ons-button>
+                    <ons-button modifier="large" data-select="exchangeCubes">Cubes from Exchange</ons-button>
+                </div>
+            </div>
+
+            <div class = "pitScout">
+                <h2>Autonomous Capabilites:</h2><br />
+                <div class = "CheckBoxPit select-many" id="autoCapabilities">
+                    <ons-button modifier="large" data-select="dline">Pass line</ons-button>
+                    <ons-button modifier="large" data-select="middle">Middle Switch</ons-button>
+                    <ons-button modifier="large" data-select="sswitch">Close Switch</ons-button>
+                    <ons-button modifier="large" data-select="cswitch">Far Switch</ons-button>
+                    <ons-button modifier="large" data-select="sscale">Close Scale</ons-button>
+                    <ons-button modifier="large" data-select="cscale">Far Scale</ons-button>
+                </div>
+            </div>
+            <div class="pitScout">
+                <h2 style="margin-top: 4%" >End Game Capabilities:</h2>
+                <div class="CheckBoxPit select-one" id="endgame-strategy">
+                    <ons-button modifier="large" data-select="ramps">Ramps</ons-button>
+                    <ons-button modifier="large" data-select="climb">Climb</ons-button>
+                </div><br/>
+                <textarea placeholder="Additional Systems" id="more-comments"></textarea>
+                <button id="submit-pit" class="button button--material" style="margin-left: auto; margin-right: auto;"> <!-- Slight hack but this should get around form validation -->
+                    <span id="submit-text">Submit</span>
+                    <span id="submit-load" style="display: none;"><ons-icon icon="ion-load-c" spin size="26px"></ons-icon></span>
+                    <span id="submit-done" style="display: none;"><ons-icon icon="ion-checkmark-circled" size="26px"></ons-icon></span>
+                </button>
+            </div>
+        </form>
+    </ons-page>
 </template>
 
 <template id="testing123.html">
-<ons-page>
-<h1>Hello world</h1>
-</ons-page>
+    <ons-page>
+        <h1>Hello world</h1>
+    </ons-page>
 </template>
 <template id="pic-scout.html">
-<ons-page id="pic-scout" class="scout-page">
-<ons-toolbar>
-<div class="left"><ons-back-button></ons-back-button></div>
-<div class="center" id="team-title">Team <span id="team-num"></span></div>
-</ons-toolbar>
-<div>
-<div id="dimensions"><video id="video" style="width:100%;" autoplay></video></div>
-<canvas id="canvasMain" style="display: none;"></canvas>
-<div id="picMain">
-<ons-button id="snap" style="background: black">
-<i class="fas fa-camera" style="font-size: 350%; margin-bottom: 4%; margin-top:5%; margin-right: 21%; margin-left: 5%; float: left;"> </i>
-<h4 class ="PicText" style="margin-top: 7%;">Take Picture</h4>
-</ons-button>
-<div style="background-color: black" id="pic-form">
-<input type="file" name="file" id="file" class="inputfile" accept="image/*" capture="camera" style="display: none;"/>
-<label id = "label" for="file" style = "background: black; ">
-<i class="fas fa-image" style="float: left; background-color: black; margin-top: 4%; margin-left: 4.5%; margin-bottom: 3%;" ></i>
-<h4 style="font-size: 45%; padding: 6%; text-align: center;" >CHOOSE PICTURE</h4>
-</label>
-</div>
-</div>
-<div style="text-align: center;">
-<ons-button id="submit-pic">
-<span id="submit-text">Submit</span>
-<span id="submit-load" style="display: none;"><ons-icon icon="ion-load-c" spin size="26px"></ons-icon></span>
-<span id="submit-done" style="display: none;"><ons-icon icon="ion-checkmark-circled" size="26px"></ons-icon></span>
-</ons-button>
-</div>
-</div>
-</ons-page>
+    <ons-page id="pic-scout" class="scout-page">
+        <ons-toolbar>
+            <div class="left"><ons-back-button></ons-back-button></div>
+            <div class="center" id="team-title">Team <span id="team-num"></span></div>
+        </ons-toolbar>
+        <div>
+            <div id="dimensions"><video id="video" style="width:100%;" autoplay></video></div>
+            <canvas id="canvasMain" style="display: none;"></canvas>
+            <div id="picMain">
+                <ons-button id="snap" style="background: black">
+                    <i class="fas fa-camera" style="font-size: 350%; margin-bottom: 4%; margin-top:5%; margin-right: 21%; margin-left: 5%; float: left;"> </i>
+                    <h4 class ="PicText" style="margin-top: 7%;">Take Picture</h4>
+                </ons-button>
+                <div style="background-color: black" id="pic-form">
+                    <input type="file" name="file" id="file" class="inputfile" accept="image/*" capture="camera" style="display: none;"/>
+                    <label id = "label" for="file" style = "background: black; ">
+                        <i class="fas fa-image" style="float: left; background-color: black; margin-top: 4%; margin-left: 4.5%; margin-bottom: 3%;" ></i>
+                        <h4 style="font-size: 45%; padding: 6%; text-align: center;" >CHOOSE PICTURE</h4>
+                    </label>
+                </div>
+            </div>
+            <div style="text-align: center;">
+                <ons-button id="submit-pic">
+                    <span id="submit-text">Submit</span>
+                    <span id="submit-load" style="display: none;"><ons-icon icon="ion-load-c" spin size="26px"></ons-icon></span>
+                    <span id="submit-done" style="display: none;"><ons-icon icon="ion-checkmark-circled" size="26px"></ons-icon></span>
+                </ons-button>
+            </div>
+        </div>
+    </ons-page>
 </template>
 
 <template id = "submitPicture.html">
-<ons-page class="scout-page">
- 
-</ons-page>
+    <ons-page class="scout-page">
+
+    </ons-page>
 </template>
 <script>
- window.fn = {};
- window.fn.toggleMenu = function () {
- document.getElementById('appSplitter').right.toggle();
- };
- window.fn.loadView = function (index) {
- document.getElementById('appTabbar').setActiveTab(index);
- document.getElementById('sidemenu').close();
- };
- window.fn.loadLink = function (url) {
- window.open(url, '_blank');
- };
- window.fn.pushPage = function (page, anim) {
- if (anim) {
- document.getElementById('appNavigator').pushPage(page.id, {data: {title: page.title}, animation: anim});
- } else {
- document.getElementById('appNavigator').pushPage(page.id, {data: {title: page.title}});
- }
- };
- window.fn.toggle = function (el) {
- el.classList.toggle("active");
- };
- window.fn.checkForPrevAuth = function () {
-    
- if (localStorage.auth === "1") {
- document.getElementById('appNavigator').pushPage('tabbar.html');
- }
- };
+   window.fn = {};
+   window.fn.toggleMenu = function () {
+       document.getElementById('appSplitter').right.toggle();
+   };
+   window.fn.loadView = function (index) {
+       document.getElementById('appTabbar').setActiveTab(index);
+       document.getElementById('sidemenu').close();
+   };
+   window.fn.loadLink = function (url) {
+       window.open(url, '_blank');
+   };
+   window.fn.pushPage = function (page, anim) {
+       if (anim) {
+           document.getElementById('appNavigator').pushPage(page.id, {data: {title: page.title}, animation: anim});
+       } else {
+           document.getElementById('appNavigator').pushPage(page.id, {data: {title: page.title}});
+       }
+   };
+   window.fn.toggle = function (el) {
+       el.classList.toggle("active");
+   };
+   window.fn.checkForPrevAuth = function () {
+
+       if (localStorage.auth === "1") {
+           document.getElementById('appNavigator').pushPage('tabbar.html');
+       }
+   };
 </script>
 </body>
 </html>
