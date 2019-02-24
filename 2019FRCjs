@@ -191,16 +191,18 @@ function HSVtoRGB(h, s, v) {
 
 var createMatchArr = function(match) {
  var strMap = {
-       // "CrossHAB1": "Exited HAB 1",
-       "dline": "Exited HAB 1",
-       // "CrossHAB2": "Exited HAB 2"
-       "move": "Moved but did not cross",
+       "CrossHAB1": "Exited HAB 1",
+       "CrossHAB2": "Exited HAB 2",
+       "move": "Moved but did not cross HAB",
        "none": "Did not move",
-       "sswitch": "Same-side switch",
-       "sscale": "Same-side scale",
-       "cswitch": "Cross-side switch",
-       "cscale": "Cross-side scale",
-       "middle": "Switch from middle",
+       "CL1": "Cargo Level 1",
+       "CL2": "Cargo Level 2",
+       "CL3": "Cargo Level 3",
+       "PL1": "Hatch Panels Level 1",
+       "PL2": "Hatch Panels Level 2",
+       "PL3": "Hatch Panels Level 3",
+       "CL4": "Cargo Ship",
+       "PL4": "Hatch Panels on Ship",
        "twoBlocks": "Two-cube auto (see comments)",
        "": "None",
        "climb": "Climbed",
@@ -216,9 +218,14 @@ var createMatchArr = function(match) {
    strMap[match.autoMove],
    strMap[match.autoTarget],
    match.autoSuccess,
-   match.teleopCargo,
-   match.teleopScale,
-   match.teleopVault,
+   match.teleopCL1,
+   match.teleopCL2,
+   match.teleopCL3,
+   match.teleopCL4,
+   match.teleopPL1,
+   match.teleopPL2,
+   match.teleopPL3,
+   match.teleopPL4,
    strMap[match.endGame],
    match.autoComments,
    match.efficiencyComments,
@@ -317,9 +324,9 @@ var matchesExport = function() { // TODO: use settings, maybe make configurable?
      }
      let calcSheet = wb.addWorksheet('Calculated values');
      let teamSubScores = allScores.teamSubScores;
-     let scoresHeaders = ['Team', '% Auto Cargo', '% Auto Panels', 'Auto Consistency (%)', 'Teleop Cargo L1 (Mean)', 'Teleop Cargo L2 (Mean)',
-     'Teleop Cargo L3 (Mean)', 'Teleop Cargo L4 (Mean)', 'Teleop Panels L1 (Mean)', 'Teleop Panels L2 (Mean)',
-     'Teleop Panels L3 (Mean)', 'Teleop Panels L4 (Mean)', 'Robots lifted during end game (Mean)', 'General Score'];
+     let scoresHeaders = ['Team', '% Auto Cargo', '% Auto Panels', 'Auto Consistency (%)', '% Teleop Cargo L1 (Mean)', '% Teleop Cargo L2 (Mean)',
+     '% Teleop Cargo L3 (Mean)', '% Teleop Cargo L4 (Mean)', '% Teleop Panels L1 (Mean)', '% Teleop Panels L2 (Mean)',
+     '% Teleop Panels L3 (Mean)', '% Teleop Panels L4 (Mean)', 'Robots lifted during end game (Mean)', 'General Score'];
  // available data: {averageStats, teamSubScores, teamScores, subScoreRanks, teamsWithData};
  for (let col of [1, 2, 3]) calcSheet.getColumn(col + 1).numFmt = '0.00%';
      calcSheet.addRow(scoresHeaders);
@@ -331,14 +338,14 @@ var matchesExport = function() { // TODO: use settings, maybe make configurable?
      row.getCell(3).value = teamSubScore.autoHatch;
      let total = teamSubScore.autoConsistency[0] + teamSubScore.autoConsistency[1];
      row.getCell(4).value = total === 0 ? 0 : (teamSubScore.autoConsistency[1] / total);
-     row.getCell(5).value = teamSubScore.teleopCargoL1;
-     row.getCell(6).value = teamSubScore.teleopCargoL2;
-     row.getCell(7).value = teamSubScore.teleopCargoL3;
-     row.getCell(8).value = teamSubScore.teleopCargoL4;
-     row.getCell(9).value = teamSubScore.teleopHatchL1;
-     row.getCell(10).value = teamSubScore.teleopHatchL2;
-     row.getCell(11).value = teamSubScore.teleopHatchL3;
-     row.getCell(12).value = teamSubScore.teleopHatchL4;
+     row.getCell(5).value = teamSubScore.teleopCL1;
+     row.getCell(6).value = teamSubScore.teleopCL2;
+     row.getCell(7).value = teamSubScore.teleopCL3;
+     row.getCell(8).value = teamSubScore.teleopCL4;
+     row.getCell(9).value = teamSubScore.teleopPL1;
+     row.getCell(10).value = teamSubScore.teleopPL2;
+     row.getCell(11).value = teamSubScore.teleopPL3;
+     row.getCell(12).value = teamSubScore.teleopPL4;
      row.getCell(13).value = teamSubScore.endGame;
      row.getCell(14).value = allScores.teamScores[team.team_number];
  }
@@ -841,12 +848,12 @@ var buttons = page.querySelectorAll("ons-card");
      data.autoMove = page.querySelector("#auto-move").dataset.selected;
      data.autoTarget = page.querySelector("#auto-target").dataset.selected;
      data.autoSuccess = page.querySelector("#auto-target-result").dataset.selected;
-     data.teleopCargoL1 = parseInt(page.querySelector("#teleop-cargo1 ons-input").value, 10);
-     data.teleopCargoL2 = parseInt(page.querySelector("#teleop-cargo2 ons-input").value, 10);
-     data.teleopCargoL3 = parseInt(page.querySelector("#teleop-cargo3 ons-input").value, 10);
-     data.teleopPanels1 = parseInt(page.querySelector("#teleop-panel1 ons-input").value, 10);
-     data.teleopPanels2 = parseInt(page.querySelector("#teleop-panel2 ons-input").value, 10);
-     data.teleopPanels3 = parseInt(page.querySelector("#teleop-panel3 ons-input").value, 10);
+     data.teleopCL1 = parseInt(page.querySelector("#teleop-cargo1 ons-input").value, 10);
+     data.teleopCL2 = parseInt(page.querySelector("#teleop-cargo2 ons-input").value, 10);
+     data.teleopCL3 = parseInt(page.querySelector("#teleop-cargo3 ons-input").value, 10);
+     data.teleopPL1 = parseInt(page.querySelector("#teleop-panel1 ons-input").value, 10);
+     data.teleopPL2 = parseInt(page.querySelector("#teleop-panel2 ons-input").value, 10);
+     data.teleopPL3 = parseInt(page.querySelector("#teleop-panel3 ons-input").value, 10);
  data.endGame = page.querySelector("#end-game-menu").dataset.selected;
  data.autoComments = page.querySelector("#auto-textarea").value;
  data.efficiencyComments = page.querySelector("#efficiency-textarea").value;
@@ -1012,23 +1019,23 @@ var buttons = page.querySelectorAll("ons-card");
 
  });
  let autoChart = new Chart(page.querySelector("#autochart").getContext("2d"), autoConfig);
- let teleopData = {CargoL1: [], CargoL2: [], CargoL3: [], CargoL4: [], Panels1: [], Panels2: [], Panels3: [], Panels4: []};
+ let teleopData = {CL1: [], CL2: [], CL3: [], CL4: [], PL1: [], PL2: [], PL3: [], PL4: []};
  for (let match of matches) {
-     teleopData.CargoL1.push(match.teleopCargoL1);
-     teleopData.CargoL2.push(match.teleopCargoL2);
-     teleopData.CargoL3.push(match.teleopCargoL3);
-     teleopData.CargoL4.push(match.teleopCargoL4);
-     teleopData.Panels1.push(match.teleopPanels1);
-     teleopData.Panels2.push(match.teleopPanels2);
-     teleopData.Panels3.push(match.teleopPanels3);
-     teleopData.Panels4.push(match.teleopPanels4);
+     teleopData.CL1.push(match.teleopCL1);
+     teleopData.CL2.push(match.teleopCL2);
+     teleopData.CL3.push(match.teleopCL3);
+     teleopData.CL4.push(match.teleopCL4);
+     teleopData.PL1.push(match.teleopPL1);
+     teleopData.PL2.push(match.teleopPL2);
+     teleopData.PL3.push(match.teleopPL3);
+     teleopData.PL4.push(match.teleopPL4);
  }
  let boxplotData = {
-     labels: ["CargoL1", "CargoL2", "CargoL3", "CargoL4", "Panels1", "Panels2", "Panels3", "Panels4"],
+     labels: ["CL1", "CL2", "CL3", "CL4", "PL1", "PL2", "PL3", "PL4"],
      datasets: [{
          label: "Teleop",
          backgroundColor: "rgba(54, 162, 235, 0.5)",
-         data: [teleopData.CargoL1, teleopData.CargoL2, teleopData.CargoL3, teleopData.CargoL4, teleopData.Panels1, teleopData.Panels2, teleopdata.Panels3, teleopdata.Panels4],
+         data: [teleopData.CL1, teleopData.CL2, teleopData.CL3, teleopData.CL4, teleopData.PL1, teleopData.PL2, teleopdata.PL3, teleopdata.PL4],
          padding: 10,
          itemBackgroundColor: "rgb(255, 0, 0)",
          borderWidth: 2,
@@ -1215,12 +1222,12 @@ var calculateAllScores = function (teams, teamData) {
     let averageStats = {
      autoSwitch: 0,
      autoScale: 0,
-     teleopCargoL1: 0,
-     teleopCargoL2: 0,
-     teleopCargoL3: 0,
-     teleopCargoL4: 0, 
-     teleopPanels1: 0,
-     teleopPanels2: 0,
+     teleopCL1: 0,
+     teleopCL2: 0,
+     teleopCL3: 0,
+     teleopCL4: 0, 
+     teleopPL1: 0,
+     teleopPL2: 0,
      teleopPanels3: 0,
      teleopPanels4: 0,
      endGame: 0
@@ -1240,7 +1247,7 @@ var calculateAllScores = function (teams, teamData) {
      };
      var expWeight = -parseInt(settings.querySelector("#bias-crit ons-range").value) / 250;
      var totalScore = 0, totalWeight = 0;
-     var subScores = {autoSwitch: 0, autoScale: 0, teleopCargoL1: 0, teleopCargoL2: 0, teleopCargo3: 0, teleopCargo4: 0, teleopPanels1: 0, teleopPanels2: 0, teleopPanels3: 0, teleopPanels4: 0, endGame: 0, autoConsistency: [0, 0]};
+     var subScores = {autoSwitch: 0, autoScale: 0, teleopCL1: 0, teleopCL2: 0, teleopCL3: 0, teleopCL4: 0, teleopPL1: 0, teleopPL2: 0, teleopPL3: 0, teleopPL4: 0, endGame: 0, autoConsistency: [0, 0]};
 
      console.log(matches);
      for (let i = 0; i < matches.length; ++i) {
@@ -1258,22 +1265,22 @@ var calculateAllScores = function (teams, teamData) {
          }
          if (mt.autoTarget) subScores.autoConsistency[+(mt.autoSuccess === "true")]++;
 
-         score += mt.teleopCargoL1 * (+settings.querySelector("#teleop-cargo1-crit ons-range").value);
-         subScores.teleopCargoL1 += mt.teleopCargoL1 / matches.length;
-         score += mt.teleopCargoL2 * (+settings.querySelector("#teleop-cargo2-crit ons-range").value);
-         subScores.teleopCargoL2 += mt.teleopCargoL2 / matches.length;
-         score += mt.teleopCargoL3 * (+settings.querySelector("#teleop-cargo3-crit ons-range").value);
-         subScores.teleopCargoL3 += mt.teleopCargoL3 / matches.length;
-         score += mt.teleopCargoL4 * (+settings.querySelector("#teleop-cargo4-crit ons-range").value);
-         subScores.teleopCargoL4 += mt.teleopCargoL4 / matches.length;
-         score += mt.teleopPanels1 * (+settings.querySelector("#teleop-panel1-crit ons-range").value);
-         subScores.teleopPanels1 += mt.teleopPanels1 / matches.length;
-         score += mt.teleopPanels1 * (+settings.querySelector("#teleop-panel2-crit ons-range").value);
-         subScores.teleopPanels2 += mt.teleopPanels2 / matches.length;         
-         score += mt.teleopPanels3 * (+settings.querySelector("#teleop-panel3-crit ons-range").value);
-         subScores.teleopPanels3 += mt.teleopPanels3 / matches.length;
-         score += mt.teleopPanels4 * (+settings.querySelector("#teleop-panel4-crit ons-range").value);
-         subScores.teleopPanels4 += mt.teleopPanels4 / matches.length;
+         score += mt.teleopCL1 * (+settings.querySelector("#teleop-cargo1-crit ons-range").value);
+         subScores.teleopCL1 += mt.teleopCL1 / matches.length;
+         score += mt.teleopCL2 * (+settings.querySelector("#teleop-cargo2-crit ons-range").value);
+         subScores.teleopCL2 += mt.teleopCL2 / matches.length;
+         score += mt.teleopCL3 * (+settings.querySelector("#teleop-cargo3-crit ons-range").value);
+         subScores.teleopCL3 += mt.teleopCL3 / matches.length;
+         score += mt.teleopCL4 * (+settings.querySelector("#teleop-cargo4-crit ons-range").value);
+         subScores.teleopCL4 += mt.teleopCL4 / matches.length;
+         score += mt.teleopPL1 * (+settings.querySelector("#teleop-panel1-crit ons-range").value);
+         subScores.teleopPL1 += mt.teleopPL1 / matches.length;
+         score += mt.teleopPL2 * (+settings.querySelector("#teleop-panel2-crit ons-range").value);
+         subScores.teleopPL2 += mt.teleopPL2 / matches.length;         
+         score += mt.teleopPL3 * (+settings.querySelector("#teleop-panel3-crit ons-range").value);
+         subScores.teleopPL3 += mt.teleopPL3 / matches.length;
+         score += mt.teleopPL4 * (+settings.querySelector("#teleop-panel4-crit ons-range").value);
+         subScores.teleopPL4 += mt.teleopPL4 / matches.length;
          //subScores.vault += mt.teleopVault / matches.length;
          let climbed = (mt.endGame !== "" && mt.endGame !== "parked" && mt.endGame !== "otherClimb") ? 1 : 0;
          if (climbed && mt.endGame.startsWith("climb") && mt.endGame !== "climb") climbed = parseInt(mt.endGame.replace("climb", ""), 10);
@@ -1295,14 +1302,14 @@ let addToAverages = function (team) {
  for (let mt of matches) {
      averageStats.autoSwitch += (mt.autoTarget.indexOf("switch") !== -1) + 2*(mt.autoTarget === "twoBlocks") + (mt.autoTarget === "middle");
      averageStats.autoScale += (mt.autoTarget.indexOf("scale") !== -1);
-     averageStats.teleopCargoL1 += mt.teleopCargoL1;
-     averageStats.teleopCargoL2 += mt.teleopCargoL2;
-     averageStats.teleopCargoL3+= mt.teleopCargoL3;
-     averageStats.teleopCargoL4 += mt.teleopCargoL4;
-     averageStats.teleopPanels1 += mt.teleopPanels1;
-     averageStats.teleopPanels2 += mt.teleopPanels2;
-     averageStats.teleopPanels3 += mt.teleopPanels3;
-     averageStats.teleopPanels4 += mt.teleopPanels4;
+     averageStats.teleopCL1 += mt.teleopCL1;
+     averageStats.teleopCL2 += mt.teleopCL2;
+     averageStats.teleopCL3+= mt.teleopCL3;
+     averageStats.teleopCL4 += mt.teleopCL4;
+     averageStats.teleopPL1 += mt.teleopPL1;
+     averageStats.teleopPL2 += mt.teleopPL2;
+     averageStats.teleopPL3 += mt.teleopPL3;
+     averageStats.teleopPL4 += mt.teleopPL4;
      averageStats.endGame += (mt.endGame && mt.endGame !== "parked" && mt.endGame !== "otherClimb") ? (+mt.endGame["climb".length] || 1) : 0;
  }
  totalMatches += matches.length;
@@ -1389,20 +1396,20 @@ var elem = ons.createElement(`<ons-card>
  <ons-col>Auto P <div class="indicator" style="${subScoreColors.autoScale}"></div></ons-col>
  </ons-row>
  <ons-row> 
- <ons-col>Teleop CL1 <div class="indicator" style="${subScoreColors.teleopCargoL1}"></div></ons-col>
- <ons-col>Teleop PL1 <div class="indicator" style="${subScoreColors.teleopPanels1}"></div></ons-col>
+ <ons-col>Teleop CL1 <div class="indicator" style="${subScoreColors.teleopCL1}"></div></ons-col>
+ <ons-col>Teleop PL1 <div class="indicator" style="${subScoreColors.teleopPL1}"></div></ons-col>
  </ons-row>
  <ons-row>
- <ons-col>Teleop CL2 <div class="indicator" style="${subScoreColors.teleopCargoL2}"></div></ons-col>
- <ons-col>Teleop PL2 <div class="indicator" style="${subScoreColors.teleopPanels2}"></div></ons-col>
+ <ons-col>Teleop CL2 <div class="indicator" style="${subScoreColors.teleopCL2}"></div></ons-col>
+ <ons-col>Teleop PL2 <div class="indicator" style="${subScoreColors.teleopPL2}"></div></ons-col>
  </ons-row>
  <ons-row>
- <ons-col>Teleop CL3 <div class="indicator" style="${subScoreColors.teleopCargoL3}"></div></ons-col>
- <ons-col>Teleop PL3 <div class="indicator" style="${subScoreColors.teleopPanels3}"></div></ons-col>
+ <ons-col>Teleop CL3 <div class="indicator" style="${subScoreColors.teleopCL3}"></div></ons-col>
+ <ons-col>Teleop PL3 <div class="indicator" style="${subScoreColors.teleopPL3}"></div></ons-col>
  </ons-row>
  <ons-row>
- <ons-col>Teleop C(Ship) <div class="indicator" style="${subScoreColors.teleopCargoL4}"></div></ons-col>
- <ons-col>Teleop P(Ship) <div class="indicator" style="${subScoreColors.teleopPanels4}"></div></ons-col>
+ <ons-col>Teleop C(Ship) <div class="indicator" style="${subScoreColors.teleopCL4}"></div></ons-col>
+ <ons-col>Teleop P(Ship) <div class="indicator" style="${subScoreColors.teleopPL4}"></div></ons-col>
  </ons-row>
  <ons-row>
  <ons-col>End Game <div class="indicator" style="${subScoreColors.endGame}"></div></ons-col>
