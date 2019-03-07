@@ -98,8 +98,8 @@
                 </div>
             </div>
             <hr />
+                <h2>Win/Loss Record: <span id="record-win"></span>-<span id="record-loss"></span></h2> -->
             <div>
-                <h2>Win/Loss Record: <span id="record-win"></span>-<span id="record-loss"></span></h2>
                 <h2>Rank: <span id="qual-rank"></span></h2>
                 <div id="match-view">
                 </div>
@@ -253,8 +253,8 @@
 
                     Did they move:<br />
                     <div id="auto-move" class="btn-select-menu">
-                        <ons-button modifier="large" data-select="CrossHAB1">Cross HAB L1 (3pts)</ons-button>
-                        <ons-button modifier="large" data-select="CrossHAB2">Cross HAB L2 (6pts)</ons-button>
+                        <ons-button modifier="large" data-select="CrossHAB1">Exit from HAB L1 (3pts)</ons-button>
+                        <ons-button modifier="large" data-select="CrossHAB2">Exit from HAB L2 (6pts)</ons-button>
                         <ons-button modifier="large" data-select="move">Moved but did not cross HAB</ons-button>
                         <ons-button modifier="large" data-select="none">No movement</ons-button>
                     </div>
@@ -275,17 +275,17 @@
                 <div id="teleop">
                     <h3>Teleoperated (Rocket)</h3>
                     <div id="teleop-run">
-                        <p id="teleop-cargo1">Cargo Level 1:<br/>
+                        <p id="teleop-cargo1">Cargo Balls Level 1:<br/>
                             <ons-button class="minus"><ons-icon icon="md-minus"></ons-icon></ons-button>
                             <ons-input type="number" value="0" min="0" max="2" required></ons-input>
                             <ons-button class="plus"><ons-icon icon="md-plus"></ons-icon></ons-button>
                         </p>
-                        <p id="teleop-cargo2">Cargo Level 2:<br/>
+                        <p id="teleop-cargo2">Cargo Balls Level 2:<br/>
                             <ons-button class="minus"><ons-icon icon="md-minus"></ons-icon></ons-button>
                             <ons-input type="number" value="0" min="0" max="2" required></ons-input>
                             <ons-button class="plus"><ons-icon icon="md-plus"></ons-icon></ons-button>
                         </p>
-                        <p id="teleop-cargo3">Cargo Level 3:<br />
+                        <p id="teleop-cargo3">Cargo Balls Level 3:<br />
                             <ons-button class="minus"><ons-icon icon="md-minus"></ons-icon></ons-button>
                             <ons-input type="number" value="0" min="0" max="2" required></ons-input>
                             <ons-button class="plus"><ons-icon icon="md-plus"></ons-icon></ons-button>
@@ -378,29 +378,26 @@
                 <div class="CheckBoxPit select-many" id="capabilities">
                     <ons-button modifier="large" data-select="scale">Cargo Ship</ons-button>
                     <ons-button modifier="large" data-select="vault">Rocket</ons-button>
-                    <ons-button modifier="large" data-select="groundCubes">Cubes on Ground</ons-button>
-                    <ons-button modifier="large" data-select="exchangeCubes">Cubes from Exchange</ons-button>
-                </div>
+                    <ons-button modifier="large" data-select="groundCubes">Ground Panels</ons-button>
+<!--                     <ons-button modifier="large" data-select="exchangeCubes">Cubes from Exchange</ons-button>
+ -->                </div>
             </div>
 
             <div class = "pitScout">
                 <h2>Autonomous Capabilites:</h2><br />
                 <div class = "CheckBoxPit select-many" id="autoCapabilities">
-                    <ons-button modifier="large" data-select="dline">Pass line</ons-button>
-                    <ons-button modifier="large" data-select="middle">Middle Switch</ons-button>
-                    <ons-button modifier="large" data-select="sswitch">Close Switch</ons-button>
-                    <ons-button modifier="large" data-select="cswitch">Far Switch</ons-button>
-                    <ons-button modifier="large" data-select="sscale">Close Scale</ons-button>
-                    <ons-button modifier="large" data-select="cscale">Far Scale</ons-button>
+                    <ons-button modifier="large" data-select="dline">Exit from all HAB levels?</ons-button>
+                    <ons-button modifier="large" data-select="middle">Vision System</ons-button>
                 </div>
             </div>
             <div class="pitScout">
                 <h2 style="margin-top: 4%" >End Game Capabilities:</h2>
                 <div class="CheckBoxPit select-one" id="endgame-strategy">
-                    <ons-button modifier="large" data-select="ramps">Ramps</ons-button>
-                    <ons-button modifier="large" data-select="climb">Climb</ons-button>
+                    <ons-button modifier="large" data-select="ramps">Climb up to HAB level 2</ons-button>
+                    <ons-button modifier="large" data-select="climb">Climb up to HAB level 3</ons-button>
+
                 </div><br/>
-                <textarea placeholder="Additional Systems" id="more-comments"></textarea>
+                <textarea placeholder="Additional Systems, Driver Experience, etc." id="more-comments"></textarea>
                 <button id="submit-pit" class="button button--material" style="margin-left: auto; margin-right: auto;"> <!-- Slight hack but this should get around form validation -->
                     <span id="submit-text">Submit</span>
                     <span id="submit-load" style="display: none;"><ons-icon icon="ion-load-c" spin size="26px"></ons-icon></span>
