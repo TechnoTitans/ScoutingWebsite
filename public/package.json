@@ -29,6 +29,7 @@
     "moment": "^2.22.0",
     "npm": "^5.7.1",
     "onsenui": "^2.9.2",
+    "qrcode-generator": "^1.4.3",
     "workbox-sw": "^2.1.2",
     "xlsx": "^0.12.5"
   }
