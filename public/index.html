@@ -95,12 +95,24 @@
                     </div>
                 </div>
                 <hr />
-                <div id="teleopstats">
+                <div>
+                    <h2>Cargo</h2>
+                    <div class="chart-container">
+                        <canvas id="teleopChartCargo"></canvas>
+                    </div>
+                </div>
+                <div>
+                    <h2>Hatches</h2>
+                    <div class="chart-container">
+                        <canvas id="teleopChartHatch"></canvas>
+                    </div>
+                </div>
+                <!-- <div id="teleopstats">
                     <h2>Teleop</h2>
                     <div class="chart-container">
                         <canvas id="teleopchart"></canvas>
                     </div>
-                </div>
+                </div> -->
                 <hr />
                 <div id="endgamestats">
                     <h2>End Game</h2>
@@ -522,7 +534,7 @@
 
                 <div class="pitScout">
                     <h2>Day:</h2>
-                    <div class="CheckBoxPit select-one" id="workingOn">
+                    <div class="CheckBoxPit select-one" id="dayOfComp">
                         <ons-button modifier="large" data-select="first">First</ons-button>
                         <ons-button modifier="large" data-select="second">Second</ons-button>
                         <ons-button modifier="large" data-select="third">Third</ons-button>
@@ -531,7 +543,7 @@
 
                 <div class="pitScout">
                     <h2>Changes to robot during comp:</h2>
-                    <div class="CheckBoxPit select-one" id="workingOn">
+                    <div class="CheckBoxPit select-one" id="changesDuringComp">
                         <ons-button modifier="large" data-select="nothing">Nothing</ons-button>
                         <ons-button modifier="large" data-select="minor">Minor System</ons-button>
                         <ons-button modifier="large" data-select="major">Major System</ons-button>
@@ -541,7 +553,7 @@
 
                 <div class="pitScout">
                     <h2>Drive Train Type:</h2>
-                    <textarea placeholder="Drive Train Type with Wheel Number" id="drivetrain-select"></textarea>
+                    <textarea placeholder="Drive Train Type with Wheel Number" id="drivetrain-describe"></textarea>
                 </div>
 
                 <div class="pitScout">
@@ -556,7 +568,7 @@
 
                 <div class="pitScout">
                     <h2>Teleop Capabilities:</h2><br />
-                    <div class="CheckBoxPit select-many" id="capabilities">
+                    <div class="CheckBoxPit select-many" id="teleCapabilities">
                         <ons-button modifier="large" data-select="ball1">Level 1 Ball</ons-button>
                         <ons-button modifier="large" data-select="hatch1">Level 1 Hatch</ons-button>
                         <ons-button modifier="large" data-select="ball2">Level 2 Ball</ons-button>
@@ -570,7 +582,7 @@
 
                 <div class="pitScout">
                     <h2 style="margin-top: 4%">End Game Capabilities:</h2>
-                    <div class="CheckBoxPit select-one" id="endgame-strategy">
+                    <div class="CheckBoxPit select-one" id="endgame-capabilities">
                         <ons-button modifier="large" data-select="ramps">Climb up to HAB level 2</ons-button>
                         <ons-button modifier="large" data-select="climb">Climb up to HAB level 3</ons-button>
                     </div>
@@ -578,8 +590,8 @@
 
                 <div class="pitScout">
                     <h2 style="margin-top: 4%">Driver Experience</h2>
-                    <div class="CheckBoxPit select-one" id="endgame-strategy">
-                        <ons-range style="width: 100%;" value="50" data-select="ramps"></ons-range>
+                    <div class="CheckBoxPit select-one" id="driveExperience">
+                        <ons-range style="width: 100%;" value="50" data-select="ramps" id="driverExperienceRange"></ons-range>
 
                     </div><br />
                     <textarea placeholder="Additional Systems, Driver Experience, etc." id="more-comments"></textarea>
@@ -594,6 +606,9 @@
                             <ons-icon icon="ion-checkmark-circled" size="26px"></ons-icon>
                         </span>
                     </button>
+                </div>
+                <div id="pitQRCode">
+                    QR code goes here
                 </div>
             </form>
         </ons-page>

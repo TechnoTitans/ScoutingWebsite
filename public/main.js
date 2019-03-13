@@ -927,22 +927,36 @@ document.addEventListener('init', function (event) {
             if (submitted) return false;
             submitted = true;
             var data = {};
+
             data.user = firebase.auth().currentUser.displayName;
             data.teamNum = team.team_number;
-            data.workingOn = page.querySelector("#workingOn").dataset.selected;
-            data.driveTrain = page.querySelector("#drivetrain-select").value;
-            data.capabilities = page.querySelector("#capabilities").dataset.selected;
+            data.day = page.querySelector("#dayOfComp").dataset.selected;
+            data.changes = page.querySelector("#changesDuringComp").dataset.selected;
+            data.driveTrain = page.querySelector("#drivetrain-describe").value;
             data.autoCapabilities = page.querySelector("#autoCapabilities").dataset.selected;
-            data.endGameCapabilities = page.querySelector("#endgame-strategy").dataset.selected;
+            data.teleCapabilities = page.querySelector("#teleCapabilities").dataset.selected;
+            data.endGameCapabilities = page.querySelector("#endgame-capabilities").dataset.selected;
+            data.driverExperience = page.querySelector("#driverExperienceRange").value;
             data.comment = page.querySelector("#more-comments").value;
+
             var btn = this.querySelector("#submit-pit");
             btn.querySelector("#submit-load").style.display = "initial";
             btn.querySelector("#submit-text").style.display = "none";
-            writeScoutingData(data, true).then(() => {
+
+            if (navigator.onLine) {
+                console.log('online');
+                writeScoutingData(data, false).then(() => {
+                    btn.querySelector("#submit-load").style.display = "none";
+                    btn.querySelector("#submit-done").style.display = "initial";
+                    btn.style.backgroundColor = "green";
+                });
+            } else {
+                console.log('offline');
+                generateQRCode(data, 'pitQRCode');
                 btn.querySelector("#submit-load").style.display = "none";
                 btn.querySelector("#submit-done").style.display = "initial";
-                btn.style.backgroundColor = "green";
-            });
+                btn.style.backgroundColor = "red";
+            }
         }
     } else if (page.matches("#settingsPage")) {
         page.querySelectorAll("#rank-criteria p").forEach(function (p) {
@@ -1086,56 +1100,191 @@ document.addEventListener('init', function (event) {
             teleopData.PL3.push(match.teleopPL3);
             teleopData.PL4.push(match.teleopPL4);
         }
-        let boxplotData = {
-            labels: ["CL1", "CL2", "CL3", "Ship Car", "PL1", "PL2", "PL3", "Ship Pan"],
-            datasets: [{
-                label: "Teleop",
-                backgroundColor: "rgba(54, 162, 235, 0.5)",
-                data: [teleopData.CL1, teleopData.CL2, teleopData.CL3, teleopData.CL4, teleopData.PL1, teleopData.PL2, teleopData.PL3, teleopData.PL4],
-                padding: 10,
-                itemBackgroundColor: "rgb(255, 0, 0)",
-                borderWidth: 2,
-                borderColor: "rgba(54, 162, 235, 0.5)",
-            }]
-        };
-        new Chart(page.querySelector("#teleopchart"), {
-            type: 'boxplot',
-            data: boxplotData,
+        // let boxplotData = {
+        //     // labels: ["CL1", "CL2", "CL3", "Ship Car", "PL1", "PL2", "PL3", "Ship Pan"],
+        //     labels: "CL1",
+        //     datasets: [{
+        //         label: "Teleop",
+        //         backgroundColor: "rgba(54, 162, 235, 0.5)",
+        //         // data: [teleopData.CL1, teleopData.CL2, teleopData.CL3, teleopData.CL4, teleopData.PL1, teleopData.PL2, teleopData.PL3, teleopData.PL4],
+        //         data: teleopData.CL1,
+        //         padding: 10,
+        //         itemBackgroundColor: "rgb(255, 0, 0)",
+        //         borderWidth: 2,
+        //         borderColor: "rgba(54, 162, 235, 0.5)",
+        //     }]
+        // };
+
+        // console.log(boxplotData.datasets[0].data);
+
+        let lineChartData = [teleopData.CL1, teleopData.CL2, 
+                            teleopData.CL3, teleopData.CL4, 
+                            teleopData.PL1, teleopData.PL2, 
+                            teleopData.PL3, teleopData.PL4];
+
+        let totalLineChartData = [];
+        let lineChartLabels = [];
+
+        for (let i = 0; i < lineChartData.length; i++) {
+            totalLineChartData.push([]);
+        }
+
+        for (let i = 0; i < lineChartData[0].length; i++) {
+            lineChartLabels.push([i]);
+        }
+
+        for (let j = 0; j < lineChartData.length; j++) {
+            for (let i = 0; i < lineChartData[j].length; i++) {
+                totalLineChartData[j].push({x: i, y: lineChartData[j][i]});
+                console.log({x: i, y: lineChartData[j][i]});
+            }
+        }
+
+        new Chart(page.querySelector("#teleopChartCargo"), {
+            type: 'line',
+            data: {
+                labels: lineChartLabels,
+                datasets: [{
+                        label: 'CL1',
+                        backgroundColor: "red",
+                        borderColor: "red",
+                        data: totalLineChartData[0],
+                        fill: false,
+                    },{
+                        label: 'CL2',
+                        backgroundColor: "blue",
+                        borderColor: "blue",
+                        data: totalLineChartData[1],
+                        fill: false,
+                    },{
+                        label: 'CL3',
+                        backgroundColor: "green",
+                        borderColor: "green",
+                        data: totalLineChartData[2],
+                        fill: false,
+                    },{
+                        label: 'ShipC',
+                        backgroundColor: "purple",
+                        borderColor: "purple",
+                        data: totalLineChartData[3],
+                        fill: false,
+                    }]
+			},
+
             options: {
                 responsive: true,
                 legend: {
-                    display: false,
+                    display: true,
                 },
                 title: {
                     display: true,
-                    text: 'Teleop scores'
+                    text: 'Cargo Scores'
                 },
                 scales: {
                     yAxes: [{
                         display: true,
                         ticks: {
-                            min: -0.5,
+                            min: 0,
                             suggestedMax: 4,
                             step: 1
                         }
                     }]
-                },
-                tooltips: {
-                    callbacks: {
-                        label: function label(item, data) {
-                            var datasetLabel = data.datasets[item.datasetIndex].label || '';
-                            var value = data.datasets[item.datasetIndex].data[item.index];
-                            var b = value.__stats; // kind of sketchy
-                            var label = datasetLabel + ' ' + (typeof item.xLabel === 'string' ? item.xLabel : item.yLabel);
-                            if (!b) {
-                                return label + 'NaN';
-                            }
-                            return [`q1 ${b.q1}`, `median: ${b.median}`, `q3: ${b.q3}`];
-                        }
-                    }
                 }
             }
         });
+
+        new Chart(page.querySelector("#teleopChartHatch"), {
+            type: 'line',
+            data: {
+                labels: lineChartLabels,
+                datasets: [{
+                        label: 'PL1',
+                        backgroundColor: "red",
+                        borderColor: "red",
+                        data: totalLineChartData[4],
+                        fill: false,
+                    },{
+                        label: 'PL2',
+                        backgroundColor: "blue",
+                        borderColor: "blue",
+                        data: totalLineChartData[5],
+                        fill: false,
+                    },{
+                        label: 'PL3',
+                        backgroundColor: "green",
+                        borderColor: "green",
+                        data: totalLineChartData[6],
+                        fill: false,
+                    },{
+                        label: 'ShipP',
+                        backgroundColor: "purple",
+                        borderColor: "purple",
+                        data: totalLineChartData[7],
+                        fill: false,
+                    }]
+			},
+
+            options: {
+                responsive: true,
+                legend: {
+                    display: true,
+                },
+                title: {
+                    display: true,
+                    text: 'Panel Scores'
+                },
+                scales: {
+                    yAxes: [{
+                        display: true,
+                        ticks: {
+                            min: 0,
+                            suggestedMax: 4,
+                            step: 1
+                        }
+                    }]
+                }
+            }
+        });
+
+        // new Chart(page.querySelector("#teleopchart"), {
+        //     type: 'line',
+        //     data: boxplotData,
+        //     options: {
+        //         responsive: true,
+        //         legend: {
+        //             display: false,
+        //         },
+        //         title: {
+        //             display: true,
+        //             text: 'Teleop scores'
+        //         },
+        //         scales: {
+        //             yAxes: [{
+        //                 display: true,
+        //                 ticks: {
+        //                     min: -0.5,
+        //                     suggestedMax: 4,
+        //                     step: 1
+        //                 }
+        //             }]
+        //         },
+        //         tooltips: {
+        //             callbacks: {
+        //                 label: function label(item, data) {
+        //                     var datasetLabel = data.datasets[item.datasetIndex].label || '';
+        //                     var value = data.datasets[item.datasetIndex].data[item.index];
+        //                     var b = value.__stats; // kind of sketchy
+        //                     var label = datasetLabel + ' ' + (typeof item.xLabel === 'string' ? item.xLabel : item.yLabel);
+        //                     if (!b) {
+        //                         return label + 'NaN';
+        //                     }
+        //                     return [`q1 ${b.q1}`, `median: ${b.median}`, `q3: ${b.q3}`];
+        //                 }
+        //             }
+        //         }
+        //     }
+        // });
+
         let endGameData = { parked: [0, 0], climb2: [0, 0], none: 0, climb: [0, 0], climb3: [0, 0], otherClimb: [0, 0], ramps: [0, 0], other: [0, 0] };
         for (let mt of matches) {
             let ind = (mt.endGameSuccess === "true" || mt.endGameSuccess === undefined) ? 0 : 1;
@@ -1417,6 +1566,7 @@ var calculateAllScores = function (teams, teamData) {
             if (isNaN(totalScore)) totalScore = 0;
             totalWeight += weight;
         }
+        console.log("TOTAL SCORE: " + totalScore);
         teamScores[number] = totalScore / totalWeight;
         teamSubScores[number] = subScores;
     };
@@ -1523,30 +1673,32 @@ document.addEventListener("show", function (event) {
                     // console.log("KEYS: " + key);
                     subScoreColors[key] = createColor(subScoreRanks[key]);
                 }
+                // console.log(team);
+                console.log(teamSubScores[team.team_number]);
                 var elem = ons.createElement(`<ons-card>
  <h3>${rank}. ${team.team_number} ${team.nickname}</h3>
  <ons-row>
- <ons-col>Auto C ${subScoreRanks.autoSwitch}<div class="indicator" style="${subScoreColors.autoSwitch}"></div></ons-col>
- <ons-col>Auto P ${subScoreRanks.autoScale}<div class="indicator" style="${subScoreColors.autoScale}"></div></ons-col>
+ <ons-col>Auto C (${Math.round(teamSubScores[team.team_number].autoSwitch * 100) / 100})<div class="indicator" style="${subScoreColors.autoSwitch}"></div></ons-col>
+ <ons-col>Auto P (${Math.round(teamSubScores[team.team_number].autoScale * 100) / 100})<div class="indicator" style="${subScoreColors.autoScale}"></div></ons-col>
  </ons-row>
  <ons-row> 
- <ons-col>Teleop CL1 ${subScoreRanks.teleopCL1}<div class="indicator" style="${subScoreColors.teleopCL1}"></div></ons-col>
- <ons-col>Teleop PL1 ${subScoreRanks.teleopPL1}<div class="indicator" style="${subScoreColors.teleopPL1}"></div></ons-col>
+ <ons-col>Teleop CL1 (${Math.round(teamSubScores[team.team_number].teleopCL1 * 100) / 100})<div class="indicator" style="${subScoreColors.teleopCL1}"></div></ons-col>
+ <ons-col>Teleop PL1 (${Math.round(teamSubScores[team.team_number].teleopPL1 * 100) / 100})<div class="indicator" style="${subScoreColors.teleopPL1}"></div></ons-col>
  </ons-row>
  <ons-row>
- <ons-col>Teleop CL2 ${subScoreRanks.teleopCL2}<div class="indicator" style="${subScoreColors.teleopCL2}"></div></ons-col>
- <ons-col>Teleop PL2 ${subScoreRanks.teleopPL2}<div class="indicator" style="${subScoreColors.teleopPL2}"></div></ons-col>
+ <ons-col>Teleop CL2 (${Math.round(teamSubScores[team.team_number].teleopCL2 * 100) / 100})<div class="indicator" style="${subScoreColors.teleopCL2}"></div></ons-col>
+ <ons-col>Teleop PL2 (${Math.round(teamSubScores[team.team_number].teleopPL2 * 100) / 100})<div class="indicator" style="${subScoreColors.teleopPL2}"></div></ons-col>
  </ons-row>
  <ons-row>
- <ons-col>Teleop CL3 ${subScoreRanks.teleopCL3}<div class="indicator" style="${subScoreColors.teleopCL3}"></div></ons-col>
- <ons-col>Teleop PL3 ${subScoreRanks.teleopPL3}<div class="indicator" style="${subScoreColors.teleopPL3}"></div></ons-col>
+ <ons-col>Teleop CL3 (${Math.round(teamSubScores[team.team_number].teleopCL3 * 100) / 100})<div class="indicator" style="${subScoreColors.teleopCL3}"></div></ons-col>
+ <ons-col>Teleop PL3 (${Math.round(teamSubScores[team.team_number].teleopPL3 * 100) / 100})<div class="indicator" style="${subScoreColors.teleopPL3}"></div></ons-col>
  </ons-row>
  <ons-row>
- <ons-col>Teleop C(Ship) ${subScoreRanks.teleopCL4}<div class="indicator" style="${subScoreColors.teleopCL4}"></div></ons-col>
- <ons-col>Teleop P(Ship) ${subScoreRanks.teleopPL4}<div class="indicator" style="${subScoreColors.teleopPL4}"></div></ons-col>
+ <ons-col>Teleop ShipC (${Math.round(teamSubScores[team.team_number].teleopCL4 * 100) / 100})<div class="indicator" style="${subScoreColors.teleopCL4}"></div></ons-col>
+ <ons-col>Teleop ShipP (${Math.round(teamSubScores[team.team_number].teleopPL4 * 100) / 100})<div class="indicator" style="${subScoreColors.teleopPL4}"></div></ons-col>
  </ons-row>
  <ons-row>
- <ons-col>End Game ${subScoreRanks.endGame}<div class="indicator" style="${subScoreColors.endGame}"></div></ons-col>
+ <ons-col>End Game (${Math.round(teamSubScores[team.team_number].endGame * 100) / 100})<div class="indicator" style="${subScoreColors.endGame}"></div></ons-col>
  </ons-row>
  </ons-card>`);
                 elem.onclick = function () {
