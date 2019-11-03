@@ -1,0 +1,425 @@
+[
+  {
+    "city": "Marietta",
+    "country": "USA",
+    "key": "frc1002",
+    "name": "GE Volunteers / United Technologies-Automated Logic / Lockheed Martin / Grainger / Cobb EMC / Capitol Special Risks / Publix Super Markets Foundation / Kroger / Chick-fil-A / Massey Automotive / NASA & Joseph Wheeler High School",
+    "nickname": "The CircuitRunners",
+    "state_prov": "Georgia",
+    "team_number": 1002
+  },
+  {
+    "city": "Augusta",
+    "country": "USA",
+    "key": "frc1102",
+    "name": " Savannah River Nuclear Solutions / Bechtel Corporation / SHAW Industries / Southern Nuclear / Crane Inc.  / Career and Technology Education Foundation / Boeing / Bridgestone Americas, Inc. / Novelis & M'Aiken Magic - CSRA Community Robotics Teams",
+    "nickname": "M'Aiken Magic ",
+    "state_prov": "Georgia",
+    "team_number": 1102
+  },
+  {
+    "city": "Suwanee",
+    "country": "USA",
+    "key": "frc1261",
+    "name": "The Motorola Solutions Foundation / ViaSat / Maxxis Tires / ZF North America, INC / Automation Direct / Gwinnett County Public Schools / Eastern Data, Inc. / Howard Brothers Hardware & Peachtree Ridge High School",
+    "nickname": "Robo Lions",
+    "state_prov": "Georgia",
+    "team_number": 1261
+  },
+  {
+    "city": "Kennesaw",
+    "country": "USA",
+    "key": "frc1311",
+    "name": "Kell Robotics/Kennesaw State University/United Technologies/Gassouth/General Electric/Novelis/Komatsu/Automated Logic/Lockheed-Martin Aeronautics/Google/Yamaha/DoDSTEM/Johnnys Pizza/STEM Leadership Foundation/Cobb EMC/Arylessence/Dow/Check Point Software Technologies, Inc./AGCO & Kell High School & Kennesaw Mountain High School & North Cobb High School",
+    "nickname": "Kell Robotics",
+    "state_prov": "Georgia",
+    "team_number": 1311
+  },
+  {
+    "city": "Atlanta",
+    "country": "USA",
+    "key": "frc1414",
+    "name": "Atlanta International School/E.R.M.I./Novelis/Kennesaw State University/SolidWorks/Big Blue Saw/Tulix Systems/Synergetic Technologies&Atlanta International School",
+    "nickname": "IHOT",
+    "state_prov": "Georgia",
+    "team_number": 1414
+  },
+  {
+    "city": "Atlanta",
+    "country": "USA",
+    "key": "frc1648",
+    "name": "Motorola Solutions Foundation / Lockheed Martin / Mailchimp / GE Volunteers / US Department of Defense / Earthly Dynamics / Women in Transportation Atlanta / Georgia's Own Foundation / Atlanta Public Schools / CTAE & Grady High School",
+    "nickname": "G3 Robotics",
+    "state_prov": "Georgia",
+    "team_number": 1648
+  },
+  {
+    "city": "Johns Creek",
+    "country": "USA",
+    "key": "frc1683",
+    "name": "Nordson Corporation/General Motors/Intuitive Surgical/Yeoman Technology Group/Cyrano Systems&Northview High School",
+    "nickname": "Techno Titans",
+    "state_prov": "Georgia",
+    "team_number": 1683
+  },
+  {
+    "city": "Cumming",
+    "country": "USA",
+    "key": "frc1746",
+    "name": "Automation Direct/Forsyth Alliance / Metcam, Inc. / Solvay / PDI / Abbott Fund / Marco / McNaughton-McKay Electric Company / Mike & Shelley Muranyi / Southern Legacy Waffles LLC / Gerald & Carmen Tozer & Forsyth Central High School",
+    "nickname": "OTTO",
+    "state_prov": "Georgia",
+    "team_number": 1746
+  },
+  {
+    "city": "Suwanee",
+    "country": "USA",
+    "key": "frc1771",
+    "name": "Meggitt Training Systems / Gwinnett County Public Schools / LaserCraft Technologies Inc. / Nordson Corporation / WIT & North Gwinnett High School",
+    "nickname": "North Gwinnett Robotics",
+    "state_prov": "Georgia",
+    "team_number": 1771
+  },
+  {
+    "city": "Atlanta",
+    "country": "USA",
+    "key": "frc2415",
+    "name": "Novelis/Jim and Marilyn Black Family/UL-Greenguard & Westminster School",
+    "nickname": "WiredCats",
+    "state_prov": "Georgia",
+    "team_number": 2415
+  },
+  {
+    "city": "Marietta",
+    "country": "USA",
+    "key": "frc2974",
+    "name": "GE Volunteers / Novelis / United Technologies-Automated Logic / Women in Technology / Cobb EMC / Lockheed Martin / Randstad & Walton High School",
+    "nickname": "Walton Robotics",
+    "state_prov": "Georgia",
+    "team_number": 2974
+  },
+  {
+    "city": "Kingsland",
+    "country": "USA",
+    "key": "frc3329",
+    "name": "Lockheed Martin / DoD STEM - SWFLANT / Camden Roundtable / ABL Space Systems / US Army & Camden Co High School",
+    "nickname": "Wildbots",
+    "state_prov": "Georgia",
+    "team_number": 3329
+  },
+  {
+    "city": "Lagrange",
+    "country": "USA",
+    "key": "frc3581",
+    "name": "Verizon/Caterpillar/Kimberly-Clark/Trackmobile LLC & Thinc Academy",
+    "nickname": "THINC Robotics Alliance",
+    "state_prov": "Georgia",
+    "team_number": 3581
+  },
+  {
+    "city": "Unknown City",
+    "country": "USA",
+    "key": "frc3344",
+    "name": "Unknown Name",
+    "nickname": "Space Dragons",
+    "state_prov": "Georgia",
+    "team_number": 3344
+  },
+  {
+    "city": "Warner Robins",
+    "country": "USA",
+    "key": "frc3635",
+    "name": "Boeing / Honeywell / Dixie Crows & Veterans High School & Warner Robins High School & Northside High School & Houston Co High School & Perry High School",
+    "nickname": " Flying Legion ",
+    "state_prov": "Georgia",
+    "team_number": 3635
+  },
+  {
+    "city": "Statesboro",
+    "country": "USA",
+    "key": "frc3998",
+    "name": "Bulloch Academy & BULLOCH ACADEMY INC",
+    "nickname": "Redneck Robotics",
+    "state_prov": "Georgia",
+    "team_number": 3998
+  },
+  {
+    "city": "Decatur",
+    "country": "USA",
+    "key": "frc4026",
+    "name": "Johnson Research and Development/GE/Big Nerd Ranch/Madison Avenue Community Fund/Decatur Education Foundation/Novelis/Kennesaw State University/Automation Direct&Family/Community",
+    "nickname": "Global Dynamics",
+    "state_prov": "Georgia",
+    "team_number": 4026
+  },
+  {
+    "city": "Cumming ",
+    "country": "USA",
+    "key": "frc4112",
+    "name": "AutomationDirect/Leidos/Siemens/Novelis/Kennesaw State University/Schneider Electronics & South Forsyth High School",
+    "nickname": "EagleBots",
+    "state_prov": "Georgia",
+    "team_number": 4112
+  },
+  {
+    "city": "Columbus",
+    "country": "USA",
+    "key": "frc4188",
+    "name": "UTC / Synovus / Lockheed Martin / U.S. Army / AFLAC / WestRock & Hardaway High School & Columbus High School",
+    "nickname": "Columbus Space Program",
+    "state_prov": "Georgia",
+    "team_number": 4188
+  },
+  {
+    "city": "Lithia Springs",
+    "country": "USA",
+    "key": "frc4459",
+    "name": "General Electric / Google / Greystone Power / Douglasville Wellness and Chiropractic & Lithia Springs High School",
+    "nickname": "LeoTechs",
+    "state_prov": "Georgia",
+    "team_number": 4459
+  },
+  {
+    "city": "Unknown City",
+    "country": "USA",
+    "key": "frc4509",
+    "name": "Unknown Name",
+    "nickname": "Mechanical Bulls",
+    "state_prov": "Georgia",
+    "team_number": 4509
+  },
+  {
+    "city": "Atlanta",
+    "country": "USA",
+    "key": "frc4468",
+    "name": "GE Volunteers/H.B. Fuller/Johnson Research & Development/Gate 6 Solutions/SOLIDWORKS/Novelis/Invention Studio at Georgia Tech/Automation Direct/Fastenal&Fernbank Science Center",
+    "nickname": "Fernbank LINKS",
+    "state_prov": "Georgia",
+    "team_number": 4468
+  },
+  {
+    "city": "Savannah",
+    "country": "USA",
+    "key": "frc4701",
+    "name": "Department of Defense/Great Dane/H.V. Jenkins Robotics Team Build-A-Bot Program/Publix Charities/Wound Care/Sylvan Learning Center & Herchel V Jenkins High School & Herchel V Jenkins High School",
+    "nickname": "Warriors (Team W.I.R.E.)",
+    "state_prov": "Georgia",
+    "team_number": 4701
+  },
+  {
+    "city": "Alpharetta",
+    "country": "USA",
+    "key": "frc4749",
+    "name": "GE Volunteers/Averna/Genesis Technology USA & Mount Pisgah Christian School",
+    "nickname": "Pisgah Robotics",
+    "state_prov": "Georgia",
+    "team_number": 4749
+  },
+  {
+    "city": "Marietta",
+    "country": "USA",
+    "key": "frc4910",
+    "name": "GE Volunteers/UTC Automated Logic/Lockheed Martin/Picture Keeper/Harrison Design/Rotary of East Cobb/Cobb EMC&Neighborhood Group",
+    "nickname": "East Cobb Robotics",
+    "state_prov": "Georgia",
+    "team_number": 4910
+  },
+  {
+    "city": "Macon",
+    "country": "USA",
+    "key": "frc4941",
+    "name": "Bibb County School District / Bibb County CTAE / DOD STEM / Middle Georgia State University / Perdue Farms / Andrews, Hammock, and Powell & Central High School & Rutland High School & Howard High School",
+    "nickname": "RoboBibb",
+    "state_prov": "Georgia",
+    "team_number": 4941
+  },
+  {
+    "city": "Johns Creek",
+    "country": "USA",
+    "key": "frc5109",
+    "name": "Meggitt Training Systems / Adobe / Sovereign Systems & Johns Creek High School",
+    "nickname": "Gladiator Robotics",
+    "state_prov": "Georgia",
+    "team_number": 5109
+  },
+  {
+    "city": "Duluth",
+    "country": "USA",
+    "key": "frc5293",
+    "name": "Gwinnett County Public Schools / Nordson Corporation & Duluth High School",
+    "nickname": "Metal Crusaders",
+    "state_prov": "Georgia",
+    "team_number": 5293
+  },
+  {
+    "city": "Decatur",
+    "country": "USA",
+    "key": "frc5332",
+    "name": "Clorox/ABLT/Lost World Adventures/Spivey’s Body shop&Family/Community",
+    "nickname": "Toaster Tech",
+    "state_prov": "Georgia",
+    "team_number": 5332
+  },
+  {
+    "city": "Atlanta",
+    "country": "USA",
+    "key": "frc5651",
+    "name": "GE Energy (Power and Water) & Maynard Jackson High School",
+    "nickname": "Maynard Jackson Jungle C.A.Ts",
+    "state_prov": "Georgia",
+    "team_number": 5651
+  },
+  {
+    "city": "Dawson",
+    "country": "USA",
+    "key": "frc5840",
+    "name": "Hope H. Campbell / Lucy Stone / Flint Holdings / Dawson Rotary & Terrell Middle High School",
+    "nickname": "Shock Wave",
+    "state_prov": "Georgia",
+    "team_number": 5840
+  },
+  {
+    "city": "Dalton",
+    "country": "USA",
+    "key": "frc5900",
+    "name": "Shaw Industries/Dalton Utilities/Grainger/Expert Die/Northwest Georgia College & Career Academy&Whitfield County Career Academy",
+    "nickname": "Career Blazer Robotics Team - The Fighting Mongooses",
+    "state_prov": "Georgia",
+    "team_number": 5900
+  },
+  {
+    "city": "Atlanta",
+    "country": "USA",
+    "key": "frc6340",
+    "name": "GE Power / Precision Air Technology / Dunwoody Urgent Care & Marist School",
+    "nickname": "The Marist Manatees",
+    "state_prov": "Georgia",
+    "team_number": 6340
+  },
+  {
+    "city": "Acworth",
+    "country": "USA",
+    "key": "frc6341",
+    "name": "Inalfa Roof Systems / Cobb EMC / Towne Lake Optimist Club / Cherokee County Educational Foundation (CCEF) / Georgia Science Teachers Associations / Yanmar EVO Center / Skyline Properties, Inc & Etowah High School & Woodstock High School & River Ridge High School & Interact Club of Etowah High School & Interact Club of Woodstock High School",
+    "nickname": "Firestorm Robotics",
+    "state_prov": "Georgia",
+    "team_number": 6341
+  },
+  {
+    "city": "Atlanta",
+    "country": "USA",
+    "key": "frc6705",
+    "name": "&Dunwoody High School",
+    "nickname": "WildCat 5e",
+    "state_prov": "Georgia",
+    "team_number": 6705
+  },
+  {
+    "city": "Suwanee",
+    "country": "USA",
+    "key": "frc6829",
+    "name": "NASA/Boeing/Integrated Device Technology, Inc./Kidsignments, Inc./Geekspace Gwinnett/Delta Air Lines/Farmhouse Design&Family/Community",
+    "nickname": "Ignite Robotics",
+    "state_prov": "Georgia",
+    "team_number": 6829
+  },
+  {
+    "city": "Dalton",
+    "country": "USA",
+    "key": "frc6887",
+    "name": "Dalton Utilities / SHAW & Dalton High School",
+    "nickname": "Dalton Catabots",
+    "state_prov": "Georgia",
+    "team_number": 6887
+  },
+  {
+    "city": "Albany",
+    "country": "USA",
+    "key": "frc6919",
+    "name": "Commodore Conyers College & Career Academy ",
+    "nickname": "The Commodores",
+    "state_prov": "Georgia",
+    "team_number": 6919
+  },
+  {
+    "city": "Albany",
+    "country": "USA",
+    "key": "frc7315",
+    "name": "Deerfield Windsor School",
+    "nickname": "Giga Knights",
+    "state_prov": "Georgia",
+    "team_number": 7315
+  },
+  {
+    "city": "Milton",
+    "country": "USA",
+    "key": "frc7427",
+    "name": "NASA/Google&Family/Community",
+    "nickname": "Protocol X Robotics",
+    "state_prov": "Georgia",
+    "team_number": 7427
+  },
+  {
+    "city": "Acworth",
+    "country": "USA",
+    "key": "frc7449",
+    "name": "NASA/Novelis/National Recreation Foundation/Argosy Foundation/Atkinson Construction/Georgia Robotics Alliance&Family/Community&Georgia National Guard Youth Family Program",
+    "nickname": "Lithium Robotics",
+    "state_prov": "Georgia",
+    "team_number": 7449
+  },
+  {
+    "city": "Cumming",
+    "country": "USA",
+    "key": "frc7451",
+    "name": "Forsyth County Schools/AutomationDirect.com/Forsyth County Chamber of Commerce/REV Robotics/SolidWorks Education/Armabot/Hephaestus Robotics FRC 6390&Alliance Academy for Innovation",
+    "nickname": "AvengerRobotics",
+    "state_prov": "Georgia",
+    "team_number": 7451
+  },
+  {
+    "city": "Sylvester",
+    "country": "USA",
+    "key": "frc7470",
+    "name": "Worth Co High School",
+    "nickname": "iRAMBOTs with NASA",
+    "state_prov": "Georgia",
+    "team_number": 7470
+  },
+  {
+    "city": "Tifton",
+    "country": "USA",
+    "key": "frc7499",
+    "name": "NASA/Lowe's Home Improvement/Georgia Museum of Agriculture&Upward Bound/TRIO",
+    "nickname": "Stallion Robotics",
+    "state_prov": "Georgia",
+    "team_number": 7499
+  },
+  {
+    "city": "Atlanta",
+    "country": "USA",
+    "key": "frc7514",
+    "name": "Johnson STEM Activity Center/FEDEX/Novelis/NASA/CGFO; Educate Girls, Empower Communities/Urban Outsourcing/Dispersive Technologies/TDS Design/SWE (Society of Women Engineers) at Georgia Tech&Family/Community",
+    "nickname": "EVE Robotics",
+    "state_prov": "Georgia",
+    "team_number": 7514
+  },
+  {
+    "city": "Augusta",
+    "country": "USA",
+    "key": "frc7883",
+    "name": "Cross Creek High School",
+    "nickname": "CCHS RazorBots ",
+    "state_prov": "Georgia",
+    "team_number": 7883
+  },
+  {
+    "city": "Roswell",
+    "country": "USA",
+    "key": "frc832",
+    "name": "GE Volunteers / Siemens / Rockwell Automation / Dow Chemical / Arconic Foundation / Kennesaw State University / Novelis / Fulton County Schools & Roswell High School",
+    "nickname": "Oscar",
+    "state_prov": "Georgia",
+    "team_number": 832
+  }
+]
